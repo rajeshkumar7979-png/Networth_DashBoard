@@ -4,8 +4,8 @@ import numpy as np
 import yfinance as yf
 import requests
 from datetime import datetime, timedelta
+import pytz
 import plotly.express as px
-import plotly.graph_objects as go
 
 # -------------------------------------------------
 # PAGE CONFIG
@@ -18,51 +18,43 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
+# TIMEZONE - INDIA
+# -------------------------------------------------
+IST = pytz.timezone("Asia/Kolkata")
+now_ist = datetime.now(IST)
+
+# -------------------------------------------------
 # MODERN CSS
 # -------------------------------------------------
 st.markdown("""
 <style>
-    /* Main header */
     .main-title {
         font-size: 1.9rem;
         font-weight: 700;
         color: #0f172a;
-        margin-bottom: 0.15rem;
+        margin-bottom: 0.1rem;
     }
     .sub-title {
         color: #64748b;
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        margin-bottom: 1.4rem;
     }
-
-    /* Metric cards */
     div[data-testid="stMetric"] {
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 16px 18px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        padding: 14px 16px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     }
     div[data-testid="stMetricValue"] {
-        font-size: 1.55rem !important;
+        font-size: 1.5rem !important;
         font-weight: 650;
     }
-    div[data-testid="stMetricLabel"] {
-        font-size: 0.8rem;
-        color: #64748b;
-    }
-
-    /* Section headers */
     .section-header {
         font-size: 1.15rem;
         font-weight: 600;
         color: #1e293b;
-        margin: 1.8rem 0 0.8rem 0;
-    }
-
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: #f8fafc;
+        margin: 1.6rem 0 0.7rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -80,7 +72,7 @@ def get_usd_inr():
 
 @st.cache_data(ttl=600)
 def get_mf_nav(isin: str):
-    if not isin or len(isin) < 8:
+    if not isin or len(str(isin)) < 8:
         return None, None
     try:
         r = requests.get(f"https://api.mfapi.in/mf/search?q={isin}", timeout=8)
@@ -120,13 +112,12 @@ def load_data(uploaded_file=None):
     else:
         try:
             xls = pd.ExcelFile("data/Networth_Raw_Data.xlsx")
-        except Exception as e:
+        except:
             st.error("Could not load data/Networth_Raw_Data.xlsx. Please upload the file from the sidebar.")
             st.stop()
 
-    # Flexible sheet detection
     sheet_map = {s.lower().strip(): s for s in xls.sheet_names}
-    
+
     def find_sheet(*names):
         for n in names:
             if n in sheet_map:
@@ -136,7 +127,6 @@ def load_data(uploaded_file=None):
     fd = pd.read_excel(xls, find_sheet("fd", "fixed deposits", "fixed_deposits"))
     mf = pd.read_excel(xls, find_sheet("mf", "mutual funds", "mutual_funds"))
     stocks = pd.read_excel(xls, find_sheet("stocks", "stock", "equities"))
-
     return fd, mf, stocks
 
 # -------------------------------------------------
@@ -152,10 +142,10 @@ with st.sidebar:
 
     st.markdown("---")
     st.caption("Sources: mfapi.in · Yahoo Finance · Frankfurter")
-    st.caption(f"Refreshed: {datetime.now().strftime('%d %b %Y, %H:%M')}")
+    st.caption(f"IST Time: {now_ist.strftime('%d %b %Y, %H:%M')}")
 
 # -------------------------------------------------
-# LOAD
+# LOAD DATA
 # -------------------------------------------------
 fd_raw, mf_raw, stocks_raw = load_data(uploaded)
 usd_inr = get_usd_inr()
@@ -173,7 +163,6 @@ for _, row in mf_raw.iterrows():
         invested = safe_float(row.get("Invested Amount", row.get("Invested")))
 
         nav, nav_date = get_mf_nav(isin) if isin else (None, None)
-
         if nav is None:
             nav = safe_float(row.get("Current NAV"))
             if nav == 0:
@@ -189,11 +178,10 @@ for _, row in mf_raw.iterrows():
             "ISIN": isin,
             "Fund Name": str(row.get("Fund Name", "") or ""),
             "Units": units,
-            "Invested": invested,
+            "Invested (INR)": invested,
             "Current NAV": nav,
-            "NAV Date": nav_date or "",
-            "Current Value": current_value,
-            "P&L": pnl,
+            "Current Value (INR)": current_value,
+            "P&L (INR)": pnl,
             "Return %": ret
         })
     except:
@@ -228,10 +216,10 @@ for _, row in stocks_raw.iterrows():
             "Owner": str(row.get("Owner", "") or ""),
             "Symbol": symbol,
             "Quantity": qty,
-            "Invested": invested,
+            "Invested (INR)": invested,
             "Current Price": price,
-            "Current Value": current_value,
-            "P&L": pnl,
+            "Current Value (INR)": current_value,
+            "P&L (INR)": pnl,
             "Return %": ret
         })
     except:
@@ -240,10 +228,10 @@ for _, row in stocks_raw.iterrows():
 stocks = pd.DataFrame(stock_rows)
 
 # -------------------------------------------------
-# PROCESS FIXED DEPOSITS (CLEAN + ENHANCED)
+# PROCESS FIXED DEPOSITS (CLEAN + INR CONVERSION)
 # -------------------------------------------------
 fd_rows = []
-today = datetime.now().date()
+today = now_ist.date()
 
 for _, row in fd_raw.iterrows():
     try:
@@ -251,18 +239,16 @@ for _, row in fd_raw.iterrows():
         account = str(row.get("Account Number", "") or "").strip()
         principal = safe_float(row.get("Principal Amount"))
 
-        # Skip summary / total / empty rows
+        # Skip summary / empty / total rows
         if (not holder or holder.lower() in ["nan", "nat", "none"] or
             principal <= 0 or
-            "total" in holder.lower() or
-            account in ["", "nan", "None"] and principal > 1000000):   # rough filter for totals
+            "total" in holder.lower()):
             continue
 
         currency = str(row.get("Currency", "INR") or "INR").upper().strip()
         if currency not in ["INR", "USD"]:
             currency = "INR"
 
-        # Dates
         try:
             mat_date = pd.to_datetime(row.get("Maturity Date"), errors="coerce")
             dep_date = pd.to_datetime(row.get("Deposit Date"), errors="coerce")
@@ -275,21 +261,29 @@ for _, row in fd_raw.iterrows():
 
         roi = safe_float(row.get("ROI % p.a.", row.get("ROI_Percent_pa", 6.5)))
 
-        # Simple accrued interest (approximate)
-        accrued = principal * (roi / 100) * (days_elapsed / 365) if days_elapsed > 0 else 0
-        current_value = principal + accrued
-        current_inr = current_value * usd_inr if currency == "USD" else current_value
+        # Accrued interest (simple)
+        accrued = principal * (roi / 100) * (max(days_elapsed, 0) / 365)
+        current_value_original = principal + accrued
+
+        # Convert to INR
+        if currency == "USD":
+            current_value_inr = current_value_original * usd_inr
+            principal_inr = principal * usd_inr
+        else:
+            current_value_inr = current_value_original
+            principal_inr = principal
 
         fd_rows.append({
             "Holder Name": holder,
             "Account Number": account,
             "Currency": currency,
-            "Principal": principal,
+            "Principal (Original)": round(principal, 2),
+            "Principal (INR)": round(principal_inr, 0),
             "ROI %": roi,
             "Days to Maturity": days_to_mat,
             "Accrued Interest": round(accrued, 0),
-            "Current Value": round(current_value, 0),
-            "Current Value (INR)": round(current_inr, 0),
+            "Current Value (Original)": round(current_value_original, 0),
+            "Current Value (INR)": round(current_value_inr, 0),
             "Maturity Date": mat_date.strftime("%Y-%m-%d") if pd.notna(mat_date) else ""
         })
     except:
@@ -298,16 +292,16 @@ for _, row in fd_raw.iterrows():
 fd = pd.DataFrame(fd_rows)
 
 # -------------------------------------------------
-# AGGREGATES
+# AGGREGATES (ALL IN INR)
 # -------------------------------------------------
-total_mf = mf["Current Value"].sum() if not mf.empty else 0
-total_stocks = stocks["Current Value"].sum() if not stocks.empty else 0
+total_mf = mf["Current Value (INR)"].sum() if not mf.empty else 0
+total_stocks = stocks["Current Value (INR)"].sum() if not stocks.empty else 0
 total_fd = fd["Current Value (INR)"].sum() if not fd.empty else 0
 
 total_networth = total_mf + total_stocks + total_fd
-total_invested = (mf["Invested"].sum() if not mf.empty else 0) + \
-                 (stocks["Invested"].sum() if not stocks.empty else 0) + \
-                 (fd["Principal"].sum() if not fd.empty else 0)
+total_invested = (mf["Invested (INR)"].sum() if not mf.empty else 0) + \
+                 (stocks["Invested (INR)"].sum() if not stocks.empty else 0) + \
+                 (fd["Principal (INR)"].sum() if not fd.empty else 0)
 total_pnl = total_networth - total_invested
 equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth else 0
 fd_pct = (total_fd / total_networth * 100) if total_networth else 0
@@ -316,22 +310,22 @@ fd_pct = (total_fd / total_networth * 100) if total_networth else 0
 # HEADER
 # -------------------------------------------------
 st.markdown('<div class="main-title">Family Net Worth Dashboard</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="sub-title">Live prices · Last calculated {datetime.now().strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="sub-title">All values in INR · Live prices · Last calculated {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
 
 if mf_failed or stock_failed:
-    st.warning(f"Data quality note: {mf_failed} MF and {stock_failed} stocks used fallback prices.")
+    st.warning(f"Note: {mf_failed} mutual funds and {stock_failed} stocks used fallback prices.")
 else:
     st.success("All live prices fetched successfully")
 
 # -------------------------------------------------
-# KPI ROW
+# KPI CARDS
 # -------------------------------------------------
-k1, k2, k3, k4, k5 = st.columns(5)
-k1.metric("Total Net Worth", f"₹{total_networth:,.0f}")
-k2.metric("Unrealized P&L", f"₹{total_pnl:,.0f}", f"{(total_pnl/total_invested*100):.1f}%" if total_invested else None)
-k3.metric("Equity Allocation", f"{equity_pct:.1f}%")
-k4.metric("FD / Cash Drag", f"{fd_pct:.1f}%")
-k5.metric("USD / INR", f"{usd_inr:.2f}")
+c1, c2, c3, c4, c5 = st.columns(5)
+c1.metric("Total Net Worth", f"₹{total_networth:,.0f}")
+c2.metric("Unrealized P&L", f"₹{total_pnl:,.0f}", f"{(total_pnl/total_invested*100):.1f}%" if total_invested else None)
+c3.metric("Equity Allocation", f"{equity_pct:.1f}%")
+c4.metric("FD / Cash Drag", f"{fd_pct:.1f}%")
+c5.metric("USD / INR", f"{usd_inr:.2f}")
 
 st.markdown("---")
 
@@ -355,9 +349,12 @@ with left:
 with right:
     st.markdown('<div class="section-header">Net Worth by Family Member</div>', unsafe_allow_html=True)
     owner_map = {}
-    for df, col in [(mf, "Current Value"), (stocks, "Current Value"), (fd, "Current Value (INR)")]:
-        if not df.empty and "Owner" in df.columns or "Holder Name" in df.columns:
-            key = "Owner" if "Owner" in df.columns else "Holder Name"
+    for df, col, key in [
+        (mf, "Current Value (INR)", "Owner"),
+        (stocks, "Current Value (INR)", "Owner"),
+        (fd, "Current Value (INR)", "Holder Name")
+    ]:
+        if not df.empty and key in df.columns:
             for owner, val in df.groupby(key)[col].sum().items():
                 owner_map[owner] = owner_map.get(owner, 0) + val
 
@@ -379,9 +376,9 @@ with tab1:
     if not mf.empty:
         st.dataframe(
             mf.style.format({
-                "Invested": "₹{:,.0f}",
-                "Current Value": "₹{:,.0f}",
-                "P&L": "₹{:,.0f}",
+                "Invested (INR)": "₹{:,.0f}",
+                "Current Value (INR)": "₹{:,.0f}",
+                "P&L (INR)": "₹{:,.0f}",
                 "Return %": "{:.1f}%",
                 "Current NAV": "{:.2f}",
                 "Units": "{:.3f}"
@@ -389,15 +386,15 @@ with tab1:
             use_container_width=True, height=420
         )
     else:
-        st.info("No mutual fund data found")
+        st.info("No mutual fund data")
 
 with tab2:
     if not stocks.empty:
         st.dataframe(
             stocks.style.format({
-                "Invested": "₹{:,.0f}",
-                "Current Value": "₹{:,.0f}",
-                "P&L": "₹{:,.0f}",
+                "Invested (INR)": "₹{:,.0f}",
+                "Current Value (INR)": "₹{:,.0f}",
+                "P&L (INR)": "₹{:,.0f}",
                 "Return %": "{:.1f}%",
                 "Current Price": "{:.2f}",
                 "Quantity": "{:.0f}"
@@ -405,25 +402,26 @@ with tab2:
             use_container_width=True, height=420
         )
     else:
-        st.info("No stock data found")
+        st.info("No stock data")
 
 with tab3:
     if not fd.empty:
         st.dataframe(
             fd.style.format({
-                "Principal": "₹{:,.0f}",
-                "Accrued Interest": "₹{:,.0f}",
-                "Current Value": "₹{:,.0f}",
+                "Principal (Original)": "{:,.2f}",
+                "Principal (INR)": "₹{:,.0f}",
+                "Accrued Interest": "{:,.0f}",
+                "Current Value (Original)": "{:,.0f}",
                 "Current Value (INR)": "₹{:,.0f}",
                 "ROI %": "{:.2f}"
             }),
             use_container_width=True, height=420
         )
     else:
-        st.info("No fixed deposit data found")
+        st.info("No fixed deposit data")
 
 # -------------------------------------------------
 # FOOTER
 # -------------------------------------------------
 st.markdown("---")
-st.caption("Personal use only · Live data from mfapi.in, Yahoo Finance & Frankfurter · Not financial advice")
+st.caption(f"All figures in INR · USD converted at {usd_inr:.2f} · IST {now_ist.strftime('%d %b %Y %H:%M')} · Personal use only")
