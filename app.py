@@ -24,13 +24,13 @@ IST = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.now(IST)
 
 # -------------------------------------------------
-# DARK MODE + TIGHTER CSS
+# IMPROVED DARK MODE CSS (Better Contrast)
 # -------------------------------------------------
 st.markdown("""
 <style>
     .stApp {
         background-color: #0f172a;
-        color: #e2e8f0;
+        color: #f1f5f9;
     }
     section[data-testid="stSidebar"] {
         background-color: #1e293b !important;
@@ -47,10 +47,10 @@ st.markdown("""
         margin-bottom: 1.1rem;
     }
     .section-header {
-        font-size: 1.05rem;
+        font-size: 1.08rem;
         font-weight: 600;
         color: #f1f5f9;
-        margin: 1.3rem 0 0.5rem 0;
+        margin: 1.4rem 0 0.6rem 0;
     }
     div[data-testid="stMetric"] {
         background: #1e293b;
@@ -65,10 +65,23 @@ st.markdown("""
     }
     div[data-testid="stMetricLabel"] {
         color: #94a3b8 !important;
-        font-size: 0.8rem !important;
     }
+    /* Better tab contrast */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #1e293b;
+        border-radius: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #94a3b8;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #f8fafc !important;
+        background-color: #334155 !important;
+        border-radius: 6px;
+    }
+    /* Dataframe text */
     .stDataFrame {
-        font-size: 0.85rem;
+        color: #e2e8f0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -144,7 +157,6 @@ def load_data(uploaded_file=None):
             st.stop()
 
     sheet_map = {s.lower().strip(): s for s in xls.sheet_names}
-
     def find_sheet(*names):
         for n in names:
             if n in sheet_map:
@@ -177,7 +189,7 @@ usd_inr = get_usd_inr()
 amfi_navs = get_amfi_nav_dict()
 
 # -------------------------------------------------
-# PROCESS MUTUAL FUNDS (AGGREGATED)
+# PROCESS MUTUAL FUNDS
 # -------------------------------------------------
 mf_txns = []
 for _, row in mf_raw.iterrows():
@@ -309,6 +321,57 @@ equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networt
 fd_pct = (total_fd / total_networth * 100) if total_networth else 0
 
 # -------------------------------------------------
+# STAGE 2: HEALTH SCORE + CONCENTRATION
+# -------------------------------------------------
+# Simple Health Score (0-100)
+score = 70  # base
+
+# Diversification penalty/reward
+if equity_pct < 15:
+    score -= 8
+elif equity_pct > 40:
+    score -= 5
+else:
+    score += 5
+
+if fd_pct > 75:
+    score -= 10
+elif fd_pct > 65:
+    score -= 5
+else:
+    score += 3
+
+# Concentration
+top5_mf_pct = 0
+top5_stock_pct = 0
+if not mf.empty and total_mf > 0:
+    top5_mf_pct = mf.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100
+if not stocks.empty and total_stocks > 0:
+    top5_stock_pct = stocks.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100
+
+if top5_mf_pct > 60:
+    score -= 6
+if top5_stock_pct > 50:
+    score -= 5
+
+score = max(0, min(100, score))
+
+if score >= 80:
+    health_label = "🟢 HEALTHY"
+elif score >= 65:
+    health_label = "🟡 ADEQUATE"
+else:
+    health_label = "🔴 NEEDS ATTENTION"
+
+# Asset class commentary
+if fd_pct > 70:
+    commentary = "Your portfolio is heavily conservative (FD-dominated). Equity exposure is relatively low."
+elif equity_pct > 35:
+    commentary = "Equity allocation is meaningful. Monitor concentration and volatility."
+else:
+    commentary = "Balanced between safety (FD) and growth (Equity)."
+
+# -------------------------------------------------
 # HEADER
 # -------------------------------------------------
 st.markdown('<div class="main-title">Family Net Worth Dashboard</div>', unsafe_allow_html=True)
@@ -322,14 +385,17 @@ else:
     st.success(f"All live prices OK · {len(amfi_navs)} AMFI NAVs loaded")
 
 # -------------------------------------------------
-# TOP KPIs
+# TOP KPIs + HEALTH SCORE
 # -------------------------------------------------
-k1, k2, k3, k4, k5 = st.columns(5)
+k1, k2, k3, k4, k5, k6 = st.columns(6)
 k1.metric("Total Net Worth", format_inr(total_networth))
 k2.metric("Unrealized P&L", format_inr(total_pnl), f"{(total_pnl/total_invested*100):.1f}%" if total_invested else None)
 k3.metric("Equity Allocation", f"{equity_pct:.1f}%")
 k4.metric("FD / Cash Drag", f"{fd_pct:.1f}%")
 k5.metric("USD / INR", f"{usd_inr:.2f}")
+k6.metric("Health Score", f"{score}/100", health_label)
+
+st.caption(f"💬 {commentary}")
 
 st.markdown("---")
 
@@ -359,7 +425,7 @@ with c2:
         st.plotly_chart(fig2, use_container_width=True)
 
 # -------------------------------------------------
-# KEY INSIGHTS - STAGE 1
+# KEY INSIGHTS
 # -------------------------------------------------
 st.markdown('<div class="section-header">Key Insights</div>', unsafe_allow_html=True)
 
@@ -377,20 +443,23 @@ if not fd.empty and "Days to Maturity" in fd.columns:
     l2.metric("Next 30 days", format_inr(ladder["Next 30 days"]))
     l3.metric("Next 90 days", format_inr(ladder["Next 90 days"]))
     l4.metric("Next 1 year", format_inr(ladder["Next 1 year"]))
-else:
-    st.info("No FD maturity data")
 
-st.markdown("")
+# Concentration
+st.markdown("**📊 Concentration Snapshot**")
+cc1, cc2, cc3 = st.columns(3)
+cc1.metric("Top 5 MFs of total MF", f"{top5_mf_pct:.1f}%")
+cc2.metric("Top 5 Stocks of total Stocks", f"{top5_stock_pct:.1f}%")
+cc3.metric("Equity as % of Net Worth", f"{equity_pct:.1f}%")
 
-# Three columns for insights
+# Insights tables
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown("**📅 Upcoming FDs (90 days)**")
+    st.markdown("**📅 Upcoming FDs (90d)**")
     if not fd.empty and "Days to Maturity" in fd.columns:
         upcoming = fd[(fd["Days to Maturity"].notna()) & (fd["Days to Maturity"] <= 90) & (fd["Days to Maturity"] >= 0)].sort_values("Days to Maturity")
         if not upcoming.empty:
-            st.dataframe(upcoming[["Holder Name", "Principal (INR)", "Days to Maturity"]].style.format({"Principal (INR)": "₹{:,.0f}"}), use_container_width=True, height=180)
+            st.dataframe(upcoming[["Holder Name", "Principal (INR)", "Days to Maturity"]].style.format({"Principal (INR)": "₹{:,.0f}"}), use_container_width=True, height=170)
         else:
             st.info("None")
     else:
@@ -399,35 +468,29 @@ with col1:
 with col2:
     st.markdown("**🏆 Top MFs by Value**")
     if not mf.empty:
-        top_val = mf.nlargest(5, "Current Value")[["Fund Name", "Current Value", "Return %"]]
-        st.dataframe(top_val.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
+        st.dataframe(mf.nlargest(5, "Current Value")[["Fund Name", "Current Value", "Return %"]].style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=170)
     else:
         st.info("No data")
 
 with col3:
     st.markdown("**📈 Top MFs by Return %**")
     if not mf.empty:
-        top_ret = mf.nlargest(5, "Return %")[["Fund Name", "Current Value", "Return %"]]
-        st.dataframe(top_ret.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
+        st.dataframe(mf.nlargest(5, "Return %")[["Fund Name", "Current Value", "Return %"]].style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=170)
     else:
         st.info("No data")
 
-# Second row of insights
 col4, col5 = st.columns(2)
-
 with col4:
     st.markdown("**📊 Top Stocks by Value**")
     if not stocks.empty:
-        top_s_val = stocks.nlargest(5, "Current Value")[["Symbol", "Current Value", "Return %"]]
-        st.dataframe(top_s_val.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
+        st.dataframe(stocks.nlargest(5, "Current Value")[["Symbol", "Current Value", "Return %"]].style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=170)
     else:
         st.info("No data")
 
 with col5:
     st.markdown("**🚀 Top Stocks by Return %**")
     if not stocks.empty:
-        top_s_ret = stocks.nlargest(5, "Return %")[["Symbol", "Current Value", "Return %"]]
-        st.dataframe(top_s_ret.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
+        st.dataframe(stocks.nlargest(5, "Return %")[["Symbol", "Current Value", "Return %"]].style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=170)
     else:
         st.info("No data")
 
