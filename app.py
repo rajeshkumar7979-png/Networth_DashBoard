@@ -6,7 +6,6 @@ import requests
 from datetime import datetime, timedelta
 import pytz
 import plotly.express as px
-import plotly.graph_objects as go
 
 # -------------------------------------------------
 # PAGE CONFIG
@@ -157,33 +156,66 @@ fd_raw, mf_raw, stocks_raw = load_data(uploaded)
 usd_inr = get_usd_inr()
 
 # -------------------------------------------------
-# PROCESS MUTUAL FUNDS
+# PROCESS MUTUAL FUNDS (AGGREGATED)
 # -------------------------------------------------
-mf_rows = []
-mf_failed = 0
-
+# First clean and prepare transaction level data
+mf_txns = []
 for _, row in mf_raw.iterrows():
     try:
         isin = str(row.get("ISIN", "") or "").strip()
+        owner = str(row.get("Owner", "") or "").strip()
+        fund_name = str(row.get("Fund Name", "") or "").strip()
         units = safe_float(row.get("Units"))
         invested = safe_float(row.get("Invested Amount", row.get("Invested")))
 
-        nav, nav_date = get_mf_nav(isin) if isin else (None, None)
+        if units <= 0 or not isin:
+            continue
+
+        mf_txns.append({
+            "Owner": owner,
+            "ISIN": isin,
+            "Fund Name": fund_name,
+            "Units": units,
+            "Invested": invested
+        })
+    except:
+        continue
+
+mf_txns_df = pd.DataFrame(mf_txns)
+
+# Aggregate by Owner + ISIN
+if not mf_txns_df.empty:
+    mf_agg = mf_txns_df.groupby(["Owner", "ISIN", "Fund Name"], as_index=False).agg({
+        "Units": "sum",
+        "Invested": "sum"
+    })
+else:
+    mf_agg = pd.DataFrame(columns=["Owner", "ISIN", "Fund Name", "Units", "Invested"])
+
+# Now fetch live NAV and calculate
+mf_rows = []
+mf_failed = 0
+
+for _, row in mf_agg.iterrows():
+    try:
+        isin = row["ISIN"]
+        units = row["Units"]
+        invested = row["Invested"]
+
+        nav, nav_date = get_mf_nav(isin)
         if nav is None:
-            nav = safe_float(row.get("Current NAV"))
-            if nav == 0:
-                mf_failed += 1
-                nav = safe_float(row.get("Purchase NAV"))
+            mf_failed += 1
+            nav = 0.0
 
         current_value = units * nav
         pnl = current_value - invested
         ret = (pnl / invested * 100) if invested > 0 else 0.0
 
         mf_rows.append({
-            "Owner": str(row.get("Owner", "") or ""),
+            "Owner": row["Owner"],
             "ISIN": isin,
-            "Fund Name": str(row.get("Fund Name", "") or "")[:45],
-            "Units": units,
+            "Fund Name": row["Fund Name"][:50],
+            "Units": round(units, 3),
             "Invested": invested,
             "Current NAV": nav,
             "Current Value": current_value,
@@ -206,6 +238,9 @@ for _, row in stocks_raw.iterrows():
         symbol = str(row.get("Symbol", row.get("Ticker / Symbol", "")) or "").strip().upper()
         qty = safe_float(row.get("Quantity"))
         invested = safe_float(row.get("Invested Amount"))
+
+        if qty <= 0:
+            continue
 
         price = get_stock_price(symbol) if symbol else None
         if price is None:
@@ -331,7 +366,7 @@ k5.metric("USD / INR", f"{usd_inr:.2f}")
 st.markdown("---")
 
 # -------------------------------------------------
-# CHARTS ROW
+# CHARTS
 # -------------------------------------------------
 c1, c2 = st.columns(2)
 
@@ -367,7 +402,7 @@ with c2:
         st.plotly_chart(fig2, use_container_width=True)
 
 # -------------------------------------------------
-# UPCOMING FD MATURITIES + TOP FUNDS
+# KEY INSIGHTS
 # -------------------------------------------------
 st.markdown('<div class="section-header">Key Insights</div>', unsafe_allow_html=True)
 
@@ -412,6 +447,7 @@ tab1, tab2, tab3 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits"])
 
 with tab1:
     if not mf.empty:
+        st.caption(f"Showing {len(mf)} consolidated holdings (aggregated from transactions)")
         st.dataframe(
             mf.style.format({
                 "Invested": "₹{:,.0f}",
