@@ -6,7 +6,6 @@ import requests
 from datetime import datetime
 import pytz
 import plotly.express as px
-import plotly.graph_objects as go
 
 # -------------------------------------------------
 # PAGE CONFIG
@@ -25,69 +24,51 @@ IST = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.now(IST)
 
 # -------------------------------------------------
-# DARK MODE CSS
+# DARK MODE + TIGHTER CSS
 # -------------------------------------------------
 st.markdown("""
 <style>
-    /* Dark theme */
     .stApp {
         background-color: #0f172a;
         color: #e2e8f0;
     }
-    
-    /* Sidebar */
     section[data-testid="stSidebar"] {
         background-color: #1e293b !important;
     }
-    
-    /* Headers */
     .main-title {
-        font-size: 1.9rem;
+        font-size: 1.75rem;
         font-weight: 700;
-        color: #f1f5f9;
-        margin-bottom: 0.15rem;
+        color: #f8fafc;
+        margin-bottom: 0.1rem;
     }
     .sub-title {
         color: #94a3b8;
-        font-size: 0.88rem;
-        margin-bottom: 1.3rem;
+        font-size: 0.85rem;
+        margin-bottom: 1.1rem;
     }
     .section-header {
-        font-size: 1.15rem;
+        font-size: 1.05rem;
         font-weight: 600;
         color: #f1f5f9;
-        margin: 1.5rem 0 0.7rem 0;
+        margin: 1.3rem 0 0.5rem 0;
     }
-    
-    /* Metric cards */
     div[data-testid="stMetric"] {
         background: #1e293b;
         border: 1px solid #334155;
-        border-radius: 12px;
-        padding: 14px 16px;
+        border-radius: 10px;
+        padding: 12px 14px;
     }
     div[data-testid="stMetricValue"] {
-        font-size: 1.4rem !important;
+        font-size: 1.3rem !important;
         font-weight: 650;
         color: #f8fafc !important;
     }
     div[data-testid="stMetricLabel"] {
         color: #94a3b8 !important;
+        font-size: 0.8rem !important;
     }
-    
-    /* Dataframes */
     .stDataFrame {
-        background-color: #1e293b;
-    }
-    
-    /* General text */
-    p, span, label {
-        color: #e2e8f0 !important;
-    }
-    
-    /* Success / Warning boxes */
-    .stSuccess, .stWarning, .stInfo {
-        background-color: #1e293b;
+        font-size: 0.85rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -101,7 +82,6 @@ def get_amfi_nav_dict():
         url = "https://www.amfiindia.com/spages/NAVAll.txt"
         r = requests.get(url, timeout=15)
         r.raise_for_status()
-        
         nav_dict = {}
         for line in r.text.splitlines():
             parts = line.split(";")
@@ -117,7 +97,7 @@ def get_amfi_nav_dict():
                 if isin_div and len(isin_div) > 8:
                     nav_dict[isin_div] = nav
         return nav_dict
-    except Exception as e:
+    except:
         return {}
 
 @st.cache_data(ttl=300)
@@ -182,17 +162,15 @@ def load_data(uploaded_file=None):
 with st.sidebar:
     st.markdown("### ⚙️ Controls")
     uploaded = st.file_uploader("Upload new Excel (optional)", type=["xlsx", "xls"])
-    
     if st.button("🔄 Force Recalculate", use_container_width=True, type="primary"):
         st.cache_data.clear()
         st.rerun()
-
     st.markdown("---")
     st.caption("Sources: AMFI · Yahoo Finance · Frankfurter")
     st.caption(f"IST: {now_ist.strftime('%d %b %Y, %H:%M')}")
 
 # -------------------------------------------------
-# LOAD DATA
+# LOAD
 # -------------------------------------------------
 fd_raw, mf_raw, stocks_raw = load_data(uploaded)
 usd_inr = get_usd_inr()
@@ -211,18 +189,13 @@ for _, row in mf_raw.iterrows():
         invested = safe_float(row.get("Invested Amount", row.get("Invested")))
         if units <= 0 or not isin:
             continue
-        mf_txns.append({
-            "Owner": owner, "ISIN": isin, "Fund Name": fund_name,
-            "Units": units, "Invested": invested
-        })
+        mf_txns.append({"Owner": owner, "ISIN": isin, "Fund Name": fund_name, "Units": units, "Invested": invested})
     except:
         continue
 
 mf_txns_df = pd.DataFrame(mf_txns)
 if not mf_txns_df.empty:
-    mf_agg = mf_txns_df.groupby(["Owner", "ISIN", "Fund Name"], as_index=False).agg({
-        "Units": "sum", "Invested": "sum"
-    })
+    mf_agg = mf_txns_df.groupby(["Owner", "ISIN", "Fund Name"], as_index=False).agg({"Units": "sum", "Invested": "sum"})
 else:
     mf_agg = pd.DataFrame(columns=["Owner", "ISIN", "Fund Name", "Units", "Invested"])
 
@@ -241,19 +214,12 @@ for _, row in mf_agg.iterrows():
         pnl = current_value - invested
         ret = (pnl / invested * 100) if invested > 0 else 0.0
         mf_rows.append({
-            "Owner": row["Owner"],
-            "ISIN": isin,
-            "Fund Name": row["Fund Name"][:45],
-            "Units": round(units, 3),
-            "Invested": invested,
-            "Current NAV": nav,
-            "Current Value": current_value,
-            "P&L": pnl,
-            "Return %": ret
+            "Owner": row["Owner"], "ISIN": isin, "Fund Name": row["Fund Name"][:42],
+            "Units": round(units, 3), "Invested": invested, "Current NAV": nav,
+            "Current Value": current_value, "P&L": pnl, "Return %": ret
         })
     except:
         mf_failed += 1
-
 mf = pd.DataFrame(mf_rows)
 
 # -------------------------------------------------
@@ -278,18 +244,12 @@ for _, row in stocks_raw.iterrows():
         pnl = current_value - invested
         ret = (pnl / invested * 100) if invested > 0 else 0.0
         stock_rows.append({
-            "Owner": str(row.get("Owner", "") or ""),
-            "Symbol": symbol,
-            "Quantity": qty,
-            "Invested": invested,
-            "Current Price": price,
-            "Current Value": current_value,
-            "P&L": pnl,
-            "Return %": ret
+            "Owner": str(row.get("Owner", "") or ""), "Symbol": symbol, "Quantity": qty,
+            "Invested": invested, "Current Price": price, "Current Value": current_value,
+            "P&L": pnl, "Return %": ret
         })
     except:
         stock_failed += 1
-
 stocks = pd.DataFrame(stock_rows)
 
 # -------------------------------------------------
@@ -302,8 +262,7 @@ for _, row in fd_raw.iterrows():
         holder = str(row.get("Holder Name", "") or "").strip()
         account = str(row.get("Account Number", "") or "").strip()
         principal = safe_float(row.get("Principal Amount"))
-        if (not holder or holder.lower() in ["nan", "nat", "none"] or
-            principal <= 0 or "total" in holder.lower()):
+        if (not holder or holder.lower() in ["nan", "nat", "none"] or principal <= 0 or "total" in holder.lower()):
             continue
         currency = str(row.get("Currency", "INR") or "INR").upper().strip()
         if currency not in ["INR", "USD"]:
@@ -326,21 +285,15 @@ for _, row in fd_raw.iterrows():
             current_value_inr = current_value_original
             principal_inr = principal
         fd_rows.append({
-            "Holder Name": holder,
-            "Account Number": account,
-            "Currency": currency,
-            "Principal (Original)": round(principal, 2),
-            "Principal (INR)": round(principal_inr, 0),
-            "ROI %": roi,
-            "Days to Maturity": days_to_mat,
-            "Accrued Interest": round(accrued, 0),
+            "Holder Name": holder, "Account Number": account, "Currency": currency,
+            "Principal (Original)": round(principal, 2), "Principal (INR)": round(principal_inr, 0),
+            "ROI %": roi, "Days to Maturity": days_to_mat, "Accrued Interest": round(accrued, 0),
             "Current Value (Original)": round(current_value_original, 0),
             "Current Value (INR)": round(current_value_inr, 0),
             "Maturity Date": mat_date.strftime("%Y-%m-%d") if pd.notna(mat_date) else ""
         })
     except:
         continue
-
 fd = pd.DataFrame(fd_rows)
 
 # -------------------------------------------------
@@ -350,9 +303,7 @@ total_mf = mf["Current Value"].sum() if not mf.empty else 0
 total_stocks = stocks["Current Value"].sum() if not stocks.empty else 0
 total_fd = fd["Current Value (INR)"].sum() if not fd.empty else 0
 total_networth = total_mf + total_stocks + total_fd
-total_invested = (mf["Invested"].sum() if not mf.empty else 0) + \
-                 (stocks["Invested"].sum() if not stocks.empty else 0) + \
-                 (fd["Principal (INR)"].sum() if not fd.empty else 0)
+total_invested = (mf["Invested"].sum() if not mf.empty else 0) + (stocks["Invested"].sum() if not stocks.empty else 0) + (fd["Principal (INR)"].sum() if not fd.empty else 0)
 total_pnl = total_networth - total_invested
 equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth else 0
 fd_pct = (total_fd / total_networth * 100) if total_networth else 0
@@ -361,14 +312,14 @@ fd_pct = (total_fd / total_networth * 100) if total_networth else 0
 # HEADER
 # -------------------------------------------------
 st.markdown('<div class="main-title">Family Net Worth Dashboard</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="sub-title">All values in INR · Live prices · Last calculated {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="sub-title">All values in INR · Live prices · {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
 
 if len(amfi_navs) == 0:
     st.error("AMFI NAV data could not be loaded.")
 elif mf_failed > 0:
     st.warning(f"{mf_failed} mutual funds missing NAV · {len(amfi_navs)} AMFI NAVs loaded")
 else:
-    st.success(f"All live prices fetched successfully · {len(amfi_navs)} AMFI NAVs loaded")
+    st.success(f"All live prices OK · {len(amfi_navs)} AMFI NAVs loaded")
 
 # -------------------------------------------------
 # TOP KPIs
@@ -386,90 +337,99 @@ st.markdown("---")
 # CHARTS
 # -------------------------------------------------
 c1, c2 = st.columns(2)
-
 with c1:
     st.markdown('<div class="section-header">Asset Allocation</div>', unsafe_allow_html=True)
-    alloc_df = pd.DataFrame({
-        "Asset": ["Fixed Deposits", "Mutual Funds", "Stocks"],
-        "Value": [total_fd, total_mf, total_stocks]
-    })
-    fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.45,
-                 color_discrete_sequence=["#3b82f6", "#10b981", "#f59e0b"])
+    alloc_df = pd.DataFrame({"Asset": ["Fixed Deposits", "Mutual Funds", "Stocks"], "Value": [total_fd, total_mf, total_stocks]})
+    fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.45, color_discrete_sequence=["#3b82f6", "#10b981", "#f59e0b"])
     fig.update_traces(textposition="inside", textinfo="percent+label")
-    fig.update_layout(
-        margin=dict(t=10, b=10, l=10, r=10), height=300, showlegend=False,
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font_color="#e2e8f0"
-    )
+    fig.update_layout(margin=dict(t=10, b=10, l=10, r=10), height=280, showlegend=False, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#e2e8f0")
     st.plotly_chart(fig, use_container_width=True)
 
 with c2:
     st.markdown('<div class="section-header">Net Worth by Family Member</div>', unsafe_allow_html=True)
     owner_map = {}
-    for df, col, key in [
-        (mf, "Current Value", "Owner"),
-        (stocks, "Current Value", "Owner"),
-        (fd, "Current Value (INR)", "Holder Name")
-    ]:
+    for df, col, key in [(mf, "Current Value", "Owner"), (stocks, "Current Value", "Owner"), (fd, "Current Value (INR)", "Holder Name")]:
         if not df.empty and key in df.columns:
             for owner, val in df.groupby(key)[col].sum().items():
                 owner_map[owner] = owner_map.get(owner, 0) + val
     if owner_map:
         owner_df = pd.DataFrame([{"Owner": k, "Value": v} for k, v in owner_map.items()])
-        fig2 = px.bar(owner_df, x="Owner", y="Value", text_auto=".2s",
-                      color_discrete_sequence=["#3b82f6"])
-        fig2.update_layout(
-            margin=dict(t=10, b=10, l=10, r=10), height=300, showlegend=False,
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font_color="#e2e8f0"
-        )
+        fig2 = px.bar(owner_df, x="Owner", y="Value", text_auto=".2s", color_discrete_sequence=["#3b82f6"])
+        fig2.update_layout(margin=dict(t=10, b=10, l=10, r=10), height=280, showlegend=False, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#e2e8f0")
         st.plotly_chart(fig2, use_container_width=True)
 
 # -------------------------------------------------
-# KEY INSIGHTS (ENHANCED)
+# KEY INSIGHTS - STAGE 1
 # -------------------------------------------------
 st.markdown('<div class="section-header">Key Insights</div>', unsafe_allow_html=True)
 
+# FD Maturity Ladder
+st.markdown("**📅 FD Maturity Ladder**")
+if not fd.empty and "Days to Maturity" in fd.columns:
+    ladder = {
+        "Next 7 days": fd[(fd["Days to Maturity"] >= 0) & (fd["Days to Maturity"] <= 7)]["Principal (INR)"].sum(),
+        "Next 30 days": fd[(fd["Days to Maturity"] >= 0) & (fd["Days to Maturity"] <= 30)]["Principal (INR)"].sum(),
+        "Next 90 days": fd[(fd["Days to Maturity"] >= 0) & (fd["Days to Maturity"] <= 90)]["Principal (INR)"].sum(),
+        "Next 1 year": fd[(fd["Days to Maturity"] >= 0) & (fd["Days to Maturity"] <= 365)]["Principal (INR)"].sum(),
+    }
+    l1, l2, l3, l4 = st.columns(4)
+    l1.metric("Next 7 days", format_inr(ladder["Next 7 days"]))
+    l2.metric("Next 30 days", format_inr(ladder["Next 30 days"]))
+    l3.metric("Next 90 days", format_inr(ladder["Next 90 days"]))
+    l4.metric("Next 1 year", format_inr(ladder["Next 1 year"]))
+else:
+    st.info("No FD maturity data")
+
+st.markdown("")
+
+# Three columns for insights
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown("**📅 Upcoming FD Maturities (90 days)**")
+    st.markdown("**📅 Upcoming FDs (90 days)**")
     if not fd.empty and "Days to Maturity" in fd.columns:
-        upcoming = fd[(fd["Days to Maturity"].notna()) & 
-                      (fd["Days to Maturity"] <= 90) & 
-                      (fd["Days to Maturity"] >= 0)].sort_values("Days to Maturity")
+        upcoming = fd[(fd["Days to Maturity"].notna()) & (fd["Days to Maturity"] <= 90) & (fd["Days to Maturity"] >= 0)].sort_values("Days to Maturity")
         if not upcoming.empty:
-            st.dataframe(
-                upcoming[["Holder Name", "Principal (INR)", "Days to Maturity", "Maturity Date"]]
-                .style.format({"Principal (INR)": "₹{:,.0f}"}),
-                use_container_width=True, height=200
-            )
+            st.dataframe(upcoming[["Holder Name", "Principal (INR)", "Days to Maturity"]].style.format({"Principal (INR)": "₹{:,.0f}"}), use_container_width=True, height=180)
         else:
-            st.info("No FDs maturing soon")
+            st.info("None")
     else:
-        st.info("No FD data")
+        st.info("No data")
 
 with col2:
-    st.markdown("**🏆 Top Mutual Funds**")
+    st.markdown("**🏆 Top MFs by Value**")
     if not mf.empty:
-        top_mf = mf.nlargest(5, "Current Value")[["Fund Name", "Current Value", "Return %"]]
-        st.dataframe(
-            top_mf.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}),
-            use_container_width=True, height=200
-        )
+        top_val = mf.nlargest(5, "Current Value")[["Fund Name", "Current Value", "Return %"]]
+        st.dataframe(top_val.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
     else:
-        st.info("No MF data")
+        st.info("No data")
 
 with col3:
-    st.markdown("**📈 Top Performing Stocks**")
-    if not stocks.empty:
-        top_stocks = stocks.nlargest(5, "Return %")[["Symbol", "Current Value", "Return %"]]
-        st.dataframe(
-            top_stocks.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}),
-            use_container_width=True, height=200
-        )
+    st.markdown("**📈 Top MFs by Return %**")
+    if not mf.empty:
+        top_ret = mf.nlargest(5, "Return %")[["Fund Name", "Current Value", "Return %"]]
+        st.dataframe(top_ret.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
     else:
-        st.info("No stock data")
+        st.info("No data")
+
+# Second row of insights
+col4, col5 = st.columns(2)
+
+with col4:
+    st.markdown("**📊 Top Stocks by Value**")
+    if not stocks.empty:
+        top_s_val = stocks.nlargest(5, "Current Value")[["Symbol", "Current Value", "Return %"]]
+        st.dataframe(top_s_val.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
+    else:
+        st.info("No data")
+
+with col5:
+    st.markdown("**🚀 Top Stocks by Return %**")
+    if not stocks.empty:
+        top_s_ret = stocks.nlargest(5, "Return %")[["Symbol", "Current Value", "Return %"]]
+        st.dataframe(top_s_ret.style.format({"Current Value": "₹{:,.0f}", "Return %": "{:.1f}%"}), use_container_width=True, height=180)
+    else:
+        st.info("No data")
 
 # -------------------------------------------------
 # FULL HOLDINGS
@@ -481,49 +441,29 @@ tab1, tab2, tab3 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits"])
 with tab1:
     if not mf.empty:
         st.caption(f"Showing {len(mf)} consolidated holdings · AMFI NAVs used")
-        st.dataframe(
-            mf.style.format({
-                "Invested": "₹{:,.0f}",
-                "Current Value": "₹{:,.0f}",
-                "P&L": "₹{:,.0f}",
-                "Return %": "{:.1f}%",
-                "Current NAV": "{:.2f}",
-                "Units": "{:.3f}"
-            }),
-            use_container_width=True, height=400
-        )
+        st.dataframe(mf.style.format({
+            "Invested": "₹{:,.0f}", "Current Value": "₹{:,.0f}", "P&L": "₹{:,.0f}",
+            "Return %": "{:.1f}%", "Current NAV": "{:.2f}", "Units": "{:.3f}"
+        }), use_container_width=True, height=380)
     else:
         st.info("No mutual fund data")
 
 with tab2:
     if not stocks.empty:
-        st.dataframe(
-            stocks.style.format({
-                "Invested": "₹{:,.0f}",
-                "Current Value": "₹{:,.0f}",
-                "P&L": "₹{:,.0f}",
-                "Return %": "{:.1f}%",
-                "Current Price": "{:.2f}",
-                "Quantity": "{:.0f}"
-            }),
-            use_container_width=True, height=400
-        )
+        st.dataframe(stocks.style.format({
+            "Invested": "₹{:,.0f}", "Current Value": "₹{:,.0f}", "P&L": "₹{:,.0f}",
+            "Return %": "{:.1f}%", "Current Price": "{:.2f}", "Quantity": "{:.0f}"
+        }), use_container_width=True, height=380)
     else:
         st.info("No stock data")
 
 with tab3:
     if not fd.empty:
-        st.dataframe(
-            fd.style.format({
-                "Principal (Original)": "{:,.2f}",
-                "Principal (INR)": "₹{:,.0f}",
-                "Accrued Interest": "{:,.0f}",
-                "Current Value (Original)": "{:,.0f}",
-                "Current Value (INR)": "₹{:,.0f}",
-                "ROI %": "{:.2f}"
-            }),
-            use_container_width=True, height=400
-        )
+        st.dataframe(fd.style.format({
+            "Principal (Original)": "{:,.2f}", "Principal (INR)": "₹{:,.0f}",
+            "Accrued Interest": "{:,.0f}", "Current Value (Original)": "{:,.0f}",
+            "Current Value (INR)": "₹{:,.0f}", "ROI %": "{:.2f}"
+        }), use_container_width=True, height=380)
     else:
         st.info("No fixed deposit data")
 
@@ -531,4 +471,4 @@ with tab3:
 # FOOTER
 # -------------------------------------------------
 st.markdown("---")
-st.caption(f"All figures in INR · USD @ {usd_inr:.2f} · IST {now_ist.strftime('%d %b %Y %H:%M')} · AMFI NAVs: {len(amfi_navs)} · Personal use only")
+st.caption(f"All figures in INR · USD @ {usd_inr:.2f} · IST {now_ist.strftime('%d %b %Y %H:%M')} · AMFI: {len(amfi_navs)} · Personal use only")
