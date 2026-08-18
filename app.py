@@ -6,6 +6,7 @@ import requests
 from datetime import datetime, timedelta
 import pytz
 import plotly.express as px
+from io import StringIO
 
 # -------------------------------------------------
 # PAGE CONFIG
@@ -62,6 +63,38 @@ st.markdown("""
 # -------------------------------------------------
 # HELPERS
 # -------------------------------------------------
+@st.cache_data(ttl=3600)  # Cache AMFI data for 1 hour
+def get_amfi_nav_dict():
+    """Download official AMFI NAVAll.txt and return ISIN -> NAV mapping"""
+    try:
+        url = "https://www.amfiindia.com/spages/NAVAll.txt"
+        r = requests.get(url, timeout=15)
+        r.raise_for_status()
+        
+        nav_dict = {}
+        lines = r.text.splitlines()
+        
+        for line in lines:
+            parts = line.split(";")
+            if len(parts) >= 5:
+                # Format: Scheme Code;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
+                isin_growth = parts[1].strip()
+                isin_div = parts[2].strip()
+                try:
+                    nav = float(parts[4].strip())
+                except:
+                    continue
+                
+                if isin_growth and len(isin_growth) > 8:
+                    nav_dict[isin_growth] = nav
+                if isin_div and len(isin_div) > 8:
+                    nav_dict[isin_div] = nav
+                    
+        return nav_dict
+    except Exception as e:
+        st.warning(f"Could not fetch AMFI data: {e}")
+        return {}
+
 @st.cache_data(ttl=300)
 def get_usd_inr():
     try:
@@ -69,22 +102,6 @@ def get_usd_inr():
         return float(r.json()["rates"]["INR"])
     except:
         return 95.5
-
-@st.cache_data(ttl=600)
-def get_mf_nav(isin: str):
-    if not isin or len(str(isin)) < 8:
-        return None, None
-    try:
-        r = requests.get(f"https://api.mfapi.in/mf/search?q={isin}", timeout=8)
-        if r.status_code == 200 and r.json():
-            code = r.json()[0]["schemeCode"]
-            nav_r = requests.get(f"https://api.mfapi.in/mf/{code}", timeout=8)
-            data = nav_r.json()
-            if data.get("data"):
-                return float(data["data"][0]["nav"]), data["data"][0]["date"]
-    except:
-        pass
-    return None, None
 
 @st.cache_data(ttl=300)
 def get_stock_price(symbol: str):
@@ -146,7 +163,7 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("---")
-    st.caption("Sources: mfapi.in · Yahoo Finance · Frankfurter")
+    st.caption("Sources: AMFI NAVAll.txt · Yahoo Finance · Frankfurter")
     st.caption(f"IST: {now_ist.strftime('%d %b %Y, %H:%M')}")
 
 # -------------------------------------------------
@@ -154,11 +171,11 @@ with st.sidebar:
 # -------------------------------------------------
 fd_raw, mf_raw, stocks_raw = load_data(uploaded)
 usd_inr = get_usd_inr()
+amfi_navs = get_amfi_nav_dict()
 
 # -------------------------------------------------
-# PROCESS MUTUAL FUNDS (AGGREGATED)
+# PROCESS MUTUAL FUNDS (AGGREGATED + AMFI)
 # -------------------------------------------------
-# First clean and prepare transaction level data
 mf_txns = []
 for _, row in mf_raw.iterrows():
     try:
@@ -183,7 +200,6 @@ for _, row in mf_raw.iterrows():
 
 mf_txns_df = pd.DataFrame(mf_txns)
 
-# Aggregate by Owner + ISIN
 if not mf_txns_df.empty:
     mf_agg = mf_txns_df.groupby(["Owner", "ISIN", "Fund Name"], as_index=False).agg({
         "Units": "sum",
@@ -192,7 +208,6 @@ if not mf_txns_df.empty:
 else:
     mf_agg = pd.DataFrame(columns=["Owner", "ISIN", "Fund Name", "Units", "Invested"])
 
-# Now fetch live NAV and calculate
 mf_rows = []
 mf_failed = 0
 
@@ -202,7 +217,9 @@ for _, row in mf_agg.iterrows():
         units = row["Units"]
         invested = row["Invested"]
 
-        nav, nav_date = get_mf_nav(isin)
+        # Get NAV from AMFI master list
+        nav = amfi_navs.get(isin, None)
+        
         if nav is None:
             mf_failed += 1
             nav = 0.0
@@ -348,10 +365,12 @@ fd_pct = (total_fd / total_networth * 100) if total_networth else 0
 st.markdown('<div class="main-title">Family Net Worth Dashboard</div>', unsafe_allow_html=True)
 st.markdown(f'<div class="sub-title">All values in INR · Live prices · Last calculated {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
 
-if mf_failed or stock_failed:
-    st.warning(f"Note: {mf_failed} MFs and {stock_failed} stocks used fallback prices.")
+if len(amfi_navs) == 0:
+    st.error("AMFI NAV data could not be loaded. Mutual Fund values will be zero.")
+elif mf_failed > 0:
+    st.warning(f"Note: {mf_failed} mutual funds could not find NAV in AMFI data. {len(amfi_navs)} NAVs loaded.")
 else:
-    st.success("All live prices fetched successfully")
+    st.success(f"All live prices fetched successfully · {len(amfi_navs)} AMFI NAVs loaded")
 
 # -------------------------------------------------
 # TOP KPIs
@@ -447,7 +466,7 @@ tab1, tab2, tab3 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits"])
 
 with tab1:
     if not mf.empty:
-        st.caption(f"Showing {len(mf)} consolidated holdings (aggregated from transactions)")
+        st.caption(f"Showing {len(mf)} consolidated holdings (aggregated from transactions) · AMFI NAVs used")
         st.dataframe(
             mf.style.format({
                 "Invested": "₹{:,.0f}",
@@ -498,4 +517,4 @@ with tab3:
 # FOOTER
 # -------------------------------------------------
 st.markdown("---")
-st.caption(f"All figures in INR · USD converted at {usd_inr:.2f} · IST {now_ist.strftime('%d %b %Y %H:%M')} · Personal use only")
+st.caption(f"All figures in INR · USD converted at {usd_inr:.2f} · IST {now_ist.strftime('%d %b %Y %H:%M')} · AMFI NAVs: {len(amfi_navs)} · Personal use only")
