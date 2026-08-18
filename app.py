@@ -27,12 +27,6 @@ st.markdown("""
         color: #1a365d;
         margin-bottom: 0.2rem;
     }
-    .metric-card {
-        background: #f8fafc;
-        padding: 1rem 1.2rem;
-        border-radius: 10px;
-        border: 1px solid #e2e8f0;
-    }
     .stMetric > div {
         background-color: #ffffff;
         padding: 12px 16px;
@@ -48,19 +42,17 @@ st.markdown("""
 # -------------------------------------------------
 # HELPER FUNCTIONS
 # -------------------------------------------------
-@st.cache_data(ttl=300)  # cache 5 minutes
+@st.cache_data(ttl=300)
 def get_usd_inr():
     try:
         r = requests.get("https://api.frankfurter.app/latest?from=USD&to=INR", timeout=8)
         return r.json()["rates"]["INR"]
     except:
-        return 95.5  # fallback
+        return 95.5
 
 @st.cache_data(ttl=600)
 def get_mf_nav(isin):
     try:
-        # mfapi.in by ISIN is not direct; we use a simple search approach
-        # For production we match via scheme code, but here we keep it simple
         url = f"https://api.mfapi.in/mf/search?q={isin}"
         r = requests.get(url, timeout=8)
         if r.status_code == 200 and r.json():
@@ -91,15 +83,19 @@ def load_data(uploaded_file=None):
         try:
             xls = pd.ExcelFile("data/Networth_Raw_Data.xlsx")
         except:
-            st.error("Could not find data/Networth_Raw_Data.xlsx. Please upload your file.")
+            st.error("Could not find data/Networth_Raw_Data.xlsx. Please upload your file using the sidebar.")
             st.stop()
 
-    # Read sheets (flexible names)
     sheets = {s.lower(): s for s in xls.sheet_names}
 
-    fd = pd.read_excel(xls, sheets.get("fd", list(xls.sheet_names)[0]) if "fd" in sheets else 0)
-    mf = pd.read_excel(xls, sheets.get("mf", list(xls.sheet_names)[1]) if "mf" in sheets else 1)
-    stocks = pd.read_excel(xls, sheets.get("stocks", list(xls.sheet_names)[2]) if "stocks" in sheets else 2)
+    # Try to find the correct sheets flexibly
+    fd_sheet = sheets.get("fd") or sheets.get("fixed deposits") or list(xls.sheet_names)[0]
+    mf_sheet = sheets.get("mf") or sheets.get("mutual funds") or list(xls.sheet_names)[1]
+    stocks_sheet = sheets.get("stocks") or list(xls.sheet_names)[2]
+
+    fd = pd.read_excel(xls, fd_sheet)
+    mf = pd.read_excel(xls, mf_sheet)
+    stocks = pd.read_excel(xls, stocks_sheet)
 
     return fd, mf, stocks
 
@@ -132,35 +128,42 @@ mf_processed = []
 mf_failed = 0
 
 for _, row in mf_df.iterrows():
-    isin = str(row.get("ISIN", "")).strip()
-    units = float(row.get("Units", 0) or 0)
-    invested = float(row.get("Invested Amount", 0) or row.get("Invested", 0) or 0)
-    
-    nav, nav_date = get_mf_nav(isin) if isin else (None, None)
-    
-    if nav is None:
-        # fallback to any existing Current NAV column
-        nav = float(row.get("Current NAV", 0) or 0)
-        if nav == 0:
-            mf_failed += 1
-            nav = float(row.get("Purchase NAV", 0) or 0)
-    
-    current_value = units * nav if nav else 0
-    pnl = current_value - invested
-    ret = (pnl / invested * 100) if invested > 0 else 0
+    try:
+        isin = str(row.get("ISIN", "")).strip()
+        units = pd.to_numeric(row.get("Units", 0), errors="coerce")
+        units = 0.0 if pd.isna(units) else float(units)
 
-    mf_processed.append({
-        "Owner": row.get("Owner", ""),
-        "ISIN": isin,
-        "Fund Name": row.get("Fund Name", ""),
-        "Units": units,
-        "Invested": invested,
-        "Current NAV": nav,
-        "NAV Date": nav_date,
-        "Current Value": current_value,
-        "P&L": pnl,
-        "Return %": ret
-    })
+        invested = pd.to_numeric(row.get("Invested Amount", row.get("Invested", 0)), errors="coerce")
+        invested = 0.0 if pd.isna(invested) else float(invested)
+
+        nav, nav_date = get_mf_nav(isin) if isin else (None, None)
+
+        if nav is None:
+            nav = pd.to_numeric(row.get("Current NAV", 0), errors="coerce")
+            if pd.isna(nav) or nav == 0:
+                mf_failed += 1
+                nav = pd.to_numeric(row.get("Purchase NAV", 0), errors="coerce")
+            nav = 0.0 if pd.isna(nav) else float(nav)
+
+        current_value = units * nav
+        pnl = current_value - invested
+        ret = (pnl / invested * 100) if invested > 0 else 0
+
+        mf_processed.append({
+            "Owner": str(row.get("Owner", "")),
+            "ISIN": isin,
+            "Fund Name": str(row.get("Fund Name", "")),
+            "Units": units,
+            "Invested": invested,
+            "Current NAV": nav,
+            "NAV Date": nav_date,
+            "Current Value": current_value,
+            "P&L": pnl,
+            "Return %": ret
+        })
+    except:
+        mf_failed += 1
+        continue
 
 mf_final = pd.DataFrame(mf_processed)
 
@@ -171,67 +174,82 @@ stock_processed = []
 stock_failed = 0
 
 for _, row in stocks_df.iterrows():
-    symbol = str(row.get("Symbol", row.get("Ticker / Symbol", ""))).strip().upper()
-    qty = float(row.get("Quantity", 0) or 0)
-    invested = float(row.get("Invested Amount", 0) or 0)
-    
-    price = get_stock_price(symbol) if symbol else None
-    
-    if price is None:
-        price = float(row.get("Current Price", row.get("Current Price (CMP)", 0)) or 0)
-        if price == 0:
-            stock_failed += 1
-            price = float(row.get("Purchase Price", row.get("Avg Buy Price", 0)) or 0)
-    
-    current_value = qty * price
-    pnl = current_value - invested
-    ret = (pnl / invested * 100) if invested > 0 else 0
+    try:
+        symbol = str(row.get("Symbol", row.get("Ticker / Symbol", ""))).strip().upper()
+        qty = pd.to_numeric(row.get("Quantity", 0), errors="coerce")
+        qty = 0.0 if pd.isna(qty) else float(qty)
 
-    stock_processed.append({
-        "Owner": row.get("Owner", ""),
-        "Symbol": symbol,
-        "Quantity": qty,
-        "Invested": invested,
-        "Current Price": price,
-        "Current Value": current_value,
-        "P&L": pnl,
-        "Return %": ret
-    })
+        invested = pd.to_numeric(row.get("Invested Amount", 0), errors="coerce")
+        invested = 0.0 if pd.isna(invested) else float(invested)
+
+        price = get_stock_price(symbol) if symbol else None
+
+        if price is None:
+            price = pd.to_numeric(row.get("Current Price", row.get("Current Price (CMP)", 0)), errors="coerce")
+            if pd.isna(price) or price == 0:
+                stock_failed += 1
+                price = pd.to_numeric(row.get("Purchase Price", row.get("Avg Buy Price", 0)), errors="coerce")
+            price = 0.0 if pd.isna(price) else float(price)
+
+        current_value = qty * price
+        pnl = current_value - invested
+        ret = (pnl / invested * 100) if invested > 0 else 0
+
+        stock_processed.append({
+            "Owner": str(row.get("Owner", "")),
+            "Symbol": symbol,
+            "Quantity": qty,
+            "Invested": invested,
+            "Current Price": price,
+            "Current Value": current_value,
+            "P&L": pnl,
+            "Return %": ret
+        })
+    except:
+        stock_failed += 1
+        continue
 
 stocks_final = pd.DataFrame(stock_processed)
 
 # -------------------------------------------------
-# PROCESS FDs (simple current value approximation)
+# PROCESS FDs (robust version)
 # -------------------------------------------------
 fd_processed = []
 for _, row in fd_df.iterrows():
-    principal = float(row.get("Principal Amount", 0) or 0)
-    currency = str(row.get("Currency", "INR")).upper()
-    maturity = row.get("Maturity Amount", principal)
-    
-    # Simple: use Principal as current for now (or maturity if closer)
-    current = principal
-    current_inr = current * usd_inr if currency == "USD" else current
+    try:
+        principal = pd.to_numeric(row.get("Principal Amount", 0), errors="coerce")
+        principal = 0.0 if pd.isna(principal) else float(principal)
 
-    fd_processed.append({
-        "Holder Name": row.get("Holder Name", ""),
-        "Currency": currency,
-        "Principal": principal,
-        "Current Value (INR)": current_inr,
-        "Maturity Date": row.get("Maturity Date", "")
-    })
+        currency = str(row.get("Currency", "INR")).upper().strip()
+        if currency not in ["INR", "USD"]:
+            currency = "INR"
+
+        current = principal
+        current_inr = current * usd_inr if currency == "USD" else current
+
+        fd_processed.append({
+            "Holder Name": str(row.get("Holder Name", "")),
+            "Currency": currency,
+            "Principal": principal,
+            "Current Value (INR)": current_inr,
+            "Maturity Date": row.get("Maturity Date", "")
+        })
+    except:
+        continue
 
 fd_final = pd.DataFrame(fd_processed)
 
 # -------------------------------------------------
 # AGGREGATES
 # -------------------------------------------------
-total_mf = mf_final["Current Value"].sum()
-total_stocks = stocks_final["Current Value"].sum()
-total_fd = fd_final["Current Value (INR)"].sum()
+total_mf = mf_final["Current Value"].sum() if not mf_final.empty else 0
+total_stocks = stocks_final["Current Value"].sum() if not stocks_final.empty else 0
+total_fd = fd_final["Current Value (INR)"].sum() if not fd_final.empty else 0
 
 total_networth = total_mf + total_stocks + total_fd
-total_invested = mf_final["Invested"].sum() + stocks_final["Invested"].sum() + fd_final["Principal"].sum()
+total_invested = (mf_final["Invested"].sum() if not mf_final.empty else 0) + \
+                 (stocks_final["Invested"].sum() if not stocks_final.empty else 0) + \
+                 (fd_final["Principal"].sum() if not fd_final.empty else 0)
 total_pnl = total_networth - total_invested
 equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth > 0 else 0
 
@@ -278,18 +296,26 @@ with c1:
 
 with c2:
     st.subheader("Net Worth by Family Member")
-    # Simple owner aggregation
     owner_data = []
-    for owner in set(list(mf_final["Owner"]) + list(stocks_final["Owner"])):
-        mf_val = mf_final[mf_final["Owner"] == owner]["Current Value"].sum()
-        st_val = stocks_final[stocks_final["Owner"] == owner]["Current Value"].sum()
+    all_owners = set()
+    if not mf_final.empty:
+        all_owners.update(mf_final["Owner"].tolist())
+    if not stocks_final.empty:
+        all_owners.update(stocks_final["Owner"].tolist())
+
+    for owner in all_owners:
+        mf_val = mf_final[mf_final["Owner"] == owner]["Current Value"].sum() if not mf_final.empty else 0
+        st_val = stocks_final[stocks_final["Owner"] == owner]["Current Value"].sum() if not stocks_final.empty else 0
         owner_data.append({"Owner": owner, "Value": mf_val + st_val})
-    
+
     owner_df = pd.DataFrame(owner_data)
-    fig2 = px.bar(owner_df, x="Owner", y="Value", text_auto=".2s",
-                  color_discrete_sequence=["#2b6cb0"])
-    fig2.update_layout(margin=dict(t=20, b=20, l=20, r=20), height=320, showlegend=False)
-    st.plotly_chart(fig2, use_container_width=True)
+    if not owner_df.empty:
+        fig2 = px.bar(owner_df, x="Owner", y="Value", text_auto=".2s",
+                      color_discrete_sequence=["#2b6cb0"])
+        fig2.update_layout(margin=dict(t=20, b=20, l=20, r=20), height=320, showlegend=False)
+        st.plotly_chart(fig2, use_container_width=True)
+    else:
+        st.info("No owner data available")
 
 # -------------------------------------------------
 # DETAILED TABLES
@@ -300,33 +326,42 @@ st.subheader("Full Holdings Detail")
 tab1, tab2, tab3 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits"])
 
 with tab1:
-    st.dataframe(
-        mf_final.style.format({
-            "Invested": "₹{:,.0f}",
-            "Current Value": "₹{:,.0f}",
-            "P&L": "₹{:,.0f}",
-            "Return %": "{:.1f}%",
-            "Current NAV": "{:.2f}"
-        }),
-        use_container_width=True,
-        height=400
-    )
+    if not mf_final.empty:
+        st.dataframe(
+            mf_final.style.format({
+                "Invested": "₹{:,.0f}",
+                "Current Value": "₹{:,.0f}",
+                "P&L": "₹{:,.0f}",
+                "Return %": "{:.1f}%",
+                "Current NAV": "{:.2f}"
+            }),
+            use_container_width=True,
+            height=400
+        )
+    else:
+        st.info("No mutual fund data")
 
 with tab2:
-    st.dataframe(
-        stocks_final.style.format({
-            "Invested": "₹{:,.0f}",
-            "Current Value": "₹{:,.0f}",
-            "P&L": "₹{:,.0f}",
-            "Return %": "{:.1f}%",
-            "Current Price": "{:.2f}"
-        }),
-        use_container_width=True,
-        height=400
-    )
+    if not stocks_final.empty:
+        st.dataframe(
+            stocks_final.style.format({
+                "Invested": "₹{:,.0f}",
+                "Current Value": "₹{:,.0f}",
+                "P&L": "₹{:,.0f}",
+                "Return %": "{:.1f}%",
+                "Current Price": "{:.2f}"
+            }),
+            use_container_width=True,
+            height=400
+        )
+    else:
+        st.info("No stock data")
 
 with tab3:
-    st.dataframe(fd_final, use_container_width=True, height=400)
+    if not fd_final.empty:
+        st.dataframe(fd_final, use_container_width=True, height=400)
+    else:
+        st.info("No fixed deposit data")
 
 # -------------------------------------------------
 # FOOTER
