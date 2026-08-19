@@ -132,33 +132,6 @@ def get_nifty_history():
     except Exception:
         return None
 
-# NEW — Market Pulse: a small "what's happening in markets today" strip.
-# Reuses the same yfinance ticker+history pattern as get_stock_price/
-# get_sgb_price rather than introducing a new data path. "% below ATH" is
-# computed from the longest history Yahoo will actually return for that
-# ticker (period="max") — for young futures contracts (oil, gold, silver)
-# that's only as far back as that specific contract's own listing, a real
-# limitation of free data, not a bug; genuine multi-decade ATH for those
-# would need a continuous-contract data vendor.
-MARKET_PULSE_TICKERS = [
-    ("NIFTY 50", "^NSEI"), ("SENSEX", "^BSESN"), ("Gold", "GC=F"), ("Silver", "SI=F"),
-    ("Brent Oil", "BZ=F"), ("S&P 500", "^GSPC"), ("Nasdaq Composite", "^IXIC"),
-    ("Dow Jones", "^DJI"), ("USD/INR", "INR=X"),
-]
-
-@st.cache_data(ttl=21600, show_spinner=False)
-def get_market_pulse(ticker: str):
-    try:
-        hist = yf.Ticker(ticker).history(period="max")
-        if hist.empty or len(hist) < 2:
-            return None
-        closes = hist["Close"]
-        latest, prev, ath = closes.iloc[-1], closes.iloc[-2], closes.max()
-        return {"value": float(latest), "change_pct": float((latest / prev - 1) * 100),
-                "below_ath_pct": float((latest / ath - 1) * 100), "ath_since": hist.index[0].strftime("%Y")}
-    except Exception:
-        return None
-
 def trailing_return(hist_df, years):
     if hist_df is None or hist_df.empty:
         return None
@@ -206,28 +179,6 @@ def get_stock_price(symbol: str):
     except Exception:
         pass
     return None
-
-# NEW — SGB pricing: the raw ticker (e.g. SGBSEP31II-GB) isn't the actual NSE
-# listing symbol; the "-GB" suffix is a data-entry convention, not part of
-# the tradable symbol. Stripping it and reusing the same yfinance lookup
-# pattern as get_stock_price resolves the real NSE-listed SGB tranche.
-# Returns (price, source_label) so provenance is always visible, never
-# invented, and the raw-file price stays a clearly-labeled last resort.
-@st.cache_data(ttl=1800, show_spinner=False)
-def get_sgb_price(raw_ticker: str):
-    nse_symbol = re.sub(r"-GB$", "", raw_ticker.strip(), flags=re.IGNORECASE)
-    try:
-        t = yf.Ticker(f"{nse_symbol}.NS")
-        hist = t.history(period="5d")  # a few days of buffer in case SGBs trade thinly
-        if not hist.empty:
-            price = float(hist["Close"].iloc[-1])
-            as_of = hist.index[-1].strftime("%Y-%m-%d")
-            is_latest_session = hist.index[-1].date() == datetime.now().date()
-            label = f"NSE {nse_symbol} — {'live' if is_latest_session else 'previous close'} as of {as_of}"
-            return price, label
-    except Exception:
-        pass
-    return None, None
 
 def safe_float(val, default=0.0):
     try:
@@ -378,24 +329,15 @@ for _, row in stocks_raw.iterrows():
         invested = safe_float(row.get("Invested Amount"))
         if qty <= 0:
             continue
-        is_sgb = bool(SGB_TICKER_PATTERN.match(symbol))  # NEW: checked before pricing, not after
-        price_source = "live NSE" if not is_sgb else None
-        if is_sgb:
-            price, price_source = get_sgb_price(symbol)  # NEW: SGB-specific lookup (strips "-GB", tries NSE)
-        else:
-            price = get_stock_price(symbol) if symbol else None
+        price = get_stock_price(symbol) if symbol else None
         used_fallback = False
         if price is None:
             price = safe_float(row.get("Current Price", row.get("Current Price (CMP)")))
             used_fallback = True
-            price_source = "raw file (stale, last-resort fallback)"
             if price == 0:
                 price = safe_float(row.get("Purchase Price", row.get("Avg Buy Price")))
         if used_fallback:
-            tried = f"tried NSE {re.sub(r'-GB$', '', symbol, flags=re.IGNORECASE)}" if is_sgb else "tried live NSE feed"
-            integrity_issues.append(("MEDIUM", f"{symbol}: no live/previous-close price found ({tried}) — used stale price from the raw file instead."))
-        elif is_sgb:
-            integrity_issues.append(("INFORMATIONAL", f"{symbol}: priced from {price_source}."))  # NEW: confirms the live attempt succeeded, not just silently trusted
+            integrity_issues.append(("MEDIUM", f"{symbol}: live price unavailable, used stale price from the raw file instead."))
         current_value = qty * price
         pnl = current_value - invested
         ret = (pnl / invested * 100) if invested > 0 else 0.0
@@ -403,11 +345,10 @@ for _, row in stocks_raw.iterrows():
             integrity_issues.append(("MEDIUM", f"{symbol}: P&L is {pnl/invested*100:.0f}% of invested amount — unusually large, worth a sanity check of quantity/price entry."))
         row_dict = {"Owner": str(row.get("Owner", "") or ""), "Symbol": symbol, "Quantity": qty,
                     "Invested": invested, "Current Price": price, "Current Value": current_value,
-                    "P&L": pnl, "Return %": ret, "Price Source": price_source}
-        if is_sgb:
-            gold_rows.append(row_dict)  # routed to Gold, not Stocks
+                    "P&L": pnl, "Return %": ret}
+        if SGB_TICKER_PATTERN.match(symbol):
+            gold_rows.append(row_dict)  # NEW: routed to Gold, not Stocks
         else:
-            del row_dict["Price Source"]  # unchanged shape for regular stocks — Price Source is SGB-only, additive
             stock_rows.append(row_dict)
     except Exception:
         continue
@@ -666,27 +607,6 @@ k5.metric("USD/INR", f"{usd_inr:.2f}" if usd_inr else "unavailable")
 k6.metric("Health Score", f"{health_score:.0f}", health_label)
 
 # ==================================================
-# MARKET PULSE — compact, single small table, not full charts
-# ==================================================
-st.markdown('<div class="section-header">Market pulse</div>', unsafe_allow_html=True)
-pulse_rows = []
-for label, ticker in MARKET_PULSE_TICKERS:
-    d = get_market_pulse(ticker)
-    if d:
-        pulse_rows.append({"Market": label, "Value": d["value"], "Chg %": d["change_pct"], "vs ATH %": d["below_ath_pct"]})
-    else:
-        pulse_rows.append({"Market": label, "Value": None, "Chg %": None, "vs ATH %": None})
-pulse_df = pd.DataFrame(pulse_rows)
-def _pulse_color(v):
-    if pd.isna(v): return ""
-    return "color:#22c55e" if v >= 0 else "color:#ef4444"
-st.dataframe(
-    pulse_df.style.applymap(_pulse_color, subset=["Chg %"]).format({"Value": "{:,.2f}", "Chg %": "{:+.2f}%", "vs ATH %": "{:.1f}%"}, na_rep="—"),
-    hide_index=True, use_container_width=True, height=180
-)
-st.markdown('<p class="caveat">"vs ATH" is the all-time high available from each ticker\'s own free Yahoo Finance history — for futures contracts (Gold/Silver/Brent) that\'s only as far back as that specific contract, not a true multi-decade record.</p>', unsafe_allow_html=True)
-
-# ==================================================
 # WHAT NEEDS MY ATTENTION
 # ==================================================
 st.markdown('<div class="section-header">What needs my attention</div>', unsafe_allow_html=True)
@@ -702,7 +622,7 @@ else:
 # DATA INTEGRITY (Phase 3) — visible, not buried
 # ==================================================
 if integrity_issues:
-    sev_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFORMATIONAL": 4}
+    sev_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
     integrity_issues.sort(key=lambda x: sev_order.get(x[0], 9))
     with st.expander(f"Data integrity check — {len(integrity_issues)} issue(s) found"):
         for sev, msg in integrity_issues:
@@ -861,13 +781,12 @@ with tab3:
                 "ROI %": st.column_config.NumberColumn(format="%.2f%%"),
             }, use_container_width=True, height=380)
 
-with tab4:  # Gold tab
+with tab4:  # NEW: Gold tab
     if not gold.empty:
         st.caption("Sovereign Gold Bonds, identified from the Stocks sheet by ticker pattern (SGB...-GB) and reported as Gold, not equity. "
-                    "Price sourced live from NSE (via the actual listed symbol, stripped of the '-GB' data-entry suffix) where available; "
-                    "falls back to the raw file's stale price, clearly labeled, only if no NSE quote can be found.")
+                    "Only the fields already present in the raw data are shown — no maturity date or interest rate is invented, since the source file doesn't carry them for these holdings.")
         st.dataframe(
-            gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Price Source", "Current Value", "P&L", "Return %"]],
+            gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]],
             column_config={
                 "Invested": st.column_config.NumberColumn(format="₹%d"), "Current Value": st.column_config.NumberColumn(format="₹%d"),
                 "P&L": st.column_config.NumberColumn(format="₹%d"), "Return %": st.column_config.NumberColumn(format="%.1f%%"),
