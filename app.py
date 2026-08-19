@@ -313,7 +313,15 @@ for _, row in mf_agg.iterrows():
         mf_failed += 1
 mf = pd.DataFrame(mf_rows)
 
-stock_rows = []
+# NEW — Gold/SGB: Sovereign Gold Bonds trade as NSE-listed instruments (hence
+# they were sitting in the raw Stocks sheet), but they are gold exposure, not
+# equity. Identified by ticker pattern (SGB...-GB, the standard NSE listing
+# format for SGB tranches) — a reliable, non-guessing rule matched against
+# the two real holdings in this portfolio. Everything else in the same loop
+# is completely unchanged.
+SGB_TICKER_PATTERN = re.compile(r"^SGB.*-GB$", re.IGNORECASE)
+
+stock_rows, gold_rows = [], []
 for _, row in stocks_raw.iterrows():
     try:
         symbol = str(row.get("Symbol", row.get("Ticker / Symbol", "")) or "").strip().upper()
@@ -335,12 +343,19 @@ for _, row in stocks_raw.iterrows():
         ret = (pnl / invested * 100) if invested > 0 else 0.0
         if invested > 0 and abs(pnl) > invested * 5:
             integrity_issues.append(("MEDIUM", f"{symbol}: P&L is {pnl/invested*100:.0f}% of invested amount — unusually large, worth a sanity check of quantity/price entry."))
-        stock_rows.append({"Owner": str(row.get("Owner", "") or ""), "Symbol": symbol, "Quantity": qty,
-                            "Invested": invested, "Current Price": price, "Current Value": current_value,
-                            "P&L": pnl, "Return %": ret})
+        row_dict = {"Owner": str(row.get("Owner", "") or ""), "Symbol": symbol, "Quantity": qty,
+                    "Invested": invested, "Current Price": price, "Current Value": current_value,
+                    "P&L": pnl, "Return %": ret}
+        if SGB_TICKER_PATTERN.match(symbol):
+            gold_rows.append(row_dict)  # NEW: routed to Gold, not Stocks
+        else:
+            stock_rows.append(row_dict)
     except Exception:
         continue
 stocks = pd.DataFrame(stock_rows)
+gold = pd.DataFrame(gold_rows)  # NEW: Gold asset class (currently SGB only — Gold ETF/MF/physical
+                                  # would join here too if reliably identifiable in the source data,
+                                  # per the requirement not to guess when it isn't)
 
 # ---- FD: full native/reporting currency model (Phase 2 & 6 fix) ----
 fd_rows = []
@@ -414,13 +429,16 @@ if fd_fx_unavailable:
 # -------------------------------------------------
 total_mf = mf["Current Value"].sum() if not mf.empty else 0
 total_stocks = stocks["Current Value"].sum() if not stocks.empty else 0
+total_gold = gold["Current Value"].sum() if not gold.empty else 0  # NEW
 fd_valid = fd.dropna(subset=["Current Value (INR)"]) if not fd.empty else fd
 total_fd = fd_valid["Current Value (INR)"].sum() if not fd_valid.empty else 0
-total_networth = total_mf + total_stocks + total_fd
+total_networth = total_mf + total_stocks + total_gold + total_fd  # NEW: gold added once
 total_fd_invested = fd_valid["Principal (INR, at deposit FX)"].sum() if not fd_valid.empty else 0
-total_invested = (mf["Invested"].sum() if not mf.empty else 0) + (stocks["Invested"].sum() if not stocks.empty else 0) + total_fd_invested
+total_invested = ((mf["Invested"].sum() if not mf.empty else 0) + (stocks["Invested"].sum() if not stocks.empty else 0)
+                   + (gold["Invested"].sum() if not gold.empty else 0) + total_fd_invested)  # NEW
 total_pnl = total_networth - total_invested
-equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth else 0
+equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth else 0  # unchanged formula — gold was never in this sum before or now
+gold_pct = (total_gold / total_networth * 100) if total_networth else 0  # NEW
 fd_pct = (total_fd / total_networth * 100) if total_networth else 0
 top5_mf_pct = (mf.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100) if not mf.empty and total_mf > 0 else 0
 top5_stock_pct = (stocks.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100) if not stocks.empty and total_stocks > 0 else 0
@@ -469,15 +487,17 @@ health_label = "Healthy" if health_score >= 75 else ("Adequate" if health_score 
 recon_tests = []
 owner_sum = 0
 owner_map = {}
-for df_, col, key in [(mf, "Current Value", "Owner"), (stocks, "Current Value", "Owner"), (fd_valid, "Current Value (INR)", "Holder Name")]:
+for df_, col, key in [(mf, "Current Value", "Owner"), (stocks, "Current Value", "Owner"),
+                       (gold, "Current Value", "Owner"), (fd_valid, "Current Value (INR)", "Holder Name")]:  # NEW: gold added
     if not df_.empty and key in df_.columns:
         for owner, val in df_.groupby(key)[col].sum().items():
             owner_map[owner] = owner_map.get(owner, 0) + val
 owner_sum = sum(owner_map.values())
 recon_tests.append(("Sum of owner totals = total net worth", abs(owner_sum - total_networth) < 1, f"₹{owner_sum:,.0f} vs ₹{total_networth:,.0f}"))
-alloc_sum = equity_pct + fd_pct
+alloc_sum = equity_pct + fd_pct + gold_pct  # NEW: gold_pct included, otherwise this test would always show a false ~10% gap now that gold is its own slice
 recon_tests.append(("Allocation percentages sum to 100%", abs(alloc_sum - 100) < 0.5, f"{alloc_sum:.2f}%"))
-recon_tests.append(("Portfolio total = MF + Stocks + FD", abs((total_mf + total_stocks + total_fd) - total_networth) < 1, "by construction"))
+recon_tests.append(("Portfolio total = MF + Stocks + Gold + FD", abs((total_mf + total_stocks + total_gold + total_fd) - total_networth) < 1, "by construction"))
+recon_tests.append(("SGB counted in Gold, not in Stocks or FD", not any(SGB_TICKER_PATTERN.match(s) for s in stocks["Symbol"]) if not stocks.empty else True, f"{len(gold)} SGB holding(s) in Gold"))  # NEW
 
 # -------------------------------------------------
 # RED FLAGS
@@ -486,6 +506,8 @@ flags = []
 if equity_pct < 40:
     flags.append(("critical" if equity_pct < 25 else "warning", "Equity allocation drift",
                    f"Equity is {equity_pct:.1f}% of net worth against a common 60% target — {fd_pct:.1f}% sits in FDs/cash."))
+if gold_pct > 15:  # NEW: simple threshold flag, same style as the other allocation checks
+    flags.append(("info", "Gold allocation is notable", f"Gold (SGB) is {gold_pct:.1f}% of net worth."))
 if top5_mf_pct > 60:
     flags.append(("warning", "Mutual fund concentration", f"Top 5 funds are {top5_mf_pct:.1f}% of your MF portfolio."))
 if not stocks.empty and top5_stock_pct > 65:
@@ -629,8 +651,8 @@ with c1:
     st.plotly_chart(fig_h, use_container_width=True)
 with c2:
     st.markdown('<div class="section-header">Asset allocation</div>', unsafe_allow_html=True)
-    alloc_df = pd.DataFrame({"Asset": ["Fixed Deposits", "Mutual Funds", "Stocks"], "Value": [total_fd, total_mf, total_stocks]})
-    fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.62, color_discrete_sequence=["#3b82f6", "#22c55e", "#f59e0b"])
+    alloc_df = pd.DataFrame({"Asset": ["Fixed Deposits", "Mutual Funds", "Stocks", "Gold"], "Value": [total_fd, total_mf, total_stocks, total_gold]})  # NEW: Gold added
+    fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.62, color_discrete_sequence=["#3b82f6", "#22c55e", "#f59e0b", "#eab308"])
     fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=12)
     fig.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=210, showlegend=False,
                        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
@@ -718,7 +740,7 @@ with c4:
 # instead of pre-formatted strings (Phase 7)
 # ==================================================
 st.markdown('<div class="section-header">Holdings</div>', unsafe_allow_html=True)
-tab1, tab2, tab3 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits"])
+tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits", "Gold"])  # NEW: Gold tab
 
 with tab1:
     if not mf.empty:
@@ -758,6 +780,20 @@ with tab3:
                 "FX Gain/Loss (INR)": st.column_config.NumberColumn(format="₹%d"),
                 "ROI %": st.column_config.NumberColumn(format="%.2f%%"),
             }, use_container_width=True, height=380)
+
+with tab4:  # NEW: Gold tab
+    if not gold.empty:
+        st.caption("Sovereign Gold Bonds, identified from the Stocks sheet by ticker pattern (SGB...-GB) and reported as Gold, not equity. "
+                    "Only the fields already present in the raw data are shown — no maturity date or interest rate is invented, since the source file doesn't carry them for these holdings.")
+        st.dataframe(
+            gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]],
+            column_config={
+                "Invested": st.column_config.NumberColumn(format="₹%d"), "Current Value": st.column_config.NumberColumn(format="₹%d"),
+                "P&L": st.column_config.NumberColumn(format="₹%d"), "Return %": st.column_config.NumberColumn(format="%.1f%%"),
+                "Current Price": st.column_config.NumberColumn(format="₹%.2f"),
+            }, use_container_width=True, height=200)
+    else:
+        st.caption("No SGB or other gold holdings identified in the current data.")
 
 st.markdown("---")
 st.caption(f"INR · USD {f'{usd_inr:.2f}' if usd_inr else 'unavailable'} · {now_ist.strftime('%d %b %Y %H:%M IST')} · AMFI {len(amfi_navs)} schemes loaded")
