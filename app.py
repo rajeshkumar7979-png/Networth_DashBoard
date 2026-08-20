@@ -95,10 +95,10 @@ st.markdown("""
     .crit-banner { background:#3b1219; border:1px solid #7f1d1d; color:#fecaca;
                    border-radius:10px; padding:10px 14px; margin: 8px 0 4px 0; font-size:0.82rem; }
     /* Phase A — command center */
-    .pulse-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0 4px 0; }
-    @media (max-width:1100px){ .pulse-grid{ grid-template-columns:repeat(2,1fr);} }
+    .pulse-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:8px 0 4px 0; }
+    @media (max-width:1100px){ .pulse-grid{ grid-template-columns:repeat(2,minmax(0,1fr));} }
     .pulse-card { background:linear-gradient(155deg,#12182a 0%,#0e1420 100%); border:1px solid #1c2333;
-                  border-radius:10px; padding:10px 12px; }
+                  border-radius:10px; padding:12px 14px; min-height:78px; overflow:hidden; }
     .pulse-card:hover { border-color:#2a3552; }
     .pulse-label { font-size:0.65rem; font-weight:700; color:#6b7688; text-transform:uppercase; letter-spacing:0.06em; }
     .pulse-val { font-size:1.05rem; font-weight:700; color:#f8fafc; margin-top:2px; font-variant-numeric:tabular-nums; }
@@ -259,13 +259,32 @@ TROY_OZ_G = 31.1034768  # grams per troy ounce
 
 @st.cache_data(ttl=900, show_spinner=False)
 def get_market_pulse_yf(ticker: str):
+    """Last close + day change. Ignores absurd gaps (halved contract, empty sessions)."""
     try:
-        hist = yf.Ticker(ticker).history(period="5d")
-        if hist.empty or len(hist) < 2:
+        hist = yf.Ticker(ticker).history(period="15d")
+        if hist.empty:
             return None
-        closes = hist["Close"]
-        latest, prev = float(closes.iloc[-1]), float(closes.iloc[-2])
-        return {"value": latest, "change_pct": (latest / prev - 1) * 100}
+        closes = hist["Close"].dropna()
+        if len(closes) < 1:
+            return None
+        latest = float(closes.iloc[-1])
+        change_pct = None
+        if len(closes) >= 2:
+            prev = float(closes.iloc[-2])
+            if prev > 0:
+                raw = (latest / prev - 1) * 100
+                # Single-day moves beyond ±20% are almost always data artifacts for these indices
+                if abs(raw) <= 20:
+                    change_pct = raw
+                elif len(closes) >= 3:
+                    prev2 = float(closes.iloc[-3])
+                    if prev2 > 0:
+                        raw2 = (latest / prev2 - 1) * 100 / 2  # rough 2-day avg, still clamp
+                        if abs(raw2) <= 20:
+                            change_pct = (latest / prev2 - 1) * 100  # still show true multi-day only if sane
+                            if abs(change_pct) > 20:
+                                change_pct = None
+        return {"value": latest, "change_pct": change_pct}
     except Exception:
         return None
 
@@ -318,11 +337,11 @@ def build_market_pulse_rows():
     specs = [
         ("NIFTY 50", lambda: get_market_pulse_yf("^NSEI"), "{:,.2f}"),
         ("SENSEX", lambda: get_market_pulse_yf("^BSESN"), "{:,.2f}"),
-        ("Gold ₹/10g", lambda: get_india_gold_10g(), "{:,.0f}"),
-        ("Silver ₹/kg", lambda: get_india_silver_kg(), "{:,.0f}"),
-        ("Brent", lambda: get_market_pulse_yf("BZ=F"), "{:,.2f}"),
+        ("GOLD ₹/10g", lambda: get_india_gold_10g(), "{:,.0f}"),
+        ("SILVER ₹/kg", lambda: get_india_silver_kg(), "{:,.0f}"),
+        ("BRENT OIL", lambda: get_market_pulse_yf("BZ=F"), "{:,.2f}"),
         ("S&P 500", lambda: get_market_pulse_yf("^GSPC"), "{:,.2f}"),
-        ("Nasdaq", lambda: get_market_pulse_yf("^IXIC"), "{:,.2f}"),
+        ("NASDAQ", lambda: get_market_pulse_yf("^IXIC"), "{:,.2f}"),
         ("USD/INR", lambda: get_market_pulse_yf("INR=X"), "{:,.2f}"),
     ]
     for label, fetcher, fmt in specs:
@@ -843,7 +862,7 @@ for df_, col, key in [(mf_valid, "Current Value", "Owner"), (stocks_valid, "Curr
         for owner, val in df_.groupby(key)[col].sum().items():
             owner_map[owner] = owner_map.get(owner, 0) + val
 owner_sum = sum(owner_map.values())
-recon_tests.append(("Sum of owner totals = total net worth", abs(owner_sum - total_networth) < 1, f"₹{owner_sum:,.0f} vs ₹{total_networth:,.0f}"))
+recon_tests.append(("Sum of owner totals = total net worth", abs(owner_sum - total_networth) < 1, f"{format_inr(owner_sum)} vs {format_inr(total_networth)}"))
 alloc_sum = equity_pct + fd_pct + gold_pct  # NEW: gold_pct included, otherwise this test would always show a false ~10% gap now that gold is its own slice
 recon_tests.append(("Allocation percentages sum to 100%", abs(alloc_sum - 100) < 0.5, f"{alloc_sum:.2f}%"))
 recon_tests.append(("Portfolio total = MF + Stocks + Gold + FD", abs((total_mf + total_stocks + total_gold + total_fd) - total_networth) < 1, "by construction"))
@@ -1109,10 +1128,11 @@ if integrity_issues:
 # ==================================================
 # RECONCILIATION (Phase 4)
 # ==================================================
-with st.expander("Reconciliation tests"):
-    for name, passed, detail in recon_tests:
-        cls = "recon-pass" if passed else "recon-fail"
-        st.markdown(f'<span class="{cls}">{"PASS" if passed else "FAIL"}</span> — {name} ({detail})', unsafe_allow_html=True)
+st.markdown('<div class="section-header">Reconciliation</div>', unsafe_allow_html=True)
+for name, passed, detail in recon_tests:
+    cls = "recon-pass" if passed else "recon-fail"
+    mark = "✓ PASS" if passed else "✗ FAIL"
+    st.markdown(f'<span class="{cls}">{mark}</span> — {name} ({detail})', unsafe_allow_html=True)
 
 # ==================================================
 # HEALTH BREAKDOWN + ALLOCATION
@@ -1126,7 +1146,7 @@ with c1:
         text=[f"{s:.0f}" for s in bd["Score"]], textposition="outside"))
     fig_h.update_layout(height=210, margin=dict(t=5, b=5, l=5, r=25), xaxis=dict(range=[0, 105], showgrid=False),
                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
-    st.plotly_chart(fig_h, use_container_width=True)
+    st.plotly_chart(fig_h, use_container_width=True, key="chart_health")
 
     _why = []
     if factor_scores.get("Liquidity", 100) < 50:
@@ -1153,7 +1173,7 @@ with c2:
     fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=12)
     fig.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=210, showlegend=False,
                        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="chart_alloc")
 
 # ==================================================
 # FX RETURN ATTRIBUTION — new, addresses the FCNR audit directly
@@ -1183,7 +1203,7 @@ else:
     fig_hist.add_trace(go.Scatter(x=history_df["date"], y=history_df["health_score"], line=dict(color="#f59e0b", width=2), showlegend=False), row=1, col=3)
     fig_hist.update_layout(height=250, margin=dict(t=30, b=5, l=5, r=5), paper_bgcolor="rgba(0,0,0,0)",
                             plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6", legend=dict(orientation="h", y=-0.15))
-    st.plotly_chart(fig_hist, use_container_width=True)
+    st.plotly_chart(fig_hist, use_container_width=True, key="chart_hist")
     st.dataframe(history_df.round(2), hide_index=True, use_container_width=True)
     st.download_button("Download history.csv (full precision)", history_df.to_csv(index=False), "networth_history.csv", "text/csv")
 
@@ -1220,7 +1240,7 @@ with c3:
         fig2 = px.bar(owner_df, x="Owner", y="Value", text_auto=".2s", color_discrete_sequence=["#3b82f6"])
         fig2.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=240, showlegend=False,
                             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, use_container_width=True, key="chart_owner")
 with c4:
     st.markdown('<div class="section-header">Category mix (MF) — overlap proxy</div>', unsafe_allow_html=True)
     if not mf_valid.empty:
@@ -1228,16 +1248,14 @@ with c4:
         fig3 = px.bar(cat_df, x="Current Value", y="Category", orientation="h", color_discrete_sequence=["#22c55e"])
         fig3.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=240, showlegend=False,
                             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, use_container_width=True, key="chart_cat")
         st.markdown('<p class="caveat">Category-level concentration, not real stock-level overlap — genuine holdings-level overlap needs paid portfolio-disclosure data with no free equivalent.</p>', unsafe_allow_html=True)
 
 # ==================================================
-# HOLDINGS — FIXED: FDs now show native AND reporting currency side by
-# side (Phase 6), using Streamlit's own column_config number formatting
-# instead of pre-formatted strings (Phase 7)
+# HOLDINGS DETAIL
 # ==================================================
-st.markdown('<div class="section-header">Holdings</div>', unsafe_allow_html=True)
-tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits", "Gold"])  # NEW: Gold tab
+st.markdown('<div class="section-header">Holdings detail</div>', unsafe_allow_html=True)
+tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits", "Gold"])
 
 with tab1:
     if not mf.empty:
