@@ -19,6 +19,7 @@ IST = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.now(IST)
 TODAY_NAIVE = pd.Timestamp(now_ist.date())
 HISTORY_PATH = "data/history.csv"
+AMFI_CACHE_PATH = "data/amfi_nav_cache.json"
 
 # -------------------------------------------------
 # THEME — plus: remove the white header strip. This targets Streamlit's own
@@ -80,10 +81,68 @@ def to_naive_ts(x):
 # -------------------------------------------------
 # DATA SOURCES
 # -------------------------------------------------
+def _parse_amfi_text(text: str):
+    # AMFI format (2024+): SchemeCode;ISIN_G;ISIN_D;Name;Plan;Option;NAV;Date  (8 cols)
+    # Older format:         SchemeCode;ISIN_G;ISIN_D;Name;NAV;Date                 (6 cols)
+    # Prefer index 6 (new), fall back to index 4 (old).
+    nav_dict, code_dict, name_dict = {}, {}, {}
+    for line in text.splitlines():
+        parts = line.split(";")
+        if len(parts) < 5 or not parts[0].strip().isdigit():
+            continue
+        code = parts[0].strip()
+        isin_g, isin_d = parts[1].strip(), parts[2].strip()
+        name = parts[3].strip()
+        nav = None
+        for idx in (6, 4):
+            if len(parts) > idx:
+                try:
+                    nav = float(parts[idx].strip())
+                    break
+                except Exception:
+                    continue
+        if nav is None:
+            continue
+        for isin in (isin_g, isin_d):
+            if isin and isin != "-" and len(isin) > 8:
+                nav_dict[isin] = nav
+                code_dict[isin] = code
+                name_dict[isin] = name
+    return nav_dict, code_dict, name_dict
+
+def _save_amfi_cache(nav_dict, code_dict, name_dict):
+    try:
+        os.makedirs("data", exist_ok=True)
+        import json
+        payload = {
+            "saved_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "nav": nav_dict,
+            "code": code_dict,
+            "name": name_dict,
+        }
+        with open(AMFI_CACHE_PATH, "w") as f:
+            json.dump(payload, f)
+    except Exception:
+        pass
+
+def _load_amfi_cache():
+    try:
+        import json
+        if not os.path.exists(AMFI_CACHE_PATH):
+            return None
+        with open(AMFI_CACHE_PATH) as f:
+            payload = json.load(f)
+        nav = payload.get("nav") or {}
+        if not nav:
+            return None
+        return nav, payload.get("code") or {}, payload.get("name") or {}, payload.get("saved_at", "unknown")
+    except Exception:
+        return None
+
 @st.cache_data(ttl=3600)
 def get_amfi_data():
-    # NAV updates once a day — cache 1h is enough. Browser UA + alternate host
-    # so cloud deploys are less likely to get an empty/blocked response.
+    # NAV updates once a day. Live fetch + disk fallback so a blocked cloud IP
+    # still serves yesterday's file instead of zeroing every fund.
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "text/plain,*/*",
@@ -99,29 +158,19 @@ def get_amfi_data():
                 r.raise_for_status()
                 if len(r.text) < 1000:
                     continue
-                nav_dict, code_dict, name_dict = {}, {}, {}
-                for line in r.text.splitlines():
-                    parts = line.split(";")
-                    if len(parts) >= 5 and parts[0].strip().isdigit():
-                        code = parts[0].strip()
-                        isin_g, isin_d = parts[1].strip(), parts[2].strip()
-                        name = parts[3].strip()
-                        try:
-                            nav = float(parts[4].strip())
-                        except Exception:
-                            continue
-                        for isin in (isin_g, isin_d):
-                            if isin and isin != "-" and len(isin) > 8:
-                                nav_dict[isin] = nav
-                                code_dict[isin] = code
-                                name_dict[isin] = name
+                nav_dict, code_dict, name_dict = _parse_amfi_text(r.text)
                 if nav_dict:
-                    return nav_dict, code_dict, name_dict
+                    _save_amfi_cache(nav_dict, code_dict, name_dict)
+                    return nav_dict, code_dict, name_dict, None  # None = live
             except Exception:
                 continue
         if attempt == 0:
             time.sleep(1.5)
-    return {}, {}, {}
+    cached = _load_amfi_cache()
+    if cached:
+        nav_dict, code_dict, name_dict, saved_at = cached
+        return nav_dict, code_dict, name_dict, saved_at  # disk fallback
+    return {}, {}, {}, None
 
 @st.cache_data(ttl=21600, show_spinner=False)
 def get_mf_nav_history(scheme_code: str):
@@ -307,7 +356,7 @@ with st.sidebar:
 # -------------------------------------------------
 fd_raw, mf_raw, stocks_raw = load_data(uploaded)
 usd_inr = get_usd_inr()
-amfi_navs, amfi_codes, amfi_names = get_amfi_data()
+amfi_navs, amfi_codes, amfi_names, amfi_cache_date = get_amfi_data()
 nifty_hist = get_nifty_history()
 nifty_1y, nifty_3y, nifty_5y = trailing_return(nifty_hist, 1), trailing_return(nifty_hist, 3), trailing_return(nifty_hist, 5)
 
@@ -668,7 +717,9 @@ st.markdown('<div class="main-title">Family Net Worth</div>', unsafe_allow_html=
 st.markdown(f'<div class="sub-title">INR · Live prices · {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
 
 if len(amfi_navs) == 0:
-    st.error("AMFI data failed to load this run — mutual fund values below may be stale or zero.")
+    st.error("AMFI data failed to load this run and no disk cache found — mutual fund values below are excluded.")
+elif amfi_cache_date:
+    st.warning(f"AMFI live fetch failed — using disk cache from {amfi_cache_date} · {len(amfi_navs)} NAVs · NAV only changes once/day so this is usually fine")
 elif mf_failed > 0:
     st.warning(f"{mf_failed} fund(s) missing a live NAV this run · {len(amfi_navs)} AMFI NAVs loaded OK")
 else:
