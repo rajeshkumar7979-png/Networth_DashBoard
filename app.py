@@ -82,30 +82,45 @@ def to_naive_ts(x):
 # -------------------------------------------------
 @st.cache_data(ttl=3600)
 def get_amfi_data():
-    for attempt in range(2):  # one retry — a single timeout was previously killing every MF valuation at once
-        try:
-            r = requests.get("https://www.amfiindia.com/spages/NAVAll.txt", timeout=15)
-            r.raise_for_status()
-            nav_dict, code_dict, name_dict = {}, {}, {}
-            for line in r.text.splitlines():
-                parts = line.split(";")
-                if len(parts) >= 5 and parts[0].strip().isdigit():
-                    code = parts[0].strip()
-                    isin_g, isin_d = parts[1].strip(), parts[2].strip()
-                    name = parts[3].strip()
-                    try:
-                        nav = float(parts[4].strip())
-                    except Exception:
-                        continue
-                    for isin in (isin_g, isin_d):
-                        if isin and isin != "-" and len(isin) > 8:
-                            nav_dict[isin] = nav
-                            code_dict[isin] = code
-                            name_dict[isin] = name
-            return nav_dict, code_dict, name_dict
-        except Exception:
-            if attempt == 0:
-                time.sleep(1.5)
+    # NAV updates once a day — cache 1h is enough. Browser UA + alternate host
+    # so cloud deploys are less likely to get an empty/blocked response.
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/plain,*/*",
+    }
+    urls = [
+        "https://www.amfiindia.com/spages/NAVAll.txt",
+        "https://portal.amfiindia.com/spages/NAVAll.txt",
+    ]
+    for attempt in range(2):
+        for url in urls:
+            try:
+                r = requests.get(url, headers=headers, timeout=20)
+                r.raise_for_status()
+                if len(r.text) < 1000:
+                    continue
+                nav_dict, code_dict, name_dict = {}, {}, {}
+                for line in r.text.splitlines():
+                    parts = line.split(";")
+                    if len(parts) >= 5 and parts[0].strip().isdigit():
+                        code = parts[0].strip()
+                        isin_g, isin_d = parts[1].strip(), parts[2].strip()
+                        name = parts[3].strip()
+                        try:
+                            nav = float(parts[4].strip())
+                        except Exception:
+                            continue
+                        for isin in (isin_g, isin_d):
+                            if isin and isin != "-" and len(isin) > 8:
+                                nav_dict[isin] = nav
+                                code_dict[isin] = code
+                                name_dict[isin] = name
+                if nav_dict:
+                    return nav_dict, code_dict, name_dict
+            except Exception:
+                continue
+        if attempt == 0:
+            time.sleep(1.5)
     return {}, {}, {}
 
 @st.cache_data(ttl=21600, show_spinner=False)
@@ -171,10 +186,36 @@ def get_historical_usd_inr(date_str: str):
     except Exception:
         return None
 
+@st.cache_data(ttl=300, show_spinner=False)
+def get_groww_ltp(nse_symbol: str):
+    """Live LTP from Groww free NSE CASH endpoint (equities + SGBs)."""
+    if not nse_symbol:
+        return None
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/json",
+        }
+        r = requests.get(
+            f"https://groww.in/v1/api/stocks_data/v1/tr_live_prices/exchange/NSE/segment/CASH/{nse_symbol}/latest",
+            headers=headers, timeout=10,
+        )
+        r.raise_for_status()
+        ltp = r.json().get("ltp")
+        if ltp is not None and float(ltp) > 0:
+            return float(ltp)
+    except Exception:
+        pass
+    return None
+
 @st.cache_data(ttl=300)
 def get_stock_price(symbol: str):
     if not symbol:
         return None
+    # Prefer Groww live LTP; fall back to Yahoo last close
+    price = get_groww_ltp(symbol)
+    if price is not None:
+        return price
     try:
         t = yf.Ticker(f"{symbol}.NS")
         hist = t.history(period="2d")
@@ -184,12 +225,13 @@ def get_stock_price(symbol: str):
         pass
     return None
 
-# SGB pricing: the raw ticker (e.g. SGBSEP31II-GB) isn't the actual NSE
-# listing symbol; the "-GB" suffix is a data-entry convention. Strip it and
-# reuse the same yfinance pattern as get_stock_price.
-@st.cache_data(ttl=1800, show_spinner=False)
+@st.cache_data(ttl=300, show_spinner=False)
 def get_sgb_price(raw_ticker: str):
+    # Strip data-entry "-GB" suffix; Yahoo lacks most SGB series — Groww has live NSE LTP
     nse_symbol = re.sub(r"-GB$", "", raw_ticker.strip(), flags=re.IGNORECASE)
+    price = get_groww_ltp(nse_symbol)
+    if price is not None:
+        return price
     try:
         t = yf.Ticker(f"{nse_symbol}.NS")
         hist = t.history(period="5d")
@@ -302,13 +344,12 @@ mf_rows, mf_failed = [], 0
 for _, row in mf_agg.iterrows():
     try:
         isin, units, invested, pdate = row["ISIN"], row["Units"], row["Invested"], row["Purchase Date"]
-        nav = amfi_navs.get(isin)  # None means genuinely unknown — do NOT default to 0.0
+        nav = amfi_navs.get(isin)  # None = unknown; do NOT default to 0.0
         if nav is None:
             mf_failed += 1
             integrity_issues.append(("HIGH", f"{row['Fund Name'][:40]}: no live NAV found for ISIN {isin} — excluded from totals."))
         if units < 0:
             integrity_issues.append(("HIGH", f"{row['Fund Name'][:40]} ({row['Owner']}): negative net units ({units:.2f}) after aggregation — check for a sell exceeding recorded buys."))
-        # current_value/P&L/return stay None when nav is unavailable so dropna() can exclude them from totals
         if nav is not None:
             current_value = units * nav
             pnl = current_value - invested
@@ -364,7 +405,6 @@ for _, row in stocks_raw.iterrows():
                 price = safe_float(row.get("Purchase Price", row.get("Avg Buy Price")))
         if used_fallback:
             integrity_issues.append(("MEDIUM", f"{symbol}: live price unavailable, used stale price from the raw file instead."))
-        # price of 0 / missing → exclude, do not fabricate a -100% loss
         if price and price > 0:
             current_value = qty * price
             pnl = current_value - invested
@@ -385,7 +425,7 @@ for _, row in stocks_raw.iterrows():
     except Exception:
         continue
 stocks = pd.DataFrame(stock_rows)
-gold = pd.DataFrame(gold_rows)  # Gold asset class (currently SGB only)
+gold = pd.DataFrame(gold_rows)
 
 # ---- FD: full native/reporting currency model (Phase 2 & 6 fix) ----
 fd_rows = []
@@ -468,7 +508,6 @@ total_gold = gold_valid["Current Value"].sum() if not gold_valid.empty else 0
 total_fd = fd_valid["Current Value (INR)"].sum() if not fd_valid.empty else 0
 total_networth = total_mf + total_stocks + total_gold + total_fd
 total_fd_invested = fd_valid["Principal (INR, at deposit FX)"].sum() if not fd_valid.empty else 0
-# invested only for rows that actually have a current value, so P&L isn't skewed by unknowns
 total_invested = ((mf_valid["Invested"].sum() if not mf_valid.empty else 0)
                   + (stocks_valid["Invested"].sum() if not stocks_valid.empty else 0)
                   + (gold_valid["Invested"].sum() if not gold_valid.empty else 0)
@@ -531,10 +570,10 @@ for df_, col, key in [(mf_valid, "Current Value", "Owner"), (stocks_valid, "Curr
             owner_map[owner] = owner_map.get(owner, 0) + val
 owner_sum = sum(owner_map.values())
 recon_tests.append(("Sum of owner totals = total net worth", abs(owner_sum - total_networth) < 1, f"₹{owner_sum:,.0f} vs ₹{total_networth:,.0f}"))
-alloc_sum = equity_pct + fd_pct + gold_pct  # gold_pct included so this test doesn't show a false gap
+alloc_sum = equity_pct + fd_pct + gold_pct  # NEW: gold_pct included, otherwise this test would always show a false ~10% gap now that gold is its own slice
 recon_tests.append(("Allocation percentages sum to 100%", abs(alloc_sum - 100) < 0.5, f"{alloc_sum:.2f}%"))
 recon_tests.append(("Portfolio total = MF + Stocks + Gold + FD", abs((total_mf + total_stocks + total_gold + total_fd) - total_networth) < 1, "by construction"))
-recon_tests.append(("SGB counted in Gold, not in Stocks or FD", not any(SGB_TICKER_PATTERN.match(s) for s in stocks["Symbol"]) if not stocks.empty else True, f"{len(gold)} SGB holding(s) in Gold"))
+recon_tests.append(("SGB counted in Gold, not in Stocks or FD", not any(SGB_TICKER_PATTERN.match(s) for s in stocks["Symbol"]) if not stocks.empty else True, f"{len(gold)} SGB holding(s) in Gold"))  # NEW
 
 # -------------------------------------------------
 # RED FLAGS
@@ -543,7 +582,7 @@ flags = []
 if equity_pct < 40:
     flags.append(("critical" if equity_pct < 25 else "warning", "Equity allocation drift",
                    f"Equity is {equity_pct:.1f}% of net worth against a common 60% target — {fd_pct:.1f}% sits in FDs/cash."))
-if gold_pct > 15:
+if gold_pct > 15:  # NEW: simple threshold flag, same style as the other allocation checks
     flags.append(("info", "Gold allocation is notable", f"Gold (SGB) is {gold_pct:.1f}% of net worth."))
 if top5_mf_pct > 60:
     flags.append(("warning", "Mutual fund concentration", f"Top 5 funds are {top5_mf_pct:.1f}% of your MF portfolio."))
@@ -688,7 +727,7 @@ with c1:
     st.plotly_chart(fig_h, use_container_width=True)
 with c2:
     st.markdown('<div class="section-header">Asset allocation</div>', unsafe_allow_html=True)
-    alloc_df = pd.DataFrame({"Asset": ["Fixed Deposits", "Mutual Funds", "Stocks", "Gold"], "Value": [total_fd, total_mf, total_stocks, total_gold]})
+    alloc_df = pd.DataFrame({"Asset": ["Fixed Deposits", "Mutual Funds", "Stocks", "Gold"], "Value": [total_fd, total_mf, total_stocks, total_gold]})  # NEW: Gold added
     fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.62, color_discrete_sequence=["#3b82f6", "#22c55e", "#f59e0b", "#eab308"])
     fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=12)
     fig.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=210, showlegend=False,
@@ -777,7 +816,7 @@ with c4:
 # instead of pre-formatted strings (Phase 7)
 # ==================================================
 st.markdown('<div class="section-header">Holdings</div>', unsafe_allow_html=True)
-tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits", "Gold"])
+tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits", "Gold"])  # NEW: Gold tab
 
 with tab1:
     if not mf.empty:
@@ -818,7 +857,7 @@ with tab3:
                 "ROI %": st.column_config.NumberColumn(format="%.2f%%"),
             }, use_container_width=True, height=380)
 
-with tab4:
+with tab4:  # NEW: Gold tab
     if not gold.empty:
         st.caption("Sovereign Gold Bonds, identified from the Stocks sheet by ticker pattern (SGB...-GB) and reported as Gold, not equity. "
                     "Only the fields already present in the raw data are shown — no maturity date or interest rate is invented, since the source file doesn't carry them for these holdings.")
