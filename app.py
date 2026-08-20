@@ -124,6 +124,12 @@ st.markdown("""
     .dot-live { background:#22c55e; }
     .dot-cache { background:#eab308; }
     .dot-off { background:#ef4444; }
+    .alloc-legend { list-style:none; margin:8px 0 0 0; padding:0; }
+    .alloc-legend li { display:flex; justify-content:space-between; gap:12px; font-size:0.78rem;
+                       color:#9aa4b8; padding:4px 0; border-bottom:1px solid #141a28; }
+    .alloc-legend .nm { color:#e5e9f0; font-weight:600; }
+    .alloc-legend .amt { font-variant-numeric:tabular-nums; color:#c2c9d6; }
+    .snap-note { font-size:0.72rem; color:#6b7688; margin-top:4px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -273,18 +279,33 @@ def get_market_pulse_yf(ticker: str):
             prev = float(closes.iloc[-2])
             if prev > 0:
                 raw = (latest / prev - 1) * 100
-                # Single-day moves beyond ±20% are almost always data artifacts for these indices
                 if abs(raw) <= 20:
                     change_pct = raw
                 elif len(closes) >= 3:
                     prev2 = float(closes.iloc[-3])
                     if prev2 > 0:
-                        raw2 = (latest / prev2 - 1) * 100 / 2  # rough 2-day avg, still clamp
-                        if abs(raw2) <= 20:
-                            change_pct = (latest / prev2 - 1) * 100  # still show true multi-day only if sane
-                            if abs(change_pct) > 20:
-                                change_pct = None
+                        change_pct = (latest / prev2 - 1) * 100
+                        if abs(change_pct) > 20:
+                            change_pct = None
         return {"value": latest, "change_pct": change_pct}
+    except Exception:
+        return None
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def get_ath_pct(ticker: str):
+    """% below all-time high (daily close). Free Yahoo history."""
+    try:
+        hist = yf.Ticker(ticker).history(period="max")
+        if hist.empty:
+            return None
+        closes = hist["Close"].dropna()
+        if closes.empty:
+            return None
+        ath = float(closes.max())
+        latest = float(closes.iloc[-1])
+        if ath <= 0:
+            return None
+        return (latest / ath - 1) * 100
     except Exception:
         return None
 
@@ -332,24 +353,26 @@ def get_india_silver_kg():
         return None
 
 def build_market_pulse_rows():
-    """Ordered ticker strip: India indices, INR metals, global, FX."""
+    """India indices, INR metals, global, FX — with ATH% where Yahoo max history is free."""
     rows = []
+    # (label, fetcher, fmt, yf_ticker_for_ath or None)
     specs = [
-        ("NIFTY 50", lambda: get_market_pulse_yf("^NSEI"), "{:,.2f}"),
-        ("SENSEX", lambda: get_market_pulse_yf("^BSESN"), "{:,.2f}"),
-        ("GOLD ₹/10g", lambda: get_india_gold_10g(), "{:,.0f}"),
-        ("SILVER ₹/kg", lambda: get_india_silver_kg(), "{:,.0f}"),
-        ("BRENT OIL", lambda: get_market_pulse_yf("BZ=F"), "{:,.2f}"),
-        ("S&P 500", lambda: get_market_pulse_yf("^GSPC"), "{:,.2f}"),
-        ("NASDAQ", lambda: get_market_pulse_yf("^IXIC"), "{:,.2f}"),
-        ("USD/INR", lambda: get_market_pulse_yf("INR=X"), "{:,.2f}"),
+        ("NIFTY 50", lambda: get_market_pulse_yf("^NSEI"), "{:,.2f}", "^NSEI"),
+        ("SENSEX", lambda: get_market_pulse_yf("^BSESN"), "{:,.2f}", "^BSESN"),
+        ("GOLD ₹/10g", lambda: get_india_gold_10g(), "{:,.0f}", "GC=F"),
+        ("SILVER ₹/kg", lambda: get_india_silver_kg(), "{:,.0f}", "SI=F"),
+        ("BRENT OIL", lambda: get_market_pulse_yf("BZ=F"), "{:,.2f}", "BZ=F"),
+        ("S&P 500", lambda: get_market_pulse_yf("^GSPC"), "{:,.2f}", "^GSPC"),
+        ("NASDAQ", lambda: get_market_pulse_yf("^IXIC"), "{:,.2f}", "^IXIC"),
+        ("USD/INR", lambda: get_market_pulse_yf("INR=X"), "{:,.2f}", None),
     ]
-    for label, fetcher, fmt in specs:
+    for label, fetcher, fmt, ath_ticker in specs:
         d = fetcher()
+        ath = get_ath_pct(ath_ticker) if ath_ticker else None
         if d and d.get("value") is not None:
-            rows.append({"Market": label, "Value": d["value"], "Chg %": d.get("change_pct"), "fmt": fmt})
+            rows.append({"Market": label, "Value": d["value"], "Chg %": d.get("change_pct"), "ATH %": ath, "fmt": fmt})
         else:
-            rows.append({"Market": label, "Value": None, "Chg %": None, "fmt": fmt})
+            rows.append({"Market": label, "Value": None, "Chg %": None, "ATH %": ath, "fmt": fmt})
     return rows
 
 
@@ -1008,7 +1031,7 @@ with st.sidebar:
 # HEADER — command center
 # ==================================================
 st.markdown('<div class="main-title">Family Net Worth</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="sub-title">Portfolio command center · INR · {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="sub-title">Portfolio Command Center · Last updated {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
 
 # Data status pills
 amfi_dot = "dot-off" if len(amfi_navs) == 0 else ("dot-cache" if amfi_cache_date else "dot-live")
@@ -1051,12 +1074,12 @@ if _prev_nw and _prev_nw > 0:
     _nw_delta = f"{(total_networth - _prev_nw) / _prev_nw * 100:+.2f}% vs prior snapshot"
 
 k1, k2, k3, k4, k5, k6 = st.columns(6)
-k1.metric("Net Worth", format_inr_compact(total_networth), _nw_delta)
-k2.metric("P&L", format_inr_compact(total_pnl), f"{(total_pnl/total_invested*100):.1f}%" if total_invested else None)
-k3.metric("Equity", f"{equity_pct:.1f}%", "Target ~60%")
-k4.metric("FD / Cash", f"{fd_pct:.1f}%")
-k5.metric("USD/INR", f"{usd_inr:.2f}" if usd_inr else "n/a")
-k6.metric("Health Score", f"{health_score:.0f}/100", health_label)
+k1.metric("Net Worth (INR)", format_inr_compact(total_networth), _nw_delta)
+k2.metric("Invested Capital", format_inr_compact(total_invested), "Total amount invested")
+k3.metric("Total P&L", format_inr_compact(total_pnl), f"{(total_pnl/total_invested*100):.1f}% overall" if total_invested else None)
+k4.metric("Equity Allocation", f"{equity_pct:.1f}%", "Below target" if equity_pct < 50 else "Target ~60%")
+k5.metric("FD / Cash", f"{fd_pct:.1f}%")
+k6.metric("Health Score", f"{health_score:.0f} / 100", health_label)
 
 # ==================================================
 # MARKET PULSE — card grid (Phase A)
@@ -1077,12 +1100,17 @@ for row in pulse_rows:
             chg_html = f'<div class="pulse-chg-up">▲ {chg:+.2f}%</div>'
         else:
             chg_html = f'<div class="pulse-chg-dn">▼ {chg:+.2f}%</div>'
+    ath = row.get("ATH %")
+    if ath is not None:
+        ath_html = f'<div class="pulse-chg-na" style="font-size:0.68rem">{ath:.1f}% from ATH</div>'
+    else:
+        ath_html = ""
     pulse_cards.append(
         f'<div class="pulse-card"><div class="pulse-label">{row["Market"]}</div>'
-        f'<div class="pulse-val">{val}</div>{chg_html}</div>'
+        f'<div class="pulse-val">{val}</div>{chg_html}{ath_html}</div>'
     )
 st.markdown(f'<div class="pulse-grid">{"".join(pulse_cards)}</div>', unsafe_allow_html=True)
-st.caption("Free delayed sources · Gold ₹/10g & Silver ₹/kg (INR) · daily change vs prior session close")
+st.caption("Free delayed sources · Gold ₹/10g & Silver ₹/kg (INR) · day change vs prior close · ATH from Yahoo daily history")
 
 # ==================================================
 # CRITICAL integrity
@@ -1168,12 +1196,27 @@ with c1:
 
 with c2:
     st.markdown('<div class="section-header">Asset allocation</div>', unsafe_allow_html=True)
-    alloc_df = pd.DataFrame({"Asset": ["Fixed Deposits", "Mutual Funds", "Stocks", "Gold"], "Value": [total_fd, total_mf, total_stocks, total_gold]})  # NEW: Gold added
-    fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.62, color_discrete_sequence=["#3b82f6", "#22c55e", "#f59e0b", "#eab308"])
-    fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=12)
-    fig.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=210, showlegend=False,
-                       paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
+    alloc_df = pd.DataFrame({
+        "Asset": ["Fixed Deposits / Cash", "Mutual Funds", "Stocks", "Gold (SGB)"],
+        "Value": [total_fd, total_mf, total_stocks, total_gold],
+    })
+    colors = ["#3b82f6", "#a855f7", "#f59e0b", "#eab308"]
+    fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.62, color_discrete_sequence=colors)
+    fig.update_traces(textposition="inside", textinfo="percent", textfont_size=12)
+    fig.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=200, showlegend=False,
+                       paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6",
+                       annotations=[dict(text=f"{format_inr_compact(total_networth)}<br>Net Worth",
+                                         x=0.5, y=0.5, font_size=13, showarrow=False, font_color="#e5e9f0")])
     st.plotly_chart(fig, use_container_width=True, key="chart_alloc")
+    # Legend with amounts (mockup-style)
+    legend_items = ""
+    for asset, val, col in zip(alloc_df["Asset"], alloc_df["Value"], colors):
+        pct = (val / total_networth * 100) if total_networth else 0
+        legend_items += (
+            f'<li><span class="nm"><span style="color:{col}">●</span> {asset}</span>'
+            f'<span class="amt">{pct:.1f}% · {format_inr(val)}</span></li>'
+        )
+    st.markdown(f'<ul class="alloc-legend">{legend_items}</ul>', unsafe_allow_html=True)
 
 # ==================================================
 # FX RETURN ATTRIBUTION — new, addresses the FCNR audit directly
@@ -1250,6 +1293,55 @@ with c4:
                             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
         st.plotly_chart(fig3, use_container_width=True, key="chart_cat")
         st.markdown('<p class="caveat">Category-level concentration, not real stock-level overlap — genuine holdings-level overlap needs paid portfolio-disclosure data with no free equivalent.</p>', unsafe_allow_html=True)
+
+# ==================================================
+# TOP 5 STOCK CONCENTRATION + HOLDINGS SNAPSHOT
+# ==================================================
+snap_l, snap_r = st.columns([1, 1])
+with snap_l:
+    st.markdown('<div class="section-header">Top 5 stock concentration</div>', unsafe_allow_html=True)
+    if not stocks_valid.empty and total_stocks > 0:
+        top5 = stocks_valid.nlargest(5, "Current Value")[["Symbol", "Current Value"]].copy()
+        top5_sum = top5["Current Value"].sum()
+        other_val = max(total_stocks - top5_sum, 0)
+        pie_df = pd.concat([
+            top5.rename(columns={"Symbol": "Name", "Current Value": "Value"}),
+            pd.DataFrame([{"Name": "Others", "Value": other_val}]),
+        ], ignore_index=True)
+        fig_t5 = px.pie(pie_df, values="Value", names="Name", hole=0.55,
+                        color_discrete_sequence=["#3b82f6", "#f59e0b", "#a855f7", "#ef4444", "#22c55e", "#64748b"])
+        fig_t5.update_traces(textposition="inside", textinfo="percent", textfont_size=11)
+        fig_t5.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=220, showlegend=True,
+                             legend=dict(orientation="h", y=-0.15, font=dict(size=10)),
+                             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6",
+                             annotations=[dict(text=f"{top5_stock_pct:.0f}%<br>Top 5", x=0.5, y=0.5,
+                                               font_size=14, showarrow=False, font_color="#e5e9f0")])
+        st.plotly_chart(fig_t5, use_container_width=True, key="chart_top5")
+    else:
+        st.caption("No stock holdings for concentration chart.")
+
+with snap_r:
+    st.markdown('<div class="section-header">Holdings snapshot · Gold / SGB</div>', unsafe_allow_html=True)
+    if not gold_valid.empty:
+        _g = gold_valid[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]].copy()
+        st.dataframe(
+            style_money_df(_g),
+            column_config={
+                "Quantity": st.column_config.NumberColumn(format="%g"),
+                "Invested": st.column_config.NumberColumn(format="₹%d"),
+                "Current Value": st.column_config.NumberColumn(format="₹%d"),
+                "P&L": st.column_config.NumberColumn(format="₹%d"),
+                "Return %": st.column_config.NumberColumn(format="%.1f%%"),
+                "Current Price": st.column_config.NumberColumn(format="₹%.2f"),
+            },
+            use_container_width=True, height=220, hide_index=True,
+        )
+        st.markdown(
+            f'<p class="snap-note">Total Gold/SGB {format_inr(total_gold)} · {gold_pct:.1f}% of net worth · NSE via Groww/Yahoo</p>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.caption("No SGB / gold holdings identified.")
 
 # ==================================================
 # HOLDINGS DETAIL
