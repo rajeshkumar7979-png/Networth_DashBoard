@@ -420,8 +420,38 @@ def safe_float(val, default=0.0):
     except Exception:
         return default
 
+def format_inr_indian(num, decimals=0):
+    """Indian grouping: 2,68,12,952.00 (lakhs/crores), not Western 26,812,952."""
+    if num is None or (isinstance(num, float) and np.isnan(num)):
+        return "₹0" if decimals == 0 else "₹0.00"
+    try:
+        n = float(num)
+    except Exception:
+        return "₹0"
+    sign = "-" if n < 0 else ""
+    n = abs(n)
+    if decimals <= 0:
+        int_part = str(int(round(n)))
+        frac = ""
+    else:
+        s = f"{n:.{decimals}f}"
+        int_part, frac = s.split(".")
+        frac = "." + frac
+    # Indian: last 3 digits, then groups of 2
+    if len(int_part) <= 3:
+        grouped = int_part
+    else:
+        last3 = int_part[-3:]
+        rest = int_part[:-3]
+        groups = []
+        while rest:
+            groups.append(rest[-2:])
+            rest = rest[:-2]
+        grouped = ",".join(reversed(groups)) + "," + last3
+    return f"{sign}₹{grouped}{frac}"
+
 def format_inr(num):
-    return "₹0" if pd.isna(num) else f"₹{num:,.0f}"
+    return format_inr_indian(num, decimals=0)
 
 def load_data(uploaded_file=None):
     if uploaded_file is not None:
@@ -549,7 +579,7 @@ for _, row in mf_agg.iterrows():
             "Owner": row["Owner"], "ISIN": isin, "Fund Name": row["Fund Name"][:42], "Category": category,
             "Units": round(units, 3), "Invested": invested, "Current NAV": nav, "Current Value": current_value,
             "P&L": pnl, "Return %": ret, "Ann. Return %": fund_return_ann,
-            "1Y %": r1y, "3Y %": r3y, "5Y %": r5y, "Nifty 1Y %": b1y, "Nifty 3Y %": b3y, "Nifty 5Y %": b5y,
+            "1Y %": r1y, "3Y %": r3y, "5Y %": r5y, "vs Nifty50 1Y": b1y, "vs Nifty50 3Y": b3y, "vs Nifty50 5Y": b5y,
             "Purchase Date": pdate,
         })
     except Exception:
@@ -742,8 +772,8 @@ def score_diversification(mf_df):
     hhi = ((cat / cat.sum()) ** 2).sum()
     return min(100, max(0, (1 - hhi) * 100 / 0.85))  # FIXED: capped at 100
 def score_performance(mf_df):
-    valid = mf_df.dropna(subset=["1Y %", "Nifty 1Y %"])
-    return (valid["1Y %"] > valid["Nifty 1Y %"]).mean() * 100 if not valid.empty else 60
+    valid = mf_df.dropna(subset=["1Y %", "vs Nifty50 1Y"])
+    return (valid["1Y %"] > valid["vs Nifty50 1Y"]).mean() * 100 if not valid.empty else 60
 
 alloc_score = score_allocation(equity_pct)
 conc_score = min(score_concentration(top5_mf_pct), score_concentration(top5_stock_pct) if not stocks_valid.empty else 100)
@@ -787,11 +817,11 @@ if top5_mf_pct > 60:
 if not stocks_valid.empty and top5_stock_pct > 65:
     flags.append(("warning", "Stock concentration", f"Top 5 stocks are {top5_stock_pct:.1f}% of your equity holdings."))
 if not mf_valid.empty:
-    persistent = mf_valid.dropna(subset=["1Y %", "3Y %", "Nifty 1Y %", "Nifty 3Y %"])
-    persistent = persistent[(persistent["1Y %"] < persistent["Nifty 1Y %"] - 2) & (persistent["3Y %"] < persistent["Nifty 3Y %"] - 2)]
+    persistent = mf_valid.dropna(subset=["1Y %", "3Y %", "vs Nifty50 1Y", "vs Nifty50 3Y"])
+    persistent = persistent[(persistent["1Y %"] < persistent["vs Nifty50 1Y"] - 2) & (persistent["3Y %"] < persistent["vs Nifty50 3Y"] - 2)]
     for _, r in persistent.sort_values("1Y %").head(3).iterrows():
         flags.append(("warning", f"{r['Fund Name']}: persistent underperformance",
-                       f"Trailing both 1Y ({r['1Y %']:.1f}% vs {r['Nifty 1Y %']:.1f}%) and 3Y ({r['3Y %']:.1f}% vs {r['Nifty 3Y %']:.1f}%)."))
+                       f"Trailing both 1Y ({r['1Y %']:.1f}% vs Nifty50 {r['vs Nifty50 1Y']:.1f}%) and 3Y ({r['3Y %']:.1f}% vs Nifty50 {r['vs Nifty50 3Y']:.1f}%)."))
     losers = mf_valid[mf_valid["Return %"] < -10]
     for _, r in losers.sort_values("Return %").head(3).iterrows():
         flags.append(("critical", f"{r['Fund Name']} down {abs(r['Return %']):.1f}%", "Currently a loss position."))
@@ -907,22 +937,30 @@ k6.metric("Health Score", f"{health_score:.0f}", health_label)
 pulse_rows = build_market_pulse_rows()
 
 def _ticker_item(row):
+    # Inline colors — Streamlit often strips stylesheet class colors inside markdown HTML
     if row["Value"] is None:
-        return f'<span class="ticker-item ticker-na"><span class="ticker-name">{row["Market"]}</span> —</span>'
+        return (
+            f'<span class="ticker-item" style="color:#5b6478">'
+            f'<span class="ticker-name">{row["Market"]}</span> —</span>'
+        )
     chg = row["Chg %"]
-    if chg is None:
-        cls, arrow, chg_html = "ticker-na", "", ""
-    elif chg >= 0:
-        cls, arrow = "ticker-up", "▲"
-        chg_html = f'<span class="ticker-chg">{arrow} {chg:+.2f}%</span>'
-    else:
-        cls, arrow = "ticker-down", "▼"
-        chg_html = f'<span class="ticker-chg">{arrow} {chg:+.2f}%</span>'
     val = row["fmt"].format(row["Value"])
+    if chg is None:
+        chg_html = ""
+    elif chg >= 0:
+        chg_html = (
+            f'<span style="color:#22c55e;font-weight:800;font-size:0.88rem">'
+            f'▲ {chg:+.2f}%</span>'
+        )
+    else:
+        chg_html = (
+            f'<span style="color:#ef4444;font-weight:800;font-size:0.88rem">'
+            f'▼ {chg:+.2f}%</span>'
+        )
     return (
-        f'<span class="ticker-item {cls}">'
-        f'<span class="ticker-name">{row["Market"]}</span>'
-        f'<span class="ticker-val">{val}</span>'
+        f'<span class="ticker-item">'
+        f'<span class="ticker-name" style="color:#8b95a8">{row["Market"]}</span>'
+        f'<span class="ticker-val" style="color:#f8fafc;font-weight:600">{val}</span>'
         f'{chg_html}</span>'
     )
 
@@ -1084,15 +1122,26 @@ tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits", "G
 
 with tab1:
     if not mf.empty:
-        st.caption(f"{len(mf)} consolidated holdings — Nifty columns are broad-market, not category-specific. '—' means insufficient history.")
+        st.caption(
+            f"{len(mf)} consolidated holdings — "
+            f"'vs Nifty50' is a broad equity bar only (not each fund's official benchmark). "
+            f"Mid/small/flexi/contra can look better or worse vs Nifty50 for the wrong reason. "
+            f"'—' means insufficient history or debt-like category."
+        )
+        _mf_view = mf[["Owner", "Fund Name", "Category", "Current Value", "P&L", "Return %",
+                        "1Y %", "3Y %", "5Y %", "vs Nifty50 1Y", "vs Nifty50 3Y", "vs Nifty50 5Y"]]
         st.dataframe(
-            mf[["Owner", "Fund Name", "Category", "Current Value", "P&L", "Return %", "1Y %", "3Y %", "5Y %", "Nifty 1Y %", "Nifty 3Y %", "Nifty 5Y %"]],
+            style_money_df(_mf_view),
             column_config={
                 "Current Value": st.column_config.NumberColumn(format="₹%d"),
                 "P&L": st.column_config.NumberColumn(format="₹%d"),
                 "Return %": st.column_config.NumberColumn(format="%.1f%%"),
-                "1Y %": st.column_config.NumberColumn(format="%.1f%%"), "3Y %": st.column_config.NumberColumn(format="%.1f%%"), "5Y %": st.column_config.NumberColumn(format="%.1f%%"),
-                "Nifty 1Y %": st.column_config.NumberColumn(format="%.1f%%"), "Nifty 3Y %": st.column_config.NumberColumn(format="%.1f%%"), "Nifty 5Y %": st.column_config.NumberColumn(format="%.1f%%"),
+                "1Y %": st.column_config.NumberColumn(format="%.1f%%"),
+                "3Y %": st.column_config.NumberColumn(format="%.1f%%"),
+                "5Y %": st.column_config.NumberColumn(format="%.1f%%"),
+                "vs Nifty50 1Y": st.column_config.NumberColumn(format="%.1f%%"),
+                "vs Nifty50 3Y": st.column_config.NumberColumn(format="%.1f%%"),
+                "vs Nifty50 5Y": st.column_config.NumberColumn(format="%.1f%%"),
             }, use_container_width=True, height=380)
 
 with tab2:
@@ -1100,18 +1149,24 @@ with tab2:
         st.dataframe(
             style_money_df(stocks[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]]),
             column_config={
-                "Invested": st.column_config.NumberColumn(format="₹%d"), "Current Value": st.column_config.NumberColumn(format="₹%d"),
-                "P&L": st.column_config.NumberColumn(format="₹%d"), "Return %": st.column_config.NumberColumn(format="%.1f%%"),
+                "Quantity": st.column_config.NumberColumn(format="%d"),
+                "Invested": st.column_config.NumberColumn(format="₹%d"),
+                "Current Value": st.column_config.NumberColumn(format="₹%d"),
+                "P&L": st.column_config.NumberColumn(format="₹%d"),
+                "Return %": st.column_config.NumberColumn(format="%.1f%%"),
                 "Current Price": st.column_config.NumberColumn(format="₹%.2f"),
             }, use_container_width=True, height=380)
         st.caption("Fundamental red flags (P/E, debt/equity, promoter pledging) need paid/structured data — not shown here to avoid false precision.")
 
 with tab3:
     if not fd.empty:
-        st.caption("Native currency and INR reporting value shown side by side — a USD FD is never displayed as though it were an INR deposit.")
+        st.caption("Native currency and INR reporting value shown side by side — a USD FD is never displayed as though it were an INR deposit. Sorted by days to maturity (overdue first).")
+        _fd_view = fd[["Holder Name", "Currency", "Principal (Native)", "Principal (INR, at deposit FX)", "ROI %",
+                        "Days to Maturity", "Current Value (Native)", "Current Value (INR)", "FX Gain/Loss (INR)", "Maturity Date"]].copy()
+        if "Days to Maturity" in _fd_view.columns:
+            _fd_view = _fd_view.sort_values("Days to Maturity", ascending=True, na_position="last")
         st.dataframe(
-            fd[["Holder Name", "Currency", "Principal (Native)", "Principal (INR, at deposit FX)", "ROI %",
-                "Days to Maturity", "Current Value (Native)", "Current Value (INR)", "FX Gain/Loss (INR)", "Maturity Date"]],
+            style_money_df(_fd_view, pnl_cols=("FX Gain/Loss (INR)",)),
             column_config={
                 "Principal (Native)": st.column_config.NumberColumn(format="%.2f"),
                 "Principal (INR, at deposit FX)": st.column_config.NumberColumn(format="₹%d"),
@@ -1128,8 +1183,11 @@ with tab4:  # NEW: Gold tab
         st.dataframe(
             style_money_df(gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]]),
             column_config={
-                "Invested": st.column_config.NumberColumn(format="₹%d"), "Current Value": st.column_config.NumberColumn(format="₹%d"),
-                "P&L": st.column_config.NumberColumn(format="₹%d"), "Return %": st.column_config.NumberColumn(format="%.1f%%"),
+                "Quantity": st.column_config.NumberColumn(format="%g"),
+                "Invested": st.column_config.NumberColumn(format="₹%d"),
+                "Current Value": st.column_config.NumberColumn(format="₹%d"),
+                "P&L": st.column_config.NumberColumn(format="₹%d"),
+                "Return %": st.column_config.NumberColumn(format="%.1f%%"),
                 "Current Price": st.column_config.NumberColumn(format="₹%.2f"),
             }, use_container_width=True, height=200)
     else:
