@@ -69,6 +69,22 @@ st.markdown("""
     .caveat { font-size: 0.72rem; color: #5b6478; font-style: italic; }
     .recon-pass { color: #22c55e; font-weight: 600; }
     .recon-fail { color: #ef4444; font-weight: 600; }
+    /* compact attention grid */
+    .flag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 4px; }
+    @media (max-width: 900px) { .flag-grid { grid-template-columns: 1fr; } }
+    .flag-card { border-radius: 8px; padding: 7px 10px; margin-bottom: 0; display: flex; gap: 8px; align-items: flex-start; border: 1px solid; }
+    .flag-title { font-weight: 600; font-size: 0.78rem; color: #f1f5f9; margin: 0; line-height: 1.25; }
+    .flag-body  { font-size: 0.70rem; color: #9aa4b8; margin: 1px 0 0 0; line-height: 1.3; }
+    /* market pulse ticker — dark mode */
+    .ticker-wrap { width:100%; overflow:hidden; background:#0f1420; border:1px solid #1c2333;
+                    border-radius:8px; padding:8px 0; white-space:nowrap; margin: 6px 0 2px 0; }
+    .ticker-move { display:inline-block; animation: ticker-scroll 45s linear infinite; }
+    .ticker-wrap:hover .ticker-move { animation-play-state: paused; }
+    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .ticker-item { display:inline-block; padding:0 22px; font-size:0.80rem; font-weight:600; }
+    .ticker-up { color:#22c55e; }
+    .ticker-down { color:#ef4444; }
+    .ticker-na { color:#5b6478; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -197,6 +213,24 @@ def get_nifty_history():
         df = hist[["Close"]].rename(columns={"Close": "nav"}).reset_index().rename(columns={"Date": "date"})
         df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
         return df
+    except Exception:
+        return None
+
+MARKET_PULSE_TICKERS = [
+    ("NIFTY 50", "^NSEI"), ("SENSEX", "^BSESN"), ("Gold", "GC=F"), ("Silver", "SI=F"),
+    ("Brent Oil", "BZ=F"), ("S&P 500", "^GSPC"), ("Nasdaq", "^IXIC"),
+    ("Dow Jones", "^DJI"), ("USD/INR", "INR=X"),
+]
+
+@st.cache_data(ttl=900, show_spinner=False)
+def get_market_pulse(ticker: str):
+    try:
+        hist = yf.Ticker(ticker).history(period="5d")
+        if hist.empty or len(hist) < 2:
+            return None
+        closes = hist["Close"]
+        latest, prev = float(closes.iloc[-1]), float(closes.iloc[-2])
+        return {"value": latest, "change_pct": (latest / prev - 1) * 100}
     except Exception:
         return None
 
@@ -708,7 +742,26 @@ def log_history_snapshot():
     hist_df.to_csv(HISTORY_PATH, index=False)
     return hist_df
 
+def _clean_history(df):
+    if df is None or df.empty or "date" not in df.columns:
+        return pd.DataFrame(columns=["date", "net_worth", "equity_pct", "fd_pct", "pnl", "health_score"])
+    df = df.copy()
+    df["date"] = df["date"].astype(str)
+    df = df[df["date"].str.match(r"^\d{4}-\d{2}-\d{2}$", na=False)]
+    for col in ["net_worth", "equity_pct", "fd_pct", "pnl", "health_score"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    df = df.dropna(subset=["net_worth"])
+    return df.reset_index(drop=True)
+
 history_df = log_history_snapshot() if log_snapshot else (pd.read_csv(HISTORY_PATH) if os.path.exists(HISTORY_PATH) else pd.DataFrame())
+history_df = _clean_history(history_df)
+# rewrite cleaned history so bad rows don't keep coming back
+if log_snapshot and not history_df.empty:
+    try:
+        history_df.to_csv(HISTORY_PATH, index=False)
+    except Exception:
+        pass
 
 # ==================================================
 # HEADER
@@ -734,16 +787,47 @@ k5.metric("USD/INR", f"{usd_inr:.2f}" if usd_inr else "unavailable")
 k6.metric("Health Score", f"{health_score:.0f}", health_label)
 
 # ==================================================
-# WHAT NEEDS MY ATTENTION
+# MARKET PULSE — dark scrolling ticker
+# ==================================================
+pulse_rows = []
+for label, ticker in MARKET_PULSE_TICKERS:
+    d = get_market_pulse(ticker)
+    if d:
+        pulse_rows.append({"Market": label, "Value": d["value"], "Chg %": d["change_pct"]})
+    else:
+        pulse_rows.append({"Market": label, "Value": None, "Chg %": None})
+
+def _ticker_item(row):
+    if row["Value"] is None:
+        return f'<span class="ticker-item ticker-na">{row["Market"]} —</span>'
+    arrow = "▲" if row["Chg %"] >= 0 else "▼"
+    cls = "ticker-up" if row["Chg %"] >= 0 else "ticker-down"
+    return (f'<span class="ticker-item {cls}">{row["Market"]} {row["Value"]:,.2f} '
+            f'{arrow} {row["Chg %"]:+.2f}%</span>')
+
+items_html = "".join(_ticker_item(r) for r in pulse_rows)
+st.markdown(
+    f'<div class="ticker-wrap"><div class="ticker-move">{items_html}{items_html}</div></div>'
+    f'<p class="caveat">Hover to pause · daily change vs prior session close (Yahoo).</p>',
+    unsafe_allow_html=True,
+)
+
+# ==================================================
+# WHAT NEEDS MY ATTENTION — compact 2-column grid
 # ==================================================
 st.markdown('<div class="section-header">What needs my attention</div>', unsafe_allow_html=True)
 if not flags:
     st.info("Nothing flagged right now.")
 else:
     icon = {"critical": "🔴", "warning": "🟡", "info": "🔵"}
+    cards = []
     for level, title, body in flags[:10]:
-        st.markdown(f"""<div class="flag-card flag-{level}"><div style="font-size:1.05rem;line-height:1.3">{icon[level]}</div>
-            <div><p class="flag-title">{title}</p><p class="flag-body">{body}</p></div></div>""", unsafe_allow_html=True)
+        cards.append(
+            f'<div class="flag-card flag-{level}">'
+            f'<div style="font-size:0.95rem;line-height:1.2">{icon[level]}</div>'
+            f'<div><p class="flag-title">{title}</p><p class="flag-body">{body}</p></div></div>'
+        )
+    st.markdown(f'<div class="flag-grid">{"".join(cards)}</div>', unsafe_allow_html=True)
 
 # ==================================================
 # DATA INTEGRITY (Phase 3) — visible, not buried
