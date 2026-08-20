@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 import re
+import time
 
 st.set_page_config(page_title="Family Net Worth", page_icon="💰", layout="wide", initial_sidebar_state="expanded")
 
@@ -81,28 +82,31 @@ def to_naive_ts(x):
 # -------------------------------------------------
 @st.cache_data(ttl=3600)
 def get_amfi_data():
-    try:
-        r = requests.get("https://www.amfiindia.com/spages/NAVAll.txt", timeout=15)
-        r.raise_for_status()
-        nav_dict, code_dict, name_dict = {}, {}, {}
-        for line in r.text.splitlines():
-            parts = line.split(";")
-            if len(parts) >= 5 and parts[0].strip().isdigit():
-                code = parts[0].strip()
-                isin_g, isin_d = parts[1].strip(), parts[2].strip()
-                name = parts[3].strip()
-                try:
-                    nav = float(parts[4].strip())
-                except Exception:
-                    continue
-                for isin in (isin_g, isin_d):
-                    if isin and isin != "-" and len(isin) > 8:
-                        nav_dict[isin] = nav
-                        code_dict[isin] = code
-                        name_dict[isin] = name
-        return nav_dict, code_dict, name_dict
-    except Exception:
-        return {}, {}, {}
+    for attempt in range(2):  # NEW: one retry — a single timeout was previously killing every MF valuation at once
+        try:
+            r = requests.get("https://www.amfiindia.com/spages/NAVAll.txt", timeout=15)
+            r.raise_for_status()
+            nav_dict, code_dict, name_dict = {}, {}, {}
+            for line in r.text.splitlines():
+                parts = line.split(";")
+                if len(parts) >= 5 and parts[0].strip().isdigit():
+                    code = parts[0].strip()
+                    isin_g, isin_d = parts[1].strip(), parts[2].strip()
+                    name = parts[3].strip()
+                    try:
+                        nav = float(parts[4].strip())
+                    except Exception:
+                        continue
+                    for isin in (isin_g, isin_d):
+                        if isin and isin != "-" and len(isin) > 8:
+                            nav_dict[isin] = nav
+                            code_dict[isin] = code
+                            name_dict[isin] = name
+            return nav_dict, code_dict, name_dict
+        except Exception:
+            if attempt == 0:
+                time.sleep(1.5)
+    return {}, {}, {}
 
 @st.cache_data(ttl=21600, show_spinner=False)
 def get_mf_nav_history(scheme_code: str):
@@ -332,19 +336,27 @@ mf_rows, mf_failed = [], 0
 for _, row in mf_agg.iterrows():
     try:
         isin, units, invested, pdate = row["ISIN"], row["Units"], row["Invested"], row["Purchase Date"]
-        nav = amfi_navs.get(isin)
+        nav = amfi_navs.get(isin)  # FIXED: no longer defaulted to 0.0 — None means genuinely unknown
+        nav_status = "AMFI (EOD)"  # NEW: simple status label, Part 6
         if nav is None:
             mf_failed += 1
+            nav_status = "Unavailable"
             integrity_issues.append(("HIGH", f"{row['Fund Name'][:40]}: no live NAV found for ISIN {isin} — excluded from totals."))
-            nav = 0.0
         if units < 0:
             integrity_issues.append(("HIGH", f"{row['Fund Name'][:40]} ({row['Owner']}): negative net units ({units:.2f}) after aggregation — check for a sell exceeding recorded buys."))
-        current_value = units * nav
-        pnl = current_value - invested
-        ret = (pnl / invested * 100) if invested > 0 else 0.0
+        # FIXED: current_value/P&L/return are now None (not computed from a fake
+        # zero NAV) whenever nav is unavailable — this is what "excluded from
+        # totals" actually requires; the old code claimed exclusion but never
+        # did it, since 0 isn't NaN and dropna() never caught it.
+        if nav is not None:
+            current_value = units * nav
+            pnl = current_value - invested
+            ret = (pnl / invested * 100) if invested > 0 else 0.0
+        else:
+            current_value = pnl = ret = None
         category = infer_category(row["Fund Name"])
         days_held = (TODAY_NAIVE - pdate).days if pdate is not None else None
-        fund_return_ann = ((current_value / invested) ** (365.25 / days_held) - 1) * 100 if (days_held and days_held >= 30 and invested > 0) else None
+        fund_return_ann = ((current_value / invested) ** (365.25 / days_held) - 1) * 100 if (current_value is not None and days_held and days_held >= 30 and invested > 0) else None
         code = amfi_codes.get(isin)
         r1y = r3y = r5y = b1y = b3y = b5y = None
         if category not in DEBT_LIKE and code:
@@ -353,8 +365,8 @@ for _, row in mf_agg.iterrows():
             b1y, b3y, b5y = nifty_1y, nifty_3y, nifty_5y
         mf_rows.append({
             "Owner": row["Owner"], "ISIN": isin, "Fund Name": row["Fund Name"][:42], "Category": category,
-            "Units": round(units, 3), "Invested": invested, "Current NAV": nav, "Current Value": current_value,
-            "P&L": pnl, "Return %": ret, "Ann. Return %": fund_return_ann,
+            "Units": round(units, 3), "Invested": invested, "Current NAV": nav, "NAV Status": nav_status,
+            "Current Value": current_value, "P&L": pnl, "Return %": ret, "Ann. Return %": fund_return_ann,
             "1Y %": r1y, "3Y %": r3y, "5Y %": r5y, "Nifty 1Y %": b1y, "Nifty 3Y %": b3y, "Nifty 5Y %": b5y,
             "Purchase Date": pdate,
         })
@@ -396,13 +408,23 @@ for _, row in stocks_raw.iterrows():
             integrity_issues.append(("MEDIUM", f"{symbol}: no live/previous-close price found ({tried}) — used stale price from the raw file instead."))
         elif is_sgb:
             integrity_issues.append(("INFORMATIONAL", f"{symbol}: priced from {price_source}."))  # NEW: confirms the live attempt succeeded, not just silently trusted
-        current_value = qty * price
-        pnl = current_value - invested
-        ret = (pnl / invested * 100) if invested > 0 else 0.0
-        if invested > 0 and abs(pnl) > invested * 5:
+        # FIXED: a price of 0 (every source came up empty) was previously still
+        # multiplied straight into Current Value, producing a fabricated -100%
+        # loss. Now treated like a missing MF NAV: excluded, not faked.
+        if price and price > 0:
+            current_value = qty * price
+            pnl = current_value - invested
+            ret = (pnl / invested * 100) if invested > 0 else 0.0
+            price_status = "Live" if not used_fallback else "Stale (raw file)"
+        else:
+            current_value = pnl = ret = None
+            price = None
+            price_status = "Unavailable"
+            integrity_issues.append(("HIGH", f"{symbol}: no valid price from any source (live, previous close, or raw file) — excluded from totals."))
+        if invested > 0 and pnl is not None and abs(pnl) > invested * 5:
             integrity_issues.append(("MEDIUM", f"{symbol}: P&L is {pnl/invested*100:.0f}% of invested amount — unusually large, worth a sanity check of quantity/price entry."))
         row_dict = {"Owner": str(row.get("Owner", "") or ""), "Symbol": symbol, "Quantity": qty,
-                    "Invested": invested, "Current Price": price, "Current Value": current_value,
+                    "Invested": invested, "Current Price": price, "Price Status": price_status, "Current Value": current_value,
                     "P&L": pnl, "Return %": ret, "Price Source": price_source}
         if is_sgb:
             gold_rows.append(row_dict)  # routed to Gold, not Stocks
@@ -486,21 +508,28 @@ if fd_fx_unavailable:
 # -------------------------------------------------
 # AGGREGATES
 # -------------------------------------------------
-total_mf = mf["Current Value"].sum() if not mf.empty else 0
-total_stocks = stocks["Current Value"].sum() if not stocks.empty else 0
-total_gold = gold["Current Value"].sum() if not gold.empty else 0  # NEW
+# FIXED: totals now genuinely exclude rows with no valid price, using the
+# same dropna pattern already established for FDs — previously mf/stocks
+# were summed unfiltered, so a fabricated -100% row was silently included.
+mf_valid = mf.dropna(subset=["Current Value"]) if not mf.empty else mf
+stocks_valid = stocks.dropna(subset=["Current Value"]) if not stocks.empty else stocks
+gold_valid = gold.dropna(subset=["Current Value"]) if not gold.empty else gold
 fd_valid = fd.dropna(subset=["Current Value (INR)"]) if not fd.empty else fd
+
+total_mf = mf_valid["Current Value"].sum() if not mf_valid.empty else 0
+total_stocks = stocks_valid["Current Value"].sum() if not stocks_valid.empty else 0
+total_gold = gold_valid["Current Value"].sum() if not gold_valid.empty else 0
 total_fd = fd_valid["Current Value (INR)"].sum() if not fd_valid.empty else 0
-total_networth = total_mf + total_stocks + total_gold + total_fd  # NEW: gold added once
+total_networth = total_mf + total_stocks + total_gold + total_fd
 total_fd_invested = fd_valid["Principal (INR, at deposit FX)"].sum() if not fd_valid.empty else 0
-total_invested = ((mf["Invested"].sum() if not mf.empty else 0) + (stocks["Invested"].sum() if not stocks.empty else 0)
-                   + (gold["Invested"].sum() if not gold.empty else 0) + total_fd_invested)  # NEW
+total_invested = ((mf_valid["Invested"].sum() if not mf_valid.empty else 0) + (stocks_valid["Invested"].sum() if not stocks_valid.empty else 0)
+                   + (gold_valid["Invested"].sum() if not gold_valid.empty else 0) + total_fd_invested)  # FIXED: invested now matches which rows actually have a current value, so P&L isn't skewed by holdings with unknown price
 total_pnl = total_networth - total_invested
-equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth else 0  # unchanged formula — gold was never in this sum before or now
-gold_pct = (total_gold / total_networth * 100) if total_networth else 0  # NEW
+equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth else 0
+gold_pct = (total_gold / total_networth * 100) if total_networth else 0
 fd_pct = (total_fd / total_networth * 100) if total_networth else 0
-top5_mf_pct = (mf.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100) if not mf.empty and total_mf > 0 else 0
-top5_stock_pct = (stocks.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100) if not stocks.empty and total_stocks > 0 else 0
+top5_mf_pct = (mf_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100) if not mf_valid.empty and total_mf > 0 else 0
+top5_stock_pct = (stocks_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100) if not stocks_valid.empty and total_stocks > 0 else 0
 total_fx_gain = fd_valid["FX Gain/Loss (INR)"].sum() if not fd_valid.empty else 0
 
 # -------------------------------------------------
@@ -546,8 +575,8 @@ health_label = "Healthy" if health_score >= 75 else ("Adequate" if health_score 
 recon_tests = []
 owner_sum = 0
 owner_map = {}
-for df_, col, key in [(mf, "Current Value", "Owner"), (stocks, "Current Value", "Owner"),
-                       (gold, "Current Value", "Owner"), (fd_valid, "Current Value (INR)", "Holder Name")]:  # NEW: gold added
+for df_, col, key in [(mf_valid, "Current Value", "Owner"), (stocks_valid, "Current Value", "Owner"),
+                       (gold_valid, "Current Value", "Owner"), (fd_valid, "Current Value (INR)", "Holder Name")]:  # FIXED: _valid frames, matching the totals above
     if not df_.empty and key in df_.columns:
         for owner, val in df_.groupby(key)[col].sum().items():
             owner_map[owner] = owner_map.get(owner, 0) + val
@@ -666,9 +695,12 @@ k5.metric("USD/INR", f"{usd_inr:.2f}" if usd_inr else "unavailable")
 k6.metric("Health Score", f"{health_score:.0f}", health_label)
 
 # ==================================================
-# MARKET PULSE — compact, single small table, not full charts
+# MARKET PULSE — CSS-animated scrolling ticker, not a table.
+# Pure browser-side CSS @keyframes animation, no Python rerun loop — the
+# same pulse_rows data (fetched once per cache window) just renders
+# differently. Only presentation changed, per the request to avoid a
+# "white Excel-style table."
 # ==================================================
-st.markdown('<div class="section-header">Market pulse</div>', unsafe_allow_html=True)
 pulse_rows = []
 for label, ticker in MARKET_PULSE_TICKERS:
     d = get_market_pulse(ticker)
@@ -676,15 +708,32 @@ for label, ticker in MARKET_PULSE_TICKERS:
         pulse_rows.append({"Market": label, "Value": d["value"], "Chg %": d["change_pct"], "vs ATH %": d["below_ath_pct"]})
     else:
         pulse_rows.append({"Market": label, "Value": None, "Chg %": None, "vs ATH %": None})
-pulse_df = pd.DataFrame(pulse_rows)
-def _pulse_color(v):
-    if pd.isna(v): return ""
-    return "color:#22c55e" if v >= 0 else "color:#ef4444"
-st.dataframe(
-    pulse_df.style.map(_pulse_color, subset=["Chg %"]).format({"Value": "{:,.2f}", "Chg %": "{:+.2f}%", "vs ATH %": "{:.1f}%"}, na_rep="—"),
-    hide_index=True, use_container_width=True, height=180
-)
-st.markdown('<p class="caveat">"vs ATH" is the all-time high available from each ticker\'s own free Yahoo Finance history — for futures contracts (Gold/Silver/Brent) that\'s only as far back as that specific contract, not a true multi-decade record.</p>', unsafe_allow_html=True)
+
+def _ticker_item(row):
+    if row["Value"] is None:
+        return f'<span class="ticker-item ticker-na">{row["Market"]} \u2014</span>'
+    arrow = "\u25b2" if row["Chg %"] >= 0 else "\u25bc"
+    cls = "ticker-up" if row["Chg %"] >= 0 else "ticker-down"
+    ath_title = f'{row["vs ATH %"]:.1f}% vs ATH' if row["vs ATH %"] is not None else "ATH unavailable"
+    return (f'<span class="ticker-item {cls}" title="{ath_title}">{row["Market"]} {row["Value"]:,.2f} '
+            f'{arrow} {row["Chg %"]:+.2f}%</span>')
+
+items_html = "".join(_ticker_item(r) for r in pulse_rows)
+st.markdown(f"""
+<style>
+.ticker-wrap {{ width:100%; overflow:hidden; background:#0f1420; border:1px solid #1c2333;
+                border-radius:8px; padding:9px 0; white-space:nowrap; margin-bottom:4px; }}
+.ticker-move {{ display:inline-block; animation: ticker-scroll 45s linear infinite; }}
+.ticker-wrap:hover .ticker-move {{ animation-play-state: paused; }}
+@keyframes ticker-scroll {{ 0% {{ transform: translateX(0); }} 100% {{ transform: translateX(-50%); }} }}
+.ticker-item {{ display:inline-block; padding:0 26px; font-size:0.83rem; font-weight:600; }}
+.ticker-up {{ color:#22c55e; }}
+.ticker-down {{ color:#ef4444; }}
+.ticker-na {{ color:#5b6478; }}
+</style>
+<div class="ticker-wrap"><div class="ticker-move">{items_html}{items_html}</div></div>
+""", unsafe_allow_html=True)
+st.markdown('<p class="caveat">Hover to pause \u00b7 "vs ATH" (shown on hover) is the all-time high available from each ticker\'s own free Yahoo Finance history \u2014 for futures contracts (Gold/Silver/Brent) that\'s only as far back as that specific contract, not a true multi-decade record.</p>', unsafe_allow_html=True)
 
 # ==================================================
 # WHAT NEEDS MY ATTENTION
@@ -826,7 +875,7 @@ with tab1:
     if not mf.empty:
         st.caption(f"{len(mf)} consolidated holdings — Nifty columns are broad-market, not category-specific. '—' means insufficient history.")
         st.dataframe(
-            mf[["Owner", "Fund Name", "Category", "Current Value", "P&L", "Return %", "1Y %", "3Y %", "5Y %", "Nifty 1Y %", "Nifty 3Y %", "Nifty 5Y %"]],
+            mf[["Owner", "Fund Name", "Category", "NAV Status", "Current Value", "P&L", "Return %", "1Y %", "3Y %", "5Y %", "Nifty 1Y %", "Nifty 3Y %", "Nifty 5Y %"]],
             column_config={
                 "Current Value": st.column_config.NumberColumn(format="₹%d"),
                 "P&L": st.column_config.NumberColumn(format="₹%d"),
@@ -838,7 +887,7 @@ with tab1:
 with tab2:
     if not stocks.empty:
         st.dataframe(
-            stocks[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]],
+            stocks[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Price Status", "Current Value", "P&L", "Return %"]],
             column_config={
                 "Invested": st.column_config.NumberColumn(format="₹%d"), "Current Value": st.column_config.NumberColumn(format="₹%d"),
                 "P&L": st.column_config.NumberColumn(format="₹%d"), "Return %": st.column_config.NumberColumn(format="%.1f%%"),
