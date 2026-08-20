@@ -94,6 +94,36 @@ st.markdown("""
     .ticker-na { color:#5b6478; }
     .crit-banner { background:#3b1219; border:1px solid #7f1d1d; color:#fecaca;
                    border-radius:10px; padding:10px 14px; margin: 8px 0 4px 0; font-size:0.82rem; }
+    /* Phase A — command center */
+    .pulse-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0 4px 0; }
+    @media (max-width:1100px){ .pulse-grid{ grid-template-columns:repeat(2,1fr);} }
+    .pulse-card { background:linear-gradient(155deg,#12182a 0%,#0e1420 100%); border:1px solid #1c2333;
+                  border-radius:10px; padding:10px 12px; }
+    .pulse-card:hover { border-color:#2a3552; }
+    .pulse-label { font-size:0.65rem; font-weight:700; color:#6b7688; text-transform:uppercase; letter-spacing:0.06em; }
+    .pulse-val { font-size:1.05rem; font-weight:700; color:#f8fafc; margin-top:2px; font-variant-numeric:tabular-nums; }
+    .pulse-chg-up { color:#22c55e; font-size:0.78rem; font-weight:700; }
+    .pulse-chg-dn { color:#ef4444; font-size:0.78rem; font-weight:700; }
+    .pulse-chg-na { color:#5b6478; font-size:0.78rem; }
+    .attn-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:6px 0 8px 0; }
+    @media (max-width:1100px){ .attn-grid{ grid-template-columns:repeat(2,1fr);} }
+    .attn-tile { border-radius:10px; padding:10px 12px; border:1px solid; min-height:88px; }
+    .attn-tag { display:inline-block; font-size:0.60rem; font-weight:800; letter-spacing:0.06em;
+                padding:2px 7px; border-radius:4px; margin-bottom:6px; }
+    .tag-urgent { background:#7f1d1d; color:#fecaca; }
+    .tag-review { background:#78350f; color:#fde68a; }
+    .tag-upcoming { background:#1e3a5f; color:#93c5fd; }
+    .attn-title { font-size:0.82rem; font-weight:700; color:#f1f5f9; margin:0 0 3px 0; line-height:1.25; }
+    .attn-body { font-size:0.70rem; color:#9aa4b8; margin:0; line-height:1.3; }
+    .why-box { background:#0f1420; border:1px solid #1c2333; border-radius:10px; padding:10px 14px; margin-top:8px; }
+    .why-box li { color:#9aa4b8; font-size:0.78rem; margin:3px 0; }
+    .status-row { display:flex; flex-wrap:wrap; gap:10px; margin:6px 0 4px 0; }
+    .status-pill { font-size:0.72rem; color:#9aa4b8; background:#0f1420; border:1px solid #1c2333;
+                   border-radius:999px; padding:4px 10px; }
+    .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; }
+    .dot-live { background:#22c55e; }
+    .dot-cache { background:#eab308; }
+    .dot-off { background:#ef4444; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -452,6 +482,22 @@ def format_inr_indian(num, decimals=0):
 
 def format_inr(num):
     return format_inr_indian(num, decimals=0)
+
+def format_inr_compact(num):
+    """Use Cr / Lakh for large headline metrics."""
+    if num is None or (isinstance(num, float) and np.isnan(num)):
+        return "₹0"
+    try:
+        n = float(num)
+    except Exception:
+        return "₹0"
+    sign = "-" if n < 0 else ""
+    a = abs(n)
+    if a >= 1e7:
+        return f"{sign}₹{a/1e7:.2f} Cr"
+    if a >= 1e5:
+        return f"{sign}₹{a/1e5:.2f} L"
+    return format_inr_indian(n, decimals=0)
 
 def load_data(uploaded_file=None):
     if uploaded_file is not None:
@@ -908,71 +954,119 @@ if log_snapshot and not history_df.empty:
     except Exception:
         pass
 
+# Quick exports (sidebar)
+with st.sidebar:
+    st.markdown("### Quick actions")
+    if history_df is not None and not history_df.empty:
+        st.download_button(
+            "Download history CSV",
+            data=history_df.to_csv(index=False).encode("utf-8"),
+            file_name="networth_history.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    # Holdings export
+    _parts = []
+    if not mf_valid.empty:
+        _m = mf_valid.copy(); _m["Asset"] = "MF"; _parts.append(_m)
+    if not stocks_valid.empty:
+        _s = stocks_valid.copy(); _s["Asset"] = "Stock"; _parts.append(_s)
+    if not gold_valid.empty:
+        _g = gold_valid.copy(); _g["Asset"] = "Gold"; _parts.append(_g)
+    if _parts:
+        _hold = pd.concat(_parts, ignore_index=True, sort=False)
+        st.download_button(
+            "Download holdings CSV",
+            data=_hold.to_csv(index=False).encode("utf-8"),
+            file_name="networth_holdings.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    st.markdown("---")
+    st.caption("AMFI · Groww · Yahoo · goldprice.dev · Frankfurter")
+
 # ==================================================
-# HEADER
+# HEADER — command center
 # ==================================================
 st.markdown('<div class="main-title">Family Net Worth</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="sub-title">INR · Live prices · {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="sub-title">Portfolio command center · INR · {now_ist.strftime("%d %b %Y, %H:%M IST")}</div>', unsafe_allow_html=True)
+
+# Data status pills
+amfi_dot = "dot-off" if len(amfi_navs) == 0 else ("dot-cache" if amfi_cache_date else "dot-live")
+amfi_lbl = "AMFI offline" if len(amfi_navs) == 0 else ("AMFI cache" if amfi_cache_date else "AMFI live")
+stocks_ok = (not stocks.empty and stocks["Current Price"].notna().any()) if not stocks.empty else False
+sgb_ok = (not gold.empty and gold["Current Price"].notna().any()) if not gold.empty else False
+fx_ok = usd_inr is not None
+status_html = (
+    f'<div class="status-row">'
+    f'<span class="status-pill"><span class="status-dot {amfi_dot}"></span>{amfi_lbl} ({len(amfi_navs)})</span>'
+    f'<span class="status-pill"><span class="status-dot {"dot-live" if stocks_ok else "dot-off"}"></span>Stocks {"live" if stocks_ok else "n/a"}</span>'
+    f'<span class="status-pill"><span class="status-dot {"dot-live" if sgb_ok else "dot-off"}"></span>SGB {"live" if sgb_ok else "n/a"}</span>'
+    f'<span class="status-pill"><span class="status-dot {"dot-live" if fx_ok else "dot-off"}"></span>FX {"live" if fx_ok else "n/a"}</span>'
+    f'<span class="status-pill"><span class="status-dot dot-live"></span>Market pulse</span>'
+    f'</div>'
+)
+st.markdown(status_html, unsafe_allow_html=True)
 
 if len(amfi_navs) == 0:
     st.error("AMFI data failed to load this run and no disk cache found — mutual fund values below are excluded.")
 elif amfi_cache_date:
-    st.warning(f"AMFI live fetch failed — using disk cache from {amfi_cache_date} · {len(amfi_navs)} NAVs · NAV only changes once/day so this is usually fine")
+    st.warning(f"AMFI live fetch failed — using disk cache from {amfi_cache_date} · {len(amfi_navs)} NAVs")
 elif mf_failed > 0:
-    st.warning(f"{mf_failed} fund(s) missing a live NAV this run · {len(amfi_navs)} AMFI NAVs loaded OK")
-else:
-    st.success(f"Live prices OK · {len(amfi_navs)} AMFI NAVs loaded")
+    st.warning(f"{mf_failed} fund(s) missing a live NAV · {len(amfi_navs)} AMFI NAVs OK")
+
+# Headline metrics — compact Cr form + optional vs prior history day
+_prev_nw = _prev_eq = None
+if history_df is not None and not history_df.empty and "net_worth" in history_df.columns:
+    try:
+        _hist_sorted = history_df.sort_values("date")
+        if len(_hist_sorted) >= 2:
+            _prev_nw = float(_hist_sorted["net_worth"].iloc[-2])
+            _prev_eq = float(_hist_sorted["equity_pct"].iloc[-2]) if "equity_pct" in _hist_sorted.columns else None
+        elif len(_hist_sorted) == 1 and str(_hist_sorted["date"].iloc[-1]) != now_ist.strftime("%Y-%m-%d"):
+            _prev_nw = float(_hist_sorted["net_worth"].iloc[-1])
+    except Exception:
+        pass
+_nw_delta = None
+if _prev_nw and _prev_nw > 0:
+    _nw_delta = f"{(total_networth - _prev_nw) / _prev_nw * 100:+.2f}% vs prior snapshot"
 
 k1, k2, k3, k4, k5, k6 = st.columns(6)
-k1.metric("Net Worth", format_inr(total_networth))
-k2.metric("P&L", format_inr(total_pnl), f"{(total_pnl/total_invested*100):.1f}%" if total_invested else None)
-k3.metric("Equity", f"{equity_pct:.1f}%")
+k1.metric("Net Worth", format_inr_compact(total_networth), _nw_delta)
+k2.metric("P&L", format_inr_compact(total_pnl), f"{(total_pnl/total_invested*100):.1f}%" if total_invested else None)
+k3.metric("Equity", f"{equity_pct:.1f}%", "Target ~60%")
 k4.metric("FD / Cash", f"{fd_pct:.1f}%")
-k5.metric("USD/INR", f"{usd_inr:.2f}" if usd_inr else "unavailable")
-k6.metric("Health Score", f"{health_score:.0f}", health_label)
+k5.metric("USD/INR", f"{usd_inr:.2f}" if usd_inr else "n/a")
+k6.metric("Health Score", f"{health_score:.0f}/100", health_label)
 
 # ==================================================
-# MARKET PULSE — TradingView-style dark ticker
+# MARKET PULSE — card grid (Phase A)
 # ==================================================
+st.markdown('<div class="section-header">Market pulse</div>', unsafe_allow_html=True)
 pulse_rows = build_market_pulse_rows()
-
-def _ticker_item(row):
-    # Inline colors — Streamlit often strips stylesheet class colors inside markdown HTML
+pulse_cards = []
+for row in pulse_rows:
     if row["Value"] is None:
-        return (
-            f'<span class="ticker-item" style="color:#5b6478">'
-            f'<span class="ticker-name">{row["Market"]}</span> —</span>'
-        )
-    chg = row["Chg %"]
-    val = row["fmt"].format(row["Value"])
-    if chg is None:
-        chg_html = ""
-    elif chg >= 0:
-        chg_html = (
-            f'<span style="color:#22c55e;font-weight:800;font-size:0.88rem">'
-            f'▲ {chg:+.2f}%</span>'
-        )
+        chg_html = '<div class="pulse-chg-na">—</div>'
+        val = "—"
     else:
-        chg_html = (
-            f'<span style="color:#ef4444;font-weight:800;font-size:0.88rem">'
-            f'▼ {chg:+.2f}%</span>'
-        )
-    return (
-        f'<span class="ticker-item">'
-        f'<span class="ticker-name" style="color:#8b95a8">{row["Market"]}</span>'
-        f'<span class="ticker-val" style="color:#f8fafc;font-weight:600">{val}</span>'
-        f'{chg_html}</span>'
+        val = row["fmt"].format(row["Value"])
+        chg = row["Chg %"]
+        if chg is None:
+            chg_html = '<div class="pulse-chg-na">—</div>'
+        elif chg >= 0:
+            chg_html = f'<div class="pulse-chg-up">▲ {chg:+.2f}%</div>'
+        else:
+            chg_html = f'<div class="pulse-chg-dn">▼ {chg:+.2f}%</div>'
+    pulse_cards.append(
+        f'<div class="pulse-card"><div class="pulse-label">{row["Market"]}</div>'
+        f'<div class="pulse-val">{val}</div>{chg_html}</div>'
     )
-
-items_html = "".join(_ticker_item(r) for r in pulse_rows)
-st.markdown(
-    f'<div class="ticker-wrap"><div class="ticker-move">{items_html}{items_html}</div></div>'
-    f'<p class="caveat">Hover to pause · Gold ₹/10g & Silver ₹/kg (INR) · indices/FX daily change vs prior close</p>',
-    unsafe_allow_html=True,
-)
+st.markdown(f'<div class="pulse-grid">{"".join(pulse_cards)}</div>', unsafe_allow_html=True)
+st.caption("Free delayed sources · Gold ₹/10g & Silver ₹/kg (INR) · daily change vs prior session close")
 
 # ==================================================
-# CRITICAL integrity (if any) — not buried in expander
+# CRITICAL integrity
 # ==================================================
 crit = [m for sev, m in integrity_issues if sev == "CRITICAL"]
 if crit:
@@ -980,21 +1074,27 @@ if crit:
     st.markdown(f'<div class="crit-banner"><b>Critical data issues</b>{bullets}</div>', unsafe_allow_html=True)
 
 # ==================================================
-# WHAT NEEDS MY ATTENTION — compact 2-column grid
+# WHAT NEEDS MY ATTENTION — tagged tiles
 # ==================================================
-st.markdown('<div class="section-header">What needs my attention</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="section-header">What needs my attention · {len(flags)} item(s)</div>', unsafe_allow_html=True)
 if not flags:
     st.info("Nothing flagged right now.")
 else:
-    icon = {"critical": "🔴", "warning": "🟡", "info": "🔵"}
-    cards = []
-    for level, title, body in flags[:10]:
-        cards.append(
-            f'<div class="flag-card flag-{level}">'
-            f'<div style="font-size:0.95rem;line-height:1.2">{icon[level]}</div>'
-            f'<div><p class="flag-title">{title}</p><p class="flag-body">{body}</p></div></div>'
+    tiles = []
+    for level, title, body in flags[:8]:
+        if level == "critical":
+            tag, tag_cls, border = "URGENT", "tag-urgent", "#7f1d1d"
+        elif level == "warning":
+            tag, tag_cls, border = "REVIEW", "tag-review", "#78350f"
+        else:
+            tag, tag_cls, border = "UPCOMING", "tag-upcoming", "#1e3a5f"
+        tiles.append(
+            f'<div class="attn-tile" style="border-color:{border};background:#0f1420">'
+            f'<span class="attn-tag {tag_cls}">{tag}</span>'
+            f'<p class="attn-title">{title}</p>'
+            f'<p class="attn-body">{body}</p></div>'
         )
-    st.markdown(f'<div class="flag-grid">{"".join(cards)}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="attn-grid">{"".join(tiles)}</div>', unsafe_allow_html=True)
 
 # ==================================================
 # DATA INTEGRITY (Phase 3) — visible, not buried
@@ -1027,6 +1127,25 @@ with c1:
     fig_h.update_layout(height=210, margin=dict(t=5, b=5, l=5, r=25), xaxis=dict(range=[0, 105], showgrid=False),
                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#c2c9d6")
     st.plotly_chart(fig_h, use_container_width=True)
+
+    _why = []
+    if factor_scores.get("Liquidity", 100) < 50:
+        _why.append("Liquidity is low (high share in FDs/cash locks flexibility).")
+    if factor_scores.get("Allocation", 100) < 40:
+        _why.append(f"Equity allocation {equity_pct:.1f}% is below a common ~60% target.")
+    if factor_scores.get("Concentration", 100) < 60:
+        _why.append("Top holdings concentration is elevated.")
+    if factor_scores.get("Performance", 100) < 55:
+        _why.append("Trailing fund performance vs Nifty50 is mixed.")
+    if not _why:
+        _why.append("No single factor is dragging hard — score is moderate overall.")
+    _why_html = "".join(f"<li>{x}</li>" for x in _why)
+    st.markdown(
+        f'<div class="why-box"><b style="color:#e5e9f0;font-size:0.82rem">Why score is {health_score:.0f}?</b>'
+        f'<ul style="margin:6px 0 0 0;padding-left:18px">{_why_html}</ul></div>',
+        unsafe_allow_html=True,
+    )
+
 with c2:
     st.markdown('<div class="section-header">Asset allocation</div>', unsafe_allow_html=True)
     alloc_df = pd.DataFrame({"Asset": ["Fixed Deposits", "Mutual Funds", "Stocks", "Gold"], "Value": [total_fd, total_mf, total_stocks, total_gold]})  # NEW: Gold added
