@@ -75,16 +75,25 @@ st.markdown("""
     .flag-card { border-radius: 8px; padding: 7px 10px; margin-bottom: 0; display: flex; gap: 8px; align-items: flex-start; border: 1px solid; }
     .flag-title { font-weight: 600; font-size: 0.78rem; color: #f1f5f9; margin: 0; line-height: 1.25; }
     .flag-body  { font-size: 0.70rem; color: #9aa4b8; margin: 1px 0 0 0; line-height: 1.3; }
-    /* market pulse ticker — dark mode */
-    .ticker-wrap { width:100%; overflow:hidden; background:#0f1420; border:1px solid #1c2333;
-                    border-radius:8px; padding:8px 0; white-space:nowrap; margin: 6px 0 2px 0; }
-    .ticker-move { display:inline-block; animation: ticker-scroll 45s linear infinite; }
+    /* market pulse ticker — TradingView-style dark */
+    .ticker-wrap { width:100%; overflow:hidden; background:#0b0f18; border:1px solid #1c2333;
+                    border-radius:10px; padding:10px 0; white-space:nowrap; margin: 8px 0 4px 0; }
+    .ticker-move { display:inline-block; animation: ticker-scroll 50s linear infinite; }
     .ticker-wrap:hover .ticker-move { animation-play-state: paused; }
     @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .ticker-item { display:inline-block; padding:0 22px; font-size:0.80rem; font-weight:600; }
-    .ticker-up { color:#22c55e; }
-    .ticker-down { color:#ef4444; }
+    .ticker-item { display:inline-flex; align-items:baseline; gap:6px; padding:0 26px;
+                   font-size:0.82rem; font-weight:600; color:#e5e9f0; }
+    .ticker-name { color:#8b95a8; font-weight:600; letter-spacing:0.02em; }
+    .ticker-val { color:#f8fafc; font-variant-numeric: tabular-nums; }
+    .ticker-chg { font-weight:700; font-variant-numeric: tabular-nums; }
+    .ticker-up .ticker-chg { color:#22c55e; }
+    .ticker-down .ticker-chg { color:#ef4444; }
+    .ticker-arrow { font-size:0.95rem; font-weight:800; }
+    .ticker-up .ticker-arrow { color:#22c55e; }
+    .ticker-down .ticker-arrow { color:#ef4444; }
     .ticker-na { color:#5b6478; }
+    .crit-banner { background:#3b1219; border:1px solid #7f1d1d; color:#fecaca;
+                   border-radius:10px; padding:10px 14px; margin: 8px 0 4px 0; font-size:0.82rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -216,14 +225,10 @@ def get_nifty_history():
     except Exception:
         return None
 
-MARKET_PULSE_TICKERS = [
-    ("NIFTY 50", "^NSEI"), ("SENSEX", "^BSESN"), ("Gold", "GC=F"), ("Silver", "SI=F"),
-    ("Brent Oil", "BZ=F"), ("S&P 500", "^GSPC"), ("Nasdaq", "^IXIC"),
-    ("Dow Jones", "^DJI"), ("USD/INR", "INR=X"),
-]
+TROY_OZ_G = 31.1034768  # grams per troy ounce
 
 @st.cache_data(ttl=900, show_spinner=False)
-def get_market_pulse(ticker: str):
+def get_market_pulse_yf(ticker: str):
     try:
         hist = yf.Ticker(ticker).history(period="5d")
         if hist.empty or len(hist) < 2:
@@ -233,6 +238,90 @@ def get_market_pulse(ticker: str):
         return {"value": latest, "change_pct": (latest / prev - 1) * 100}
     except Exception:
         return None
+
+@st.cache_data(ttl=900, show_spinner=False)
+def get_india_gold_10g():
+    """INR per 10g pure gold from goldprice.dev XAU-INR spot (free, no key)."""
+    try:
+        headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+        r = requests.get(
+            "https://api.goldprice.dev/v1/prices?symbol=XAU-INR-SPOT",
+            headers=headers, timeout=12,
+        )
+        r.raise_for_status()
+        price_oz = float(r.json()["symbols"][0]["price"])
+        per_10g = price_oz / TROY_OZ_G * 10.0
+        # day change: compare vs Yahoo GC=F move as proxy when prior INR not stored
+        chg = None
+        y = get_market_pulse_yf("GC=F")
+        if y:
+            chg = y["change_pct"]
+        return {"value": per_10g, "change_pct": chg}
+    except Exception:
+        # fallback: COMEX oz * USDINR → INR/10g
+        try:
+            g = get_market_pulse_yf("GC=F")
+            fx = get_market_pulse_yf("INR=X")
+            if g and fx:
+                per_10g = g["value"] / TROY_OZ_G * 10.0 * fx["value"]
+                return {"value": per_10g, "change_pct": g["change_pct"]}
+        except Exception:
+            pass
+        return None
+
+@st.cache_data(ttl=900, show_spinner=False)
+def get_india_silver_kg():
+    """INR per kg silver via COMEX SI=F * USD/INR."""
+    try:
+        s = get_market_pulse_yf("SI=F")
+        fx = get_market_pulse_yf("INR=X")
+        if not s or not fx:
+            return None
+        per_kg = s["value"] / TROY_OZ_G * 1000.0 * fx["value"]
+        return {"value": per_kg, "change_pct": s["change_pct"]}
+    except Exception:
+        return None
+
+def build_market_pulse_rows():
+    """Ordered ticker strip: India indices, INR metals, global, FX."""
+    rows = []
+    specs = [
+        ("NIFTY 50", lambda: get_market_pulse_yf("^NSEI"), "{:,.2f}"),
+        ("SENSEX", lambda: get_market_pulse_yf("^BSESN"), "{:,.2f}"),
+        ("Gold ₹/10g", lambda: get_india_gold_10g(), "{:,.0f}"),
+        ("Silver ₹/kg", lambda: get_india_silver_kg(), "{:,.0f}"),
+        ("Brent", lambda: get_market_pulse_yf("BZ=F"), "{:,.2f}"),
+        ("S&P 500", lambda: get_market_pulse_yf("^GSPC"), "{:,.2f}"),
+        ("Nasdaq", lambda: get_market_pulse_yf("^IXIC"), "{:,.2f}"),
+        ("USD/INR", lambda: get_market_pulse_yf("INR=X"), "{:,.2f}"),
+    ]
+    for label, fetcher, fmt in specs:
+        d = fetcher()
+        if d and d.get("value") is not None:
+            rows.append({"Market": label, "Value": d["value"], "Chg %": d.get("change_pct"), "fmt": fmt})
+        else:
+            rows.append({"Market": label, "Value": None, "Chg %": None, "fmt": fmt})
+    return rows
+
+
+def style_money_df(df, pnl_cols=("P&L", "Return %", "FX Gain/Loss (INR)")):
+    """Color positive/negative P&L columns for holdings tables."""
+    if df is None or df.empty:
+        return df
+    cols = [c for c in pnl_cols if c in df.columns]
+    if not cols:
+        return df
+    def _clr(v):
+        try:
+            if v is None or (isinstance(v, float) and np.isnan(v)):
+                return ""
+            return "color: #22c55e" if float(v) >= 0 else "color: #ef4444"
+        except Exception:
+            return ""
+    try:
+        return df.style.map(_clr, subset=cols)
+    except Exception:
+        return df
 
 def trailing_return(hist_df, years):
     if hist_df is None or hist_df.empty:
@@ -381,8 +470,16 @@ with st.sidebar:
         st.rerun()
     log_snapshot = st.toggle("Log today's snapshot to history", value=True,
                               help="Free-tier Streamlit storage isn't guaranteed to survive a redeploy — download history periodically.")
+    if st.button("Reset history file", use_container_width=True,
+                 help="Deletes corrupted or unwanted history.csv rows."):
+        try:
+            if os.path.exists(HISTORY_PATH):
+                os.remove(HISTORY_PATH)
+            st.success("History cleared.")
+        except Exception as e:
+            st.error(f"Could not clear history: {e}")
     st.markdown("---")
-    st.caption("AMFI · mfapi.in · Yahoo Finance · Frankfurter · Google News")
+    st.caption("AMFI · Groww · Yahoo · goldprice.dev · Frankfurter · Google News")
     st.caption(f"IST {now_ist.strftime('%d %b %Y, %H:%M')}")
 
 # -------------------------------------------------
@@ -513,40 +610,58 @@ gold = pd.DataFrame(gold_rows)
 # ---- FD: full native/reporting currency model (Phase 2 & 6 fix) ----
 fd_rows = []
 seen_accounts = set()
+seen_fingerprints = set()  # catches exact clones when Account Number is blank/missing
 for _, row in fd_raw.iterrows():
     try:
         holder = str(row.get("Holder Name", "") or "").strip()
         account = str(row.get("Account Number", "") or "").strip()
+        if account.lower() in ("nan", "none", "nat", "-"):
+            account = ""
         principal_native = safe_float(row.get("Principal Amount"))
         if (not holder or holder.lower() in ["nan", "nat", "none"] or principal_native <= 0 or "total" in holder.lower()):
             continue
-        if account and account in seen_accounts:
-            integrity_issues.append(("CRITICAL", f"Duplicate FD account number {account} ({holder}) — appears more than once in the raw data, would double-count."))
-        seen_accounts.add(account)
 
         currency = str(row.get("Currency", "INR") or "INR").upper().strip()
         if currency not in ["INR", "USD"]:
-            integrity_issues.append(("HIGH", f"FD {account} ({holder}): unrecognized currency '{currency}' — treated as INR."))
+            integrity_issues.append(("HIGH", f"FD {account or 'no-acct'} ({holder}): unrecognized currency '{currency}' — treated as INR."))
             currency = "INR"
 
         mat_date = to_naive_ts(row.get("Maturity Date"))
         dep_date = to_naive_ts(row.get("Deposit Date"))
+        roi = safe_float(row.get("ROI % p.a.", row.get("ROI_Percent_pa", 6.5)))
+
+        # Dedup key: prefer real account number; otherwise fingerprint of the deposit itself
+        if account:
+            dedup_key = f"acct:{account}"
+        else:
+            mat_s = mat_date.strftime("%Y-%m-%d") if mat_date is not None else ""
+            dep_s = dep_date.strftime("%Y-%m-%d") if dep_date is not None else ""
+            dedup_key = f"fp:{holder}|{currency}|{principal_native:.2f}|{roi:.4f}|{mat_s}|{dep_s}"
+
+        if dedup_key in seen_accounts or dedup_key in seen_fingerprints:
+            integrity_issues.append((
+                "CRITICAL",
+                f"Duplicate FD skipped — {holder} {currency} {principal_native:,.2f} "
+                f"({'acct ' + account if account else 'no account #, identical principal/dates/ROI'}). "
+                f"Fix the Excel so this row is not counted twice."
+            ))
+            continue  # do NOT double-count
+        if account:
+            seen_accounts.add(dedup_key)
+        else:
+            seen_fingerprints.add(dedup_key)
+
         if mat_date is not None and dep_date is not None and mat_date < dep_date:
-            integrity_issues.append(("HIGH", f"FD {account} ({holder}): maturity date is before deposit date — dates likely swapped in source data."))
+            integrity_issues.append(("HIGH", f"FD {account or 'no-acct'} ({holder}): maturity date is before deposit date — dates likely swapped in source data."))
         days_to_mat = (mat_date - TODAY_NAIVE).days if mat_date is not None else None
         days_elapsed = (TODAY_NAIVE - dep_date).days if dep_date is not None else 0
-        roi = safe_float(row.get("ROI % p.a.", row.get("ROI_Percent_pa", 6.5)))
         if roi <= 0 or roi > 15:
-            integrity_issues.append(("MEDIUM", f"FD {account} ({holder}): ROI {roi}% p.a. is outside a normal FD range — verify."))
+            integrity_issues.append(("MEDIUM", f"FD {account or 'no-acct'} ({holder}): ROI {roi}% p.a. is outside a normal FD range — verify."))
 
         accrued_native = principal_native * (roi / 100) * (max(days_elapsed, 0) / 365)
         current_value_native = principal_native + accrued_native
 
-        # Native/reporting split: principal is converted at the FX rate on the
-        # DEPOSIT date (true INR cost basis); current value at TODAY's rate
-        # (mark-to-market). The gap between them, net of the native interest
-        # already counted, is the FX gain/loss — shown separately, not folded
-        # silently into "interest return".
+        # Native/reporting split: principal at deposit-date FX; current value at today's FX
         fx_today = usd_inr if currency == "USD" else 1.0
         fx_deposit = 1.0
         if currency == "USD" and dep_date is not None and usd_inr is not None:
@@ -787,30 +902,44 @@ k5.metric("USD/INR", f"{usd_inr:.2f}" if usd_inr else "unavailable")
 k6.metric("Health Score", f"{health_score:.0f}", health_label)
 
 # ==================================================
-# MARKET PULSE — dark scrolling ticker
+# MARKET PULSE — TradingView-style dark ticker
 # ==================================================
-pulse_rows = []
-for label, ticker in MARKET_PULSE_TICKERS:
-    d = get_market_pulse(ticker)
-    if d:
-        pulse_rows.append({"Market": label, "Value": d["value"], "Chg %": d["change_pct"]})
-    else:
-        pulse_rows.append({"Market": label, "Value": None, "Chg %": None})
+pulse_rows = build_market_pulse_rows()
 
 def _ticker_item(row):
     if row["Value"] is None:
-        return f'<span class="ticker-item ticker-na">{row["Market"]} —</span>'
-    arrow = "▲" if row["Chg %"] >= 0 else "▼"
-    cls = "ticker-up" if row["Chg %"] >= 0 else "ticker-down"
-    return (f'<span class="ticker-item {cls}">{row["Market"]} {row["Value"]:,.2f} '
-            f'{arrow} {row["Chg %"]:+.2f}%</span>')
+        return f'<span class="ticker-item ticker-na"><span class="ticker-name">{row["Market"]}</span> —</span>'
+    chg = row["Chg %"]
+    if chg is None:
+        cls, arrow, chg_html = "ticker-na", "", ""
+    elif chg >= 0:
+        cls, arrow = "ticker-up", "▲"
+        chg_html = f'<span class="ticker-chg">{arrow} {chg:+.2f}%</span>'
+    else:
+        cls, arrow = "ticker-down", "▼"
+        chg_html = f'<span class="ticker-chg">{arrow} {chg:+.2f}%</span>'
+    val = row["fmt"].format(row["Value"])
+    return (
+        f'<span class="ticker-item {cls}">'
+        f'<span class="ticker-name">{row["Market"]}</span>'
+        f'<span class="ticker-val">{val}</span>'
+        f'{chg_html}</span>'
+    )
 
 items_html = "".join(_ticker_item(r) for r in pulse_rows)
 st.markdown(
     f'<div class="ticker-wrap"><div class="ticker-move">{items_html}{items_html}</div></div>'
-    f'<p class="caveat">Hover to pause · daily change vs prior session close (Yahoo).</p>',
+    f'<p class="caveat">Hover to pause · Gold ₹/10g & Silver ₹/kg (INR) · indices/FX daily change vs prior close</p>',
     unsafe_allow_html=True,
 )
+
+# ==================================================
+# CRITICAL integrity (if any) — not buried in expander
+# ==================================================
+crit = [m for sev, m in integrity_issues if sev == "CRITICAL"]
+if crit:
+    bullets = "".join(f"<div>• {c}</div>" for c in crit[:6])
+    st.markdown(f'<div class="crit-banner"><b>Critical data issues</b>{bullets}</div>', unsafe_allow_html=True)
 
 # ==================================================
 # WHAT NEEDS MY ATTENTION — compact 2-column grid
@@ -969,7 +1098,7 @@ with tab1:
 with tab2:
     if not stocks.empty:
         st.dataframe(
-            stocks[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]],
+            style_money_df(stocks[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]]),
             column_config={
                 "Invested": st.column_config.NumberColumn(format="₹%d"), "Current Value": st.column_config.NumberColumn(format="₹%d"),
                 "P&L": st.column_config.NumberColumn(format="₹%d"), "Return %": st.column_config.NumberColumn(format="%.1f%%"),
@@ -997,7 +1126,7 @@ with tab4:  # NEW: Gold tab
         st.caption("Sovereign Gold Bonds, identified from the Stocks sheet by ticker pattern (SGB...-GB) and reported as Gold, not equity. "
                     "Only the fields already present in the raw data are shown — no maturity date or interest rate is invented, since the source file doesn't carry them for these holdings.")
         st.dataframe(
-            gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]],
+            style_money_df(gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]]),
             column_config={
                 "Invested": st.column_config.NumberColumn(format="₹%d"), "Current Value": st.column_config.NumberColumn(format="₹%d"),
                 "P&L": st.column_config.NumberColumn(format="₹%d"), "Return %": st.column_config.NumberColumn(format="%.1f%%"),
@@ -1007,4 +1136,8 @@ with tab4:  # NEW: Gold tab
         st.caption("No SGB or other gold holdings identified in the current data.")
 
 st.markdown("---")
-st.caption(f"INR · USD {f'{usd_inr:.2f}' if usd_inr else 'unavailable'} · {now_ist.strftime('%d %b %Y %H:%M IST')} · AMFI {len(amfi_navs)} schemes loaded")
+src = "AMFI live" if (len(amfi_navs) and not amfi_cache_date) else (f"AMFI cache {amfi_cache_date}" if amfi_cache_date else "AMFI offline")
+st.caption(
+    f"INR · USD {f'{usd_inr:.2f}' if usd_inr else 'n/a'} · {now_ist.strftime('%d %b %Y %H:%M IST')} · "
+    f"{src} ({len(amfi_navs)} schemes) · Stocks/SGB: Groww+Yahoo · Gold ₹/10g: goldprice.dev"
+)
