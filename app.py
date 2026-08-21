@@ -657,8 +657,14 @@ for _, row in mf_raw.iterrows():
 
 mf_txns_df = pd.DataFrame(mf_txns)
 if not mf_txns_df.empty:
-    mf_agg = mf_txns_df.groupby(["Owner", "ISIN", "Fund Name"], as_index=False).agg(
-        {"Units": "sum", "Invested": "sum", "Purchase Date": "min"})
+    # Aggregate by Owner+ISIN only so name variants (spaces/dashes) of the same
+    # fund collapse into one row (fixes split HDFC Liquid / Gold FoF lines).
+    def _pick_name(s):
+        return max(s.astype(str), key=len)  # longest name is usually the cleanest
+    mf_agg = (
+        mf_txns_df.groupby(["Owner", "ISIN"], as_index=False)
+        .agg({"Units": "sum", "Invested": "sum", "Purchase Date": "min", "Fund Name": _pick_name})
+    )
 else:
     mf_agg = pd.DataFrame(columns=["Owner", "ISIN", "Fund Name", "Units", "Invested", "Purchase Date"])
 
@@ -748,8 +754,10 @@ for _, row in stocks_raw.iterrows():
             current_value = pnl = ret = None
             price = None
             integrity_issues.append(("HIGH", f"{symbol}: no valid price from any source — excluded from totals."))
-        if invested > 0 and pnl is not None and abs(pnl) > invested * 5:
-            integrity_issues.append(("MEDIUM", f"{symbol}: P&L is {pnl/invested*100:.0f}% of invested amount — unusually large, worth a sanity check of quantity/price entry."))
+        # Only flag extreme P&L when it looks like a possible data error (very large
+        # multiple). Long-held winners at low cost basis are normal and noisy here.
+        if invested > 0 and pnl is not None and abs(pnl) > invested * 10:
+            integrity_issues.append(("MEDIUM", f"{symbol}: P&L is {pnl/invested*100:.0f}% of invested amount — unusually large; confirm quantity/price if this was a recent buy."))
         row_dict = {"Owner": str(row.get("Owner", "") or ""), "Symbol": symbol, "Quantity": qty,
                     "Invested": invested, "Current Price": price, "Current Value": current_value,
                     "P&L": pnl, "Return %": ret, "Source": "Stocks"}
@@ -760,10 +768,28 @@ for _, row in stocks_raw.iterrows():
     except Exception:
         continue
 
-# Merge gold from Stocks sheet + gold FoFs routed out of MF
+# Merge gold from Stocks sheet + gold FoFs routed out of MF, then collapse
+# any remaining same-owner/same-symbol splits (e.g. FoF name variants).
 gold_rows.extend(gold_rows_from_mf)
 stocks = pd.DataFrame(stock_rows)
 gold = pd.DataFrame(gold_rows)
+if not gold.empty and {"Owner", "Symbol", "Quantity", "Invested", "Current Value"}.issubset(gold.columns):
+    g_sum = gold.groupby(["Owner", "Symbol"], as_index=False).agg({
+        "Quantity": "sum",
+        "Invested": "sum",
+        "Current Value": "sum",
+        "Source": "first",
+    })
+    g_sum["Current Price"] = g_sum.apply(
+        lambda r: (r["Current Value"] / r["Quantity"]) if r["Quantity"] and r["Quantity"] > 0 and pd.notna(r["Current Value"]) else None,
+        axis=1,
+    )
+    g_sum["P&L"] = g_sum["Current Value"] - g_sum["Invested"]
+    g_sum["Return %"] = g_sum.apply(
+        lambda r: (r["P&L"] / r["Invested"] * 100) if r["Invested"] and r["Invested"] > 0 and pd.notna(r["P&L"]) else None,
+        axis=1,
+    )
+    gold = g_sum
 
 # ---- FD: full native/reporting currency model (Phase 2 & 6 fix) ----
 fd_rows = []
@@ -942,9 +968,18 @@ recon_tests.append((
 # -------------------------------------------------
 flags = []
 if equity_pct < 40:
-    flags.append(("critical" if equity_pct < 25 else "warning", "Equity allocation drift",
-                   f"Equity is {equity_pct:.1f}% of net worth against a common 60% target — {fd_pct:.1f}% sits in FDs/cash."))
-if gold_pct > 15:
+    gap_to_40 = max(0, 0.40 * total_networth - (total_mf + total_stocks))
+    gap_to_60 = max(0, 0.60 * total_networth - (total_mf + total_stocks))
+    flags.append((
+        "critical" if equity_pct < 25 else "warning",
+        "Equity allocation drift",
+        f"Equity is {equity_pct:.1f}% of NW (target ~60%); FD/cash {fd_pct:.1f}%. "
+        f"~{format_inr(gap_to_40)} more equity → 40%; ~{format_inr(gap_to_60)} → 60%.",
+    ))
+if 3 <= gold_pct <= 15:
+    flags.append(("info", "Gold allocation healthy",
+                   f"Gold (SGB + ETFs + FoFs) is {gold_pct:.1f}% of net worth — a reasonable diversifier."))
+elif gold_pct > 15:
     flags.append(("info", "Gold allocation is notable", f"Gold (SGB + ETFs + FoFs) is {gold_pct:.1f}% of net worth."))
 if top5_mf_pct > 60:
     flags.append(("warning", "Mutual fund concentration", f"Top 5 funds are {top5_mf_pct:.1f}% of your MF portfolio."))
@@ -958,11 +993,22 @@ if not mf_valid.empty:
                        f"Trailing both 1Y ({r['1Y %']:.1f}% vs Nifty50 {r['vs Nifty50 1Y']:.1f}%) and 3Y ({r['3Y %']:.1f}% vs Nifty50 {r['vs Nifty50 3Y']:.1f}%)."))
     losers = mf_valid[mf_valid["Return %"] < -10]
     for _, r in losers.sort_values("Return %").head(3).iterrows():
-        flags.append(("critical", f"{r['Fund Name']} down {abs(r['Return %']):.1f}%", "Currently a loss position."))
+        pnl_abs = abs(r["P&L"]) if pd.notna(r.get("P&L")) else 0
+        flags.append(("critical", f"{r['Fund Name'][:28]} down {abs(r['Return %']):.1f}%",
+                       f"Loss {format_inr(pnl_abs)} · currently a loss position."))
 if not stocks_valid.empty:
     losers_s = stocks_valid[stocks_valid["Return %"] < -15]
+    # Per-owner equity book for context
+    owner_eq = stocks_valid.groupby("Owner")["Current Value"].sum().to_dict() if "Owner" in stocks_valid.columns else {}
     for _, r in losers_s.sort_values("Return %").head(3).iterrows():
-        flags.append(("critical", f"{r['Symbol']} down {abs(r['Return %']):.1f}%", "Currently a significant loss position."))
+        pnl_abs = abs(r["P&L"]) if pd.notna(r.get("P&L")) else 0
+        own = r.get("Owner", "")
+        book = owner_eq.get(own, 0) or 0
+        pct_book = (pnl_abs / book * 100) if book > 0 else 0
+        flags.append(("critical", f"{r['Symbol']} down {abs(r['Return %']):.1f}%",
+                       f"Loss {format_inr(pnl_abs)}"
+                       + (f" · {pct_book:.0f}% of {own.split()[-1]}'s stock book" if own and book else "")
+                       + "."))
 if not fd.empty:
     overdue = fd[fd["Days to Maturity"] < 0]
     for _, r in overdue.iterrows():
@@ -970,10 +1016,16 @@ if not fd.empty:
         flags.append(("critical", f"{r['Holder Name']}'s FD matured {abs(int(r['Days to Maturity']))}d ago, uncollected",
                        f"{format_inr(cv) if pd.notna(cv) else r['Current Value (Native)']} — likely earning the bank's default rate instead of {r['ROI %']:.2f}%."))
     soon = fd[fd["Days to Maturity"].between(0, 14)]
+    # Rough liquid-MF stock for context on near-maturity FDs
+    liq_cv = 0.0
+    if not mf_valid.empty and "Category" in mf_valid.columns:
+        liq_cv = float(mf_valid[mf_valid["Category"] == "Liquid"]["Current Value"].sum() or 0)
     for _, r in soon.iterrows():
         cv = r['Current Value (INR)']
-        flags.append(("info", f"{r['Holder Name']}'s FD matures in {int(r['Days to Maturity'])}d",
-                       f"{format_inr(cv) if pd.notna(cv) else r['Current Value (Native)']} — decide reinvest vs. deploy elsewhere."))
+        body = f"{format_inr(cv) if pd.notna(cv) else r['Current Value (Native)']} — decide reinvest vs deploy elsewhere."
+        if liq_cv > 0:
+            body += f" Liquid MFs already hold ~{format_inr(liq_cv)}."
+        flags.append(("info", f"{r['Holder Name']}'s FD matures in {int(r['Days to Maturity'])}d", body))
 critical_integrity = [i for i in integrity_issues if i[0] == "CRITICAL"]
 for _, msg in critical_integrity:
     flags.append(("critical", "Data integrity issue", msg))
@@ -984,21 +1036,31 @@ flags.sort(key=lambda f: severity_rank[f[0]])
 # NEWS
 # -------------------------------------------------
 @st.cache_data(ttl=1800, show_spinner=False)
-def fetch_news_for(names, max_items=8):
-    items = []
+def fetch_news_for(names, max_items=10):
+    """Pull recent Google News RSS for each name; dedupe by title."""
+    items, seen = [], set()
     cutoff = datetime.now() - timedelta(days=45)
-    for name in names[:6]:
+    for name in names[:12]:
+        if not name or not str(name).strip():
+            continue
         try:
-            q = requests.utils.quote(name)
+            q = requests.utils.quote(str(name).strip())
             url = f"https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en"
             feed = feedparser.parse(url)
-            for entry in feed.entries[:3]:
+            for entry in feed.entries[:2]:
+                title = (entry.title or "").strip()
+                if not title or title in seen:
+                    continue
                 pub = datetime(*entry.published_parsed[:6]) if hasattr(entry, "published_parsed") and entry.published_parsed else None
                 if pub and pub < cutoff:
                     continue
-                items.append({"title": entry.title, "link": entry.link,
-                              "source": entry.get("source", {}).get("title", "") if hasattr(entry, "source") else "",
-                              "published": entry.get("published", ""), "pub_dt": pub or datetime.min})
+                seen.add(title)
+                items.append({
+                    "title": title, "link": entry.link,
+                    "source": entry.get("source", {}).get("title", "") if hasattr(entry, "source") else "",
+                    "published": entry.get("published", ""), "pub_dt": pub or datetime.min,
+                    "query": str(name).strip(),
+                })
         except Exception:
             continue
     items.sort(key=lambda x: x["pub_dt"], reverse=True)
@@ -1226,11 +1288,14 @@ with c1:
     if factor_scores.get("Liquidity", 100) < 50:
         _why.append("Liquidity is low (high share in FDs/cash locks flexibility).")
     if factor_scores.get("Allocation", 100) < 40:
-        _why.append(f"Equity allocation {equity_pct:.1f}% is below a common ~60% target.")
+        _gap40 = max(0, 0.40 * total_networth - (total_mf + total_stocks))
+        _why.append(f"Equity allocation {equity_pct:.1f}% is below a common ~60% target (~{format_inr(_gap40)} more equity would reach 40%).")
     if factor_scores.get("Concentration", 100) < 60:
         _why.append("Top holdings concentration is elevated.")
     if factor_scores.get("Performance", 100) < 55:
         _why.append("Trailing fund performance vs Nifty50 is mixed.")
+    if gold_pct > 0:
+        _why.append(f"Gold is {gold_pct:.1f}% of NW (SGB + ETFs + FoFs) — useful diversifier, not counted as equity.")
     if not _why:
         _why.append("No single factor is dragging hard — score is moderate overall.")
     _why_html = "".join(f"<li>{x}</li>" for x in _why)
@@ -1300,21 +1365,44 @@ else:
 # NEWS
 # ==================================================
 st.markdown('<div class="section-header">News on your holdings</div>', unsafe_allow_html=True)
-top_names = []
-if not mf_valid.empty:
-    top_names += mf_valid.nlargest(3, "Current Value")["Fund Name"].str.split(" - ").str[0].tolist()
+# Cover stocks, MFs, gold ETFs/SGB, and a few sector anchors so news is portfolio-wide
+news_queries = []
 if not stocks_valid.empty:
-    top_names += stocks_valid.nlargest(3, "Current Value")["Symbol"].tolist()
+    news_queries += stocks_valid.nlargest(5, "Current Value")["Symbol"].astype(str).tolist()
+if not mf_valid.empty:
+    news_queries += (
+        mf_valid.nlargest(4, "Current Value")["Fund Name"]
+        .astype(str).str.split(" - ").str[0].str.split(" FUND").str[0].tolist()
+    )
+if not gold_valid.empty:
+    for sym in gold_valid["Symbol"].astype(str).tolist():
+        if "SGB" in sym.upper():
+            news_queries.append("Sovereign Gold Bond")
+        elif "GOLD" in sym.upper() or sym.upper() == "GOLDBEES":
+            news_queries.append("Gold ETF India")
+        else:
+            news_queries.append(sym)
+# Dedup preserving order
+_seen_q, news_queries_u = set(), []
+for q in news_queries:
+    qn = (q or "").strip()
+    if qn and qn.lower() not in _seen_q:
+        _seen_q.add(qn.lower())
+        news_queries_u.append(qn)
 try:
-    news_items = fetch_news_for(top_names) if top_names else []
+    news_items = fetch_news_for(news_queries_u) if news_queries_u else []
 except Exception:
     news_items = []
 if not news_items:
-    st.caption("No recent (last 45 days) news found for your top holdings this run.")
+    st.caption("No recent (last 45 days) news found for your holdings this run.")
 else:
+    st.caption(f"Across stocks, funds, and gold · queries: {', '.join(news_queries_u[:8])}{'…' if len(news_queries_u) > 8 else ''}")
     for item in news_items:
-        st.markdown(f"""<div class="news-item"><a href="{item['link']}" target="_blank">{item['title']}</a>
-            <div class="news-meta">{item.get('source','')} {('· ' + item['published']) if item.get('published') else ''}</div></div>""", unsafe_allow_html=True)
+        st.markdown(
+            f"""<div class="news-item"><a href="{item['link']}" target="_blank">{item['title']}</a>
+            <div class="news-meta">{item.get('source','')} {('· ' + item['published']) if item.get('published') else ''} · re: {item.get('query','')}</div></div>""",
+            unsafe_allow_html=True,
+        )
 
 st.markdown("---")
 
@@ -1369,7 +1457,9 @@ with snap_l:
 with snap_r:
     st.markdown('<div class="section-header">Holdings snapshot · Gold</div>', unsafe_allow_html=True)
     if not gold_valid.empty:
-        _g = gold_valid[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]].copy()
+        _g_cols = [c for c in ["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"] if c in gold_valid.columns]
+        _g = gold_valid[_g_cols].copy()
+        _g_height = min(360, 48 + 28 * max(len(_g), 1))
         st.dataframe(
             style_money_df(_g),
             column_config={
@@ -1380,7 +1470,7 @@ with snap_r:
                 "Return %": st.column_config.NumberColumn(format="%.1f%%"),
                 "Current Price": st.column_config.NumberColumn(format="₹%.2f"),
             },
-            use_container_width=True, height=220, hide_index=True,
+            use_container_width=True, height=_g_height, hide_index=True,
         )
         st.markdown(
             f'<p class="snap-note">Total Gold {format_inr(total_gold)} · {gold_pct:.1f}% of net worth · SGB/ETF via Groww/Yahoo · FoFs via AMFI</p>',
@@ -1455,11 +1545,14 @@ with tab4:
     if not gold.empty:
         st.caption(
             "Unified Gold book: Sovereign Gold Bonds (SGB…-GB), gold ETFs (e.g. GOLDBEES), and Gold ETF FoFs. "
-            "All of these are excluded from Stocks and Mutual Funds so gold appears in exactly one place. "
+            "Same rows as the Gold snapshot above — excluded from Stocks and Mutual Funds so gold appears in one book only. "
             "SGB maturity/interest are not invented — source file does not carry them."
         )
+        _g_tab_cols = [c for c in ["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"] if c in gold.columns]
+        _g_tab = gold[_g_tab_cols]
+        _g_tab_h = min(400, 48 + 28 * max(len(_g_tab), 1))
         st.dataframe(
-            style_money_df(gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]]),
+            style_money_df(_g_tab),
             column_config={
                 "Quantity": st.column_config.NumberColumn(format="%g"),
                 "Invested": st.column_config.NumberColumn(format="₹%d"),
@@ -1467,7 +1560,11 @@ with tab4:
                 "P&L": st.column_config.NumberColumn(format="₹%d"),
                 "Return %": st.column_config.NumberColumn(format="%.1f%%"),
                 "Current Price": st.column_config.NumberColumn(format="₹%.2f"),
-            }, use_container_width=True, height=280)
+            }, use_container_width=True, height=_g_tab_h, hide_index=True)
+        st.markdown(
+            f'<p class="snap-note">Total Gold {format_inr(total_gold)} · {gold_pct:.1f}% of net worth</p>',
+            unsafe_allow_html=True,
+        )
     else:
         st.caption("No gold holdings identified in the current data.")
 
