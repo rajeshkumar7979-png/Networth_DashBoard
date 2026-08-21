@@ -570,8 +570,32 @@ CATEGORY_RULES = [
 ]
 DEBT_LIKE = {"Liquid", "Money Market", "Overnight"}
 
+# Gold instruments: SGB (NSE-listed bonds), gold ETFs (GOLDBEES etc.), and gold FoFs/ETFs in the MF sheet.
+# These must appear ONLY under Gold — never under Stocks or Mutual Funds.
+SGB_TICKER_PATTERN = re.compile(r"^SGB.*-GB$", re.IGNORECASE)
+GOLD_ETF_TICKERS = {"GOLDBEES", "GOLDSHARE", "GOLDCASE", "AXISGOLD", "QGOLDHALF", "BSLGOLDETF", "IVZINGOLD"}
+GOLD_FUND_NAME_RE = re.compile(
+    r"gold\s*(etf|fof|fund\s*of\s*fund|fund\s*of\s*funds)|\bgold\b.*\b(etf|fof)\b",
+    re.IGNORECASE,
+)
+
+def is_gold_symbol(symbol: str) -> bool:
+    s = (symbol or "").strip().upper()
+    if not s:
+        return False
+    if SGB_TICKER_PATTERN.match(s):
+        return True
+    if s in GOLD_ETF_TICKERS or s.endswith("GOLD") or "GOLD" in s and s.endswith("ETF"):
+        return True
+    return False
+
+def is_gold_fund(fund_name: str) -> bool:
+    return bool(GOLD_FUND_NAME_RE.search(fund_name or ""))
+
 def infer_category(fund_name: str) -> str:
     name = (fund_name or "").lower()
+    if is_gold_fund(fund_name):
+        return "Gold"
     for label, pattern in CATEGORY_RULES:
         if re.search(pattern, name):
             return label
@@ -638,23 +662,42 @@ if not mf_txns_df.empty:
 else:
     mf_agg = pd.DataFrame(columns=["Owner", "ISIN", "Fund Name", "Units", "Invested", "Purchase Date"])
 
-mf_rows, mf_failed = [], 0
+mf_rows, gold_rows_from_mf, mf_failed = [], [], 0
 for _, row in mf_agg.iterrows():
     try:
         isin, units, invested, pdate = row["ISIN"], row["Units"], row["Invested"], row["Purchase Date"]
+        fund_name = str(row["Fund Name"] or "")
         nav = amfi_navs.get(isin)  # None = unknown; do NOT default to 0.0
         if nav is None:
             mf_failed += 1
-            integrity_issues.append(("HIGH", f"{row['Fund Name'][:40]}: no live NAV found for ISIN {isin} — excluded from totals."))
+            integrity_issues.append(("HIGH", f"{fund_name[:40]}: no live NAV found for ISIN {isin} — excluded from totals."))
         if units < 0:
-            integrity_issues.append(("HIGH", f"{row['Fund Name'][:40]} ({row['Owner']}): negative net units ({units:.2f}) after aggregation — check for a sell exceeding recorded buys."))
+            integrity_issues.append(("HIGH", f"{fund_name[:40]} ({row['Owner']}): negative net units ({units:.2f}) after aggregation — check for a sell exceeding recorded buys."))
         if nav is not None:
             current_value = units * nav
             pnl = current_value - invested
             ret = (pnl / invested * 100) if invested > 0 else 0.0
         else:
             current_value = pnl = ret = None
-        category = infer_category(row["Fund Name"])
+        category = infer_category(fund_name)
+
+        # Route pure gold FoFs/ETFs out of Mutual Funds into the unified Gold book
+        if is_gold_fund(fund_name):
+            # Short display symbol for the Gold table (keep it readable)
+            sym = "GOLD-FoF"
+            if "HDFC" in fund_name.upper():
+                sym = "HDFC-GOLD-FoF"
+            elif "ICICI" in fund_name.upper():
+                sym = "ICICI-GOLD-FoF"
+            elif "NIPPON" in fund_name.upper() or "RELIANCE" in fund_name.upper():
+                sym = "NIPPON-GOLD-FoF"
+            gold_rows_from_mf.append({
+                "Owner": row["Owner"], "Symbol": sym, "Quantity": round(units, 3),
+                "Invested": invested, "Current Price": nav, "Current Value": current_value,
+                "P&L": pnl, "Return %": ret, "Source": "MF",
+            })
+            continue  # do not also put in mf_rows
+
         days_held = (TODAY_NAIVE - pdate).days if pdate is not None else None
         fund_return_ann = ((current_value / invested) ** (365.25 / days_held) - 1) * 100 if (current_value is not None and days_held and days_held >= 30 and invested > 0) else None
         code = amfi_codes.get(isin)
@@ -664,7 +707,7 @@ for _, row in mf_agg.iterrows():
             r1y, r3y, r5y = trailing_return(fund_hist, 1), trailing_return(fund_hist, 3), trailing_return(fund_hist, 5)
             b1y, b3y, b5y = nifty_1y, nifty_3y, nifty_5y
         mf_rows.append({
-            "Owner": row["Owner"], "ISIN": isin, "Fund Name": row["Fund Name"][:42], "Category": category,
+            "Owner": row["Owner"], "ISIN": isin, "Fund Name": fund_name[:42], "Category": category,
             "Units": round(units, 3), "Invested": invested, "Current NAV": nav, "Current Value": current_value,
             "P&L": pnl, "Return %": ret, "Ann. Return %": fund_return_ann,
             "1Y %": r1y, "3Y %": r3y, "5Y %": r5y, "vs Nifty50 1Y": b1y, "vs Nifty50 3Y": b3y, "vs Nifty50 5Y": b5y,
@@ -674,14 +717,8 @@ for _, row in mf_agg.iterrows():
         mf_failed += 1
 mf = pd.DataFrame(mf_rows)
 
-# NEW — Gold/SGB: Sovereign Gold Bonds trade as NSE-listed instruments (hence
-# they were sitting in the raw Stocks sheet), but they are gold exposure, not
-# equity. Identified by ticker pattern (SGB...-GB, the standard NSE listing
-# format for SGB tranches) — a reliable, non-guessing rule matched against
-# the two real holdings in this portfolio. Everything else in the same loop
-# is completely unchanged.
-SGB_TICKER_PATTERN = re.compile(r"^SGB.*-GB$", re.IGNORECASE)
-
+# Gold book: SGB + gold ETFs (from Stocks sheet) + gold FoFs (from MF sheet above).
+# All gold exposure lives in exactly one place.
 stock_rows, gold_rows = [], []
 for _, row in stocks_raw.iterrows():
     try:
@@ -690,8 +727,8 @@ for _, row in stocks_raw.iterrows():
         invested = safe_float(row.get("Invested Amount"))
         if qty <= 0:
             continue
-        is_sgb = bool(SGB_TICKER_PATTERN.match(symbol))
-        if is_sgb:
+        is_gold = is_gold_symbol(symbol)
+        if is_gold and SGB_TICKER_PATTERN.match(symbol):
             price = get_sgb_price(symbol)
         else:
             price = get_stock_price(symbol) if symbol else None
@@ -715,13 +752,16 @@ for _, row in stocks_raw.iterrows():
             integrity_issues.append(("MEDIUM", f"{symbol}: P&L is {pnl/invested*100:.0f}% of invested amount — unusually large, worth a sanity check of quantity/price entry."))
         row_dict = {"Owner": str(row.get("Owner", "") or ""), "Symbol": symbol, "Quantity": qty,
                     "Invested": invested, "Current Price": price, "Current Value": current_value,
-                    "P&L": pnl, "Return %": ret}
-        if is_sgb:
+                    "P&L": pnl, "Return %": ret, "Source": "Stocks"}
+        if is_gold:
             gold_rows.append(row_dict)
         else:
             stock_rows.append(row_dict)
     except Exception:
         continue
+
+# Merge gold from Stocks sheet + gold FoFs routed out of MF
+gold_rows.extend(gold_rows_from_mf)
 stocks = pd.DataFrame(stock_rows)
 gold = pd.DataFrame(gold_rows)
 
@@ -889,7 +929,13 @@ recon_tests.append(("Sum of owner totals = total net worth", abs(owner_sum - tot
 alloc_sum = equity_pct + fd_pct + gold_pct  # NEW: gold_pct included, otherwise this test would always show a false ~10% gap now that gold is its own slice
 recon_tests.append(("Allocation percentages sum to 100%", abs(alloc_sum - 100) < 0.5, f"{alloc_sum:.2f}%"))
 recon_tests.append(("Portfolio total = MF + Stocks + Gold + FD", abs((total_mf + total_stocks + total_gold + total_fd) - total_networth) < 1, "by construction"))
-recon_tests.append(("SGB counted in Gold, not in Stocks or FD", not any(SGB_TICKER_PATTERN.match(s) for s in stocks["Symbol"]) if not stocks.empty else True, f"{len(gold)} SGB holding(s) in Gold"))  # NEW
+_gold_leaked_stocks = any(is_gold_symbol(s) for s in stocks["Symbol"]) if not stocks.empty else False
+_gold_leaked_mf = any(is_gold_fund(n) for n in mf["Fund Name"]) if not mf.empty else False
+recon_tests.append((
+    "Gold instruments only in Gold (not Stocks/MF)",
+    (not _gold_leaked_stocks) and (not _gold_leaked_mf),
+    f"{len(gold)} gold holding(s) · leaked stocks={_gold_leaked_stocks} mf={_gold_leaked_mf}",
+))
 
 # -------------------------------------------------
 # RED FLAGS
@@ -898,8 +944,8 @@ flags = []
 if equity_pct < 40:
     flags.append(("critical" if equity_pct < 25 else "warning", "Equity allocation drift",
                    f"Equity is {equity_pct:.1f}% of net worth against a common 60% target — {fd_pct:.1f}% sits in FDs/cash."))
-if gold_pct > 15:  # NEW: simple threshold flag, same style as the other allocation checks
-    flags.append(("info", "Gold allocation is notable", f"Gold (SGB) is {gold_pct:.1f}% of net worth."))
+if gold_pct > 15:
+    flags.append(("info", "Gold allocation is notable", f"Gold (SGB + ETFs + FoFs) is {gold_pct:.1f}% of net worth."))
 if top5_mf_pct > 60:
     flags.append(("warning", "Mutual fund concentration", f"Top 5 funds are {top5_mf_pct:.1f}% of your MF portfolio."))
 if not stocks_valid.empty and top5_stock_pct > 65:
@@ -1037,13 +1083,13 @@ st.markdown(f'<div class="sub-title">Portfolio Command Center · Last updated {n
 amfi_dot = "dot-off" if len(amfi_navs) == 0 else ("dot-cache" if amfi_cache_date else "dot-live")
 amfi_lbl = "AMFI offline" if len(amfi_navs) == 0 else ("AMFI cache" if amfi_cache_date else "AMFI live")
 stocks_ok = (not stocks.empty and stocks["Current Price"].notna().any()) if not stocks.empty else False
-sgb_ok = (not gold.empty and gold["Current Price"].notna().any()) if not gold.empty else False
+gold_ok = (not gold.empty and gold["Current Price"].notna().any()) if not gold.empty else False
 fx_ok = usd_inr is not None
 status_html = (
     f'<div class="status-row">'
     f'<span class="status-pill"><span class="status-dot {amfi_dot}"></span>{amfi_lbl} ({len(amfi_navs)})</span>'
     f'<span class="status-pill"><span class="status-dot {"dot-live" if stocks_ok else "dot-off"}"></span>Stocks {"live" if stocks_ok else "n/a"}</span>'
-    f'<span class="status-pill"><span class="status-dot {"dot-live" if sgb_ok else "dot-off"}"></span>SGB {"live" if sgb_ok else "n/a"}</span>'
+    f'<span class="status-pill"><span class="status-dot {"dot-live" if gold_ok else "dot-off"}"></span>Gold {"live" if gold_ok else "n/a"}</span>'
     f'<span class="status-pill"><span class="status-dot {"dot-live" if fx_ok else "dot-off"}"></span>FX {"live" if fx_ok else "n/a"}</span>'
     f'<span class="status-pill"><span class="status-dot dot-live"></span>Market pulse</span>'
     f'</div>'
@@ -1197,7 +1243,7 @@ with c1:
 with c2:
     st.markdown('<div class="section-header">Asset allocation</div>', unsafe_allow_html=True)
     alloc_df = pd.DataFrame({
-        "Asset": ["Fixed Deposits / Cash", "Mutual Funds", "Stocks", "Gold (SGB)"],
+        "Asset": ["Fixed Deposits / Cash", "Mutual Funds", "Stocks", "Gold"],
         "Value": [total_fd, total_mf, total_stocks, total_gold],
     })
     colors = ["#3b82f6", "#a855f7", "#f59e0b", "#eab308"]
@@ -1321,7 +1367,7 @@ with snap_l:
         st.caption("No stock holdings for concentration chart.")
 
 with snap_r:
-    st.markdown('<div class="section-header">Holdings snapshot · Gold / SGB</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Holdings snapshot · Gold</div>', unsafe_allow_html=True)
     if not gold_valid.empty:
         _g = gold_valid[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]].copy()
         st.dataframe(
@@ -1337,11 +1383,11 @@ with snap_r:
             use_container_width=True, height=220, hide_index=True,
         )
         st.markdown(
-            f'<p class="snap-note">Total Gold/SGB {format_inr(total_gold)} · {gold_pct:.1f}% of net worth · NSE via Groww/Yahoo</p>',
+            f'<p class="snap-note">Total Gold {format_inr(total_gold)} · {gold_pct:.1f}% of net worth · SGB/ETF via Groww/Yahoo · FoFs via AMFI</p>',
             unsafe_allow_html=True,
         )
     else:
-        st.caption("No SGB / gold holdings identified.")
+        st.caption("No gold holdings identified.")
 
 # ==================================================
 # HOLDINGS DETAIL
@@ -1405,10 +1451,13 @@ with tab3:
                 "ROI %": st.column_config.NumberColumn(format="%.2f%%"),
             }, use_container_width=True, height=380)
 
-with tab4:  # NEW: Gold tab
+with tab4:
     if not gold.empty:
-        st.caption("Sovereign Gold Bonds, identified from the Stocks sheet by ticker pattern (SGB...-GB) and reported as Gold, not equity. "
-                    "Only the fields already present in the raw data are shown — no maturity date or interest rate is invented, since the source file doesn't carry them for these holdings.")
+        st.caption(
+            "Unified Gold book: Sovereign Gold Bonds (SGB…-GB), gold ETFs (e.g. GOLDBEES), and Gold ETF FoFs. "
+            "All of these are excluded from Stocks and Mutual Funds so gold appears in exactly one place. "
+            "SGB maturity/interest are not invented — source file does not carry them."
+        )
         st.dataframe(
             style_money_df(gold[["Owner", "Symbol", "Quantity", "Invested", "Current Price", "Current Value", "P&L", "Return %"]]),
             column_config={
@@ -1418,13 +1467,13 @@ with tab4:  # NEW: Gold tab
                 "P&L": st.column_config.NumberColumn(format="₹%d"),
                 "Return %": st.column_config.NumberColumn(format="%.1f%%"),
                 "Current Price": st.column_config.NumberColumn(format="₹%.2f"),
-            }, use_container_width=True, height=200)
+            }, use_container_width=True, height=280)
     else:
-        st.caption("No SGB or other gold holdings identified in the current data.")
+        st.caption("No gold holdings identified in the current data.")
 
 st.markdown("---")
 src = "AMFI live" if (len(amfi_navs) and not amfi_cache_date) else (f"AMFI cache {amfi_cache_date}" if amfi_cache_date else "AMFI offline")
 st.caption(
     f"INR · USD {f'{usd_inr:.2f}' if usd_inr else 'n/a'} · {now_ist.strftime('%d %b %Y %H:%M IST')} · "
-    f"{src} ({len(amfi_navs)} schemes) · Stocks/SGB: Groww+Yahoo · Gold ₹/10g: goldprice.dev"
+    f"{src} ({len(amfi_navs)} schemes) · Stocks/Gold ETF: Groww+Yahoo · Gold FoF: AMFI · Gold ₹/10g: goldprice.dev"
 )
