@@ -22,20 +22,30 @@ HISTORY_PATH = "data/history.csv"
 AMFI_CACHE_PATH = "data/amfi_nav_cache.json"
 
 # -------------------------------------------------
-# THEME — plus: remove the white header strip. This targets Streamlit's own
-# documented data-testid hook (not an undocumented internal), matching it to
-# the app's background rather than force-hiding the element, since the
-# element itself (deploy status, running indicator) has real function.
-# The .streamlit/config.toml toolbarMode="minimal" removes the Share/Star/
-# Fork/GitHub icon row, which is the officially supported way to do that
-# part — not CSS.
+# THEME
+# Collapse Streamlit header so title isn't eaten on mobile Chrome/iOS.
+# Extra top padding + safe-area for iPhone. Prefer toolbarMode="minimal"
+# in .streamlit/config.toml as well.
 # -------------------------------------------------
 st.markdown("""
 <style>
     .stApp { background: #0a0e17; color: #e5e9f0; }
-    header[data-testid="stHeader"] { background: #0a0e17; height: 2.2rem; }
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+    div[data-testid="stDecoration"] { display: none !important; }
+    div[data-testid="stToolbar"] { display: none !important; }
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
     section[data-testid="stSidebar"] { background-color: #0f1420 !important; border-right: 1px solid #1c2333; }
-    .main-title { font-size: 1.7rem; font-weight: 700; color: #f8fafc; letter-spacing: -0.03em; margin-bottom: 0.05rem; }
+    .main-title {
+        font-size: 1.7rem; font-weight: 700; color: #f8fafc; letter-spacing: -0.03em;
+        margin: 0 0 0.05rem 0; padding-top: 0.35rem; position: relative; z-index: 2;
+    }
     .sub-title { color: #6b7688; font-size: 0.82rem; margin-bottom: 0.8rem; font-weight: 400; }
     .section-header {
         font-size: 0.75rem; font-weight: 700; color: #8b95a8; margin: 1.2rem 0 0.55rem 0;
@@ -65,7 +75,20 @@ st.markdown("""
     .news-item a { color: #d7dce6 !important; text-decoration: none; font-size: 0.84rem; font-weight: 500; }
     .news-item a:hover { color: #7fa8f5 !important; }
     .news-meta { font-size: 0.71rem; color: #5b6478; margin-top: 1px; }
-    .block-container { padding-top: 0.9rem; padding-bottom: 2rem; max-width: 1400px; }
+    .block-container {
+        padding-top: 1.4rem !important;
+        padding-bottom: 2rem;
+        max-width: 1400px;
+    }
+    @supports (padding: env(safe-area-inset-top)) {
+        .block-container { padding-top: calc(1.4rem + env(safe-area-inset-top)) !important; }
+    }
+    @media (max-width: 768px) {
+        .block-container { padding-top: 1.8rem !important; padding-left: 0.9rem !important; padding-right: 0.9rem !important; }
+        .main-title { font-size: 1.45rem; padding-top: 0.5rem; }
+        .sub-title { font-size: 0.75rem; }
+        div[data-testid="stMetricValue"] { font-size: 1.15rem !important; }
+    }
     .caveat { font-size: 0.72rem; color: #5b6478; font-style: italic; }
     .recon-pass { color: #22c55e; font-weight: 600; }
     .recon-fail { color: #ef4444; font-weight: 600; }
@@ -612,6 +635,11 @@ with st.sidebar:
         st.rerun()
     log_snapshot = st.toggle("Log today's snapshot to history", value=True,
                               help="Free-tier Streamlit storage isn't guaranteed to survive a redeploy — download history periodically.")
+    auto_refresh = st.toggle(
+        "Auto-refresh every 5 min",
+        value=False,
+        help="Reloads the whole page every 5 minutes so prices/NAVs stay fresh. Turn off on mobile if it interrupts reading.",
+    )
     if st.button("Reset history file", use_container_width=True,
                  help="Deletes corrupted or unwanted history.csv rows."):
         try:
@@ -620,9 +648,57 @@ with st.sidebar:
             st.success("History cleared.")
         except Exception as e:
             st.error(f"Could not clear history: {e}")
+
+    st.markdown("##### Restore history")
+    hist_upload = st.file_uploader(
+        "Upload previous history CSV to merge",
+        type=["csv"],
+        help="After a Streamlit Cloud restart, upload a previously downloaded networth_history.csv to restore older days.",
+        key="hist_csv_upload",
+    )
+    if hist_upload is not None:
+        try:
+            os.makedirs("data", exist_ok=True)
+            incoming = pd.read_csv(hist_upload)
+            if "date" not in incoming.columns or "net_worth" not in incoming.columns:
+                st.error("CSV must have at least date and net_worth columns.")
+            else:
+                if os.path.exists(HISTORY_PATH):
+                    existing = pd.read_csv(HISTORY_PATH)
+                    merged = pd.concat([existing, incoming], ignore_index=True)
+                else:
+                    merged = incoming
+                merged["date"] = merged["date"].astype(str)
+                merged = merged[merged["date"].str.match(r"^\d{4}-\d{2}-\d{2}$", na=False)]
+                for col in ["net_worth", "equity_pct", "fd_pct", "pnl", "health_score"]:
+                    if col in merged.columns:
+                        merged[col] = pd.to_numeric(merged[col], errors="coerce")
+                merged = merged.dropna(subset=["net_worth"])
+                # Keep latest row per date
+                merged = merged.sort_values("date").drop_duplicates(subset=["date"], keep="last")
+                merged.to_csv(HISTORY_PATH, index=False)
+                st.success(f"Merged history — {len(merged)} day(s) on disk.")
+        except Exception as e:
+            st.error(f"Could not merge history: {e}")
+
     st.markdown("---")
     st.caption("AMFI · Groww · Yahoo · goldprice.dev · Frankfurter · Google News")
     st.caption(f"IST {now_ist.strftime('%d %b %Y, %H:%M')}")
+
+# Auto-refresh: full page reload (no extra package). Only when toggle is on.
+if auto_refresh:
+    import streamlit.components.v1 as components
+    components.html(
+        """
+        <script>
+        // Reload parent Streamlit page after 5 minutes
+        setTimeout(function () {
+            window.parent.location.reload();
+        }, 300000);
+        </script>
+        """,
+        height=0,
+    )
 
 # -------------------------------------------------
 # LOAD + PROCESS
