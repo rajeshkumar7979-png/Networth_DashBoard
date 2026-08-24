@@ -1736,6 +1736,14 @@ with tab4:
 
 st.markdown("---")
 src = "AMFI live" if (len(amfi_navs) and not amfi_cache_date) else (f"AMFI cache {amfi_cache_date}" if amfi_cache_date else "AMFI offline")
-st.caption(
-    f"INR · USD {f'{usd_inr:.2f}' if usd_inr else 'n/a'} · {now_ist.strftime('%d %b %Y %H:%M IST')} · "
-    f"{src} ({len(amfi_navs)} schemes) · Stocks/Gold ETF: Groww+Yahoo · Gold FoF: AMFI · Gold ₹/10g: goldprice.dev"
+_usd_lbl = ("%.2f" % usd_inr) if usd_inr else "n/a"
+_footer = (
+    "INR · USD "
+    + _usd_lbl
+    + " · "
+    + now_ist.strftime("%d %b %Y %H:%M IST")
+    + " · "
+    + src
+    + " (%d schemes) · Stocks/Gold ETF: Groww+Yahoo · Gold FoF: AMFI · Gold Rs/10g: goldprice.dev" % len(amfi_navs)
+)
+st.caption(_footer)
