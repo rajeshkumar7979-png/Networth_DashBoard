@@ -934,8 +934,11 @@ for _, row in fd_raw.iterrows():
         interest_return_inr = (accrued_native * fx_deposit) if (currency == "USD" and fx_today is not None) else accrued_native
         fx_gain_inr = ((principal_native * fx_today) - (principal_native * fx_deposit)) if (currency == "USD" and fx_today is not None) else 0.0
 
+        # NRI book: USD deposits are treated as FCNR (interest + FX), not resident INR FDs
+        product = "FCNR" if currency == "USD" else "INR FD"
         fd_rows.append({
             "Holder Name": holder, "Account Number": account, "Currency": currency,
+            "Product": product,
             "Principal (Native)": round(principal_native, 2),
             "Principal (INR, at deposit FX)": round(principal_inr_at_cost, 0) if principal_inr_at_cost is not None else None,
             "ROI %": roi, "Days to Maturity": days_to_mat,
@@ -971,28 +974,68 @@ total_invested = ((mf_valid["Invested"].sum() if not mf_valid.empty else 0)
                   + (gold_valid["Invested"].sum() if not gold_valid.empty else 0)
                   + total_fd_invested)
 total_pnl = total_networth - total_invested
-equity_pct = ((total_mf + total_stocks) / total_networth * 100) if total_networth else 0
-gold_pct = (total_gold / total_networth * 100) if total_networth else 0
-fd_pct = (total_fd / total_networth * 100) if total_networth else 0
+
+# --- NRI split: equity (ex-liquid MF) vs liquid MF vs INR FD vs FCNR vs gold ---
+if not mf_valid.empty and "Category" in mf_valid.columns:
+    _liq_mask = mf_valid["Category"].isin(DEBT_LIKE)
+    total_liquid_mf = float(mf_valid.loc[_liq_mask, "Current Value"].sum() or 0)
+    total_equity_mf = float(mf_valid.loc[~_liq_mask, "Current Value"].sum() or 0)
+else:
+    total_liquid_mf, total_equity_mf = 0.0, float(total_mf or 0)
+total_equity = total_equity_mf + total_stocks
+if not fd_valid.empty and "Product" in fd_valid.columns:
+    total_fcnr = float(fd_valid.loc[fd_valid["Product"] == "FCNR", "Current Value (INR)"].sum() or 0)
+    total_inr_fd = float(fd_valid.loc[fd_valid["Product"] == "INR FD", "Current Value (INR)"].sum() or 0)
+elif not fd_valid.empty and "Currency" in fd_valid.columns:
+    total_fcnr = float(fd_valid.loc[fd_valid["Currency"] == "USD", "Current Value (INR)"].sum() or 0)
+    total_inr_fd = float(fd_valid.loc[fd_valid["Currency"] != "USD", "Current Value (INR)"].sum() or 0)
+else:
+    total_fcnr, total_inr_fd = 0.0, float(total_fd or 0)
+
+# Near-term maturities (≤90d) count toward usable liquidity for an NRI
+if not fd_valid.empty and "Days to Maturity" in fd_valid.columns:
+    _near = fd_valid[fd_valid["Days to Maturity"].between(0, 90)]
+    total_near_fd = float(_near["Current Value (INR)"].sum() or 0) if not _near.empty else 0.0
+else:
+    total_near_fd = 0.0
+total_true_liquid = total_liquid_mf + total_near_fd
+
+def _pct(part):
+    return (part / total_networth * 100) if total_networth else 0.0
+
+equity_pct = _pct(total_equity)          # stocks + non-liquid MF only
+liquid_mf_pct = _pct(total_liquid_mf)
+inr_fd_pct = _pct(total_inr_fd)
+fcnr_pct = _pct(total_fcnr)
+gold_pct = _pct(total_gold)
+# Backward-compatible: all deposits as share of NW (history still uses this key)
+fd_pct = _pct(total_fd)
+true_liquid_pct = _pct(total_true_liquid)
+
 top5_mf_pct = (mf_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100) if not mf_valid.empty and total_mf > 0 else 0
 top5_stock_pct = (stocks_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100) if not stocks_valid.empty and total_stocks > 0 else 0
 total_fx_gain = fd_valid["FX Gain/Loss (INR)"].sum() if not fd_valid.empty else 0
+total_fcnr_interest = 0.0
+if not fd_valid.empty and "Product" in fd_valid.columns and "Interest Return (INR)" in fd_valid.columns:
+    total_fcnr_interest = float(fd_valid.loc[fd_valid["Product"] == "FCNR", "Interest Return (INR)"].sum() or 0)
 
 # -------------------------------------------------
-# HEALTH SCORE — FIXED: Diversification could mathematically exceed 100
-# (confirmed on this actual portfolio: raw formula gave 100.3). Every other
-# factor is bounded ≤100 by construction; this was the only one that wasn't.
+# HEALTH SCORE — NRI-aware
+# Liquidity scores *true* liquidity (liquid MF + FDs ≤90d), not all FCNR as locked cash.
+# Allocation still tracks equity share but narrative treats FCNR as intentional USD book.
 # -------------------------------------------------
-def score_allocation(equity_pct, target=60):
-    return max(0, 100 - abs(equity_pct - target) * 1.8)
+def score_allocation(equity_pct, target=50):
+    # Softer resident-60% target: NRI books often run lower equity by design
+    return max(0, 100 - abs(equity_pct - target) * 1.6)
 def score_concentration(top5_pct):
     if top5_pct <= 35: return 100
     if top5_pct >= 80: return 0
     return 100 - (top5_pct - 35) / 45 * 100
-def score_liquidity(fd_pct):
-    if 20 <= fd_pct <= 40: return 100
-    if fd_pct < 20: return max(0, 100 - (20 - fd_pct) * 3)
-    return max(0, 100 - (fd_pct - 40) * 1.6)
+def score_liquidity_nri(true_liquid_pct):
+    # Adequate deployable liquidity for NRI: ~12–35% of NW in liquid MF + near maturities
+    if 12 <= true_liquid_pct <= 35: return 100
+    if true_liquid_pct < 12: return max(0, 100 - (12 - true_liquid_pct) * 5)
+    return max(0, 100 - (true_liquid_pct - 35) * 1.5)
 def score_diversification(mf_df):
     if mf_df.empty:
         return 50
@@ -1000,14 +1043,14 @@ def score_diversification(mf_df):
     if cat.sum() == 0:
         return 50
     hhi = ((cat / cat.sum()) ** 2).sum()
-    return min(100, max(0, (1 - hhi) * 100 / 0.85))  # FIXED: capped at 100
+    return min(100, max(0, (1 - hhi) * 100 / 0.85))
 def score_performance(mf_df):
     valid = mf_df.dropna(subset=["1Y %", "vs Nifty50 1Y"])
     return (valid["1Y %"] > valid["vs Nifty50 1Y"]).mean() * 100 if not valid.empty else 60
 
 alloc_score = score_allocation(equity_pct)
 conc_score = min(score_concentration(top5_mf_pct), score_concentration(top5_stock_pct) if not stocks_valid.empty else 100)
-liq_score = score_liquidity(fd_pct)
+liq_score = score_liquidity_nri(true_liquid_pct)
 div_score = score_diversification(mf_valid)
 perf_score = score_performance(mf_valid)
 WEIGHTS = {"Allocation": 0.26, "Concentration": 0.20, "Liquidity": 0.20, "Diversification": 0.14, "Performance": 0.20}
@@ -1028,9 +1071,15 @@ for df_, col, key in [(mf_valid, "Current Value", "Owner"), (stocks_valid, "Curr
             owner_map[owner] = owner_map.get(owner, 0) + val
 owner_sum = sum(owner_map.values())
 recon_tests.append(("Sum of owner totals = total net worth", abs(owner_sum - total_networth) < 1, f"{format_inr(owner_sum)} vs {format_inr(total_networth)}"))
-alloc_sum = equity_pct + fd_pct + gold_pct  # NEW: gold_pct included, otherwise this test would always show a false ~10% gap now that gold is its own slice
-recon_tests.append(("Allocation percentages sum to 100%", abs(alloc_sum - 100) < 0.5, f"{alloc_sum:.2f}%"))
+# Equity (ex-liquid) + liquid MF + INR FD + FCNR + gold should ≈ 100%
+alloc_sum = equity_pct + liquid_mf_pct + inr_fd_pct + fcnr_pct + gold_pct
+recon_tests.append(("NRI allocation slices sum to 100%", abs(alloc_sum - 100) < 0.6, f"{alloc_sum:.2f}%"))
 recon_tests.append(("Portfolio total = MF + Stocks + Gold + FD", abs((total_mf + total_stocks + total_gold + total_fd) - total_networth) < 1, "by construction"))
+recon_tests.append((
+    "FCNR + INR FD = total deposits",
+    abs((total_fcnr + total_inr_fd) - total_fd) < 1,
+    f"FCNR {format_inr(total_fcnr)} + INR FD {format_inr(total_inr_fd)}",
+))
 _gold_leaked_stocks = any(is_gold_symbol(s) for s in stocks["Symbol"]) if not stocks.empty else False
 _gold_leaked_mf = any(is_gold_fund(n) for n in mf["Fund Name"]) if not mf.empty else False
 recon_tests.append((
@@ -1043,14 +1092,23 @@ recon_tests.append((
 # RED FLAGS
 # -------------------------------------------------
 flags = []
-if equity_pct < 40:
-    gap_to_40 = max(0, 0.40 * total_networth - (total_mf + total_stocks))
-    gap_to_60 = max(0, 0.60 * total_networth - (total_mf + total_stocks))
+if equity_pct < 35:
+    gap_to_40 = max(0, 0.40 * total_networth - total_equity)
+    gap_to_50 = max(0, 0.50 * total_networth - total_equity)
     flags.append((
-        "critical" if equity_pct < 25 else "warning",
-        "Equity allocation drift",
-        f"Equity is {equity_pct:.1f}% of NW (target ~60%); FD/cash {fd_pct:.1f}%. "
-        f"~{format_inr(gap_to_40)} more equity → 40%; ~{format_inr(gap_to_60)} → 60%.",
+        "critical" if equity_pct < 20 else "warning",
+        "Equity allocation (NRI view)",
+        f"Equity (stocks + non-liquid MF) is {equity_pct:.1f}% of NW. "
+        f"FCNR {fcnr_pct:.1f}% · INR FD {inr_fd_pct:.1f}% · Liquid MF {liquid_mf_pct:.1f}%. "
+        f"~{format_inr(gap_to_40)} more equity → 40%; ~{format_inr(gap_to_50)} → 50%. "
+        f"FCNR is intentional USD book (interest + FX), not generic cash.",
+    ))
+if fcnr_pct >= 15:
+    flags.append((
+        "info",
+        "FCNR / USD deposit book",
+        f"FCNR is {fcnr_pct:.1f}% of NW ({format_inr(total_fcnr)}). "
+        f"Return = interest (~{format_inr(total_fcnr_interest)}) + FX vs deposit-date USD/INR (~{format_inr(total_fx_gain)}).",
     ))
 if 3 <= gold_pct <= 15:
     flags.append(("info", "Gold allocation healthy",
@@ -1261,8 +1319,8 @@ k1, k2, k3, k4, k5, k6 = st.columns(6)
 k1.metric("Net Worth (INR)", format_inr_compact(total_networth), _nw_delta)
 k2.metric("Invested Capital", format_inr_compact(total_invested), "Total amount invested")
 k3.metric("Total P&L", format_inr_compact(total_pnl), f"{(total_pnl/total_invested*100):.1f}% overall" if total_invested else None)
-k4.metric("Equity Allocation", f"{equity_pct:.1f}%", "Below target" if equity_pct < 50 else "Target ~60%")
-k5.metric("FD / Cash", f"{fd_pct:.1f}%")
+k4.metric("Equity (ex-liquid)", f"{equity_pct:.1f}%", "NRI view · stocks + non-liquid MF")
+k5.metric("FCNR (USD)", f"{fcnr_pct:.1f}%", f"INR FD {inr_fd_pct:.1f}% · Liquid {liquid_mf_pct:.1f}%")
 k6.metric("Health Score", f"{health_score:.0f} / 100", health_label)
 
 # ==================================================
@@ -1362,32 +1420,46 @@ with c1:
 
     _why = []
     if factor_scores.get("Liquidity", 100) < 50:
-        _why.append("Liquidity is low (high share in FDs/cash locks flexibility).")
+        _why.append(
+            f"Deployable liquidity is {true_liquid_pct:.1f}% of NW "
+            f"(liquid MF + deposits maturing ≤90d). Long FCNR is not treated as cash."
+        )
     if factor_scores.get("Allocation", 100) < 40:
-        _gap40 = max(0, 0.40 * total_networth - (total_mf + total_stocks))
-        _why.append(f"Equity allocation {equity_pct:.1f}% is below a common ~60% target (~{format_inr(_gap40)} more equity would reach 40%).")
+        _gap40 = max(0, 0.40 * total_networth - total_equity)
+        _why.append(
+            f"Equity (ex-liquid) is {equity_pct:.1f}% of NW — NRI books often run lower by design; "
+            f"~{format_inr(_gap40)} more equity would reach 40%."
+        )
     if factor_scores.get("Concentration", 100) < 60:
         _why.append("Top holdings concentration is elevated.")
     if factor_scores.get("Performance", 100) < 55:
         _why.append("Trailing fund performance vs Nifty50 is mixed.")
+    if fcnr_pct > 0:
+        _why.append(
+            f"FCNR is {fcnr_pct:.1f}% of NW — USD principal + interest + INR FX vs deposit-date rate "
+            f"(not the same as resident INR FD)."
+        )
+    if inr_fd_pct > 0:
+        _why.append(f"INR FDs are {inr_fd_pct:.1f}% of NW (domestic fixed income).")
     if gold_pct > 0:
-        _why.append(f"Gold is {gold_pct:.1f}% of NW (SGB + ETFs + FoFs) — useful diversifier, not counted as equity.")
+        _why.append(f"Gold is {gold_pct:.1f}% of NW (SGB + ETFs + FoFs) — diversifier, not equity.")
     if not _why:
         _why.append("No single factor is dragging hard — score is moderate overall.")
     _why_html = "".join(f"<li>{x}</li>" for x in _why)
     st.markdown(
-        f'<div class="why-box"><b style="color:#e5e9f0;font-size:0.82rem">Why score is {health_score:.0f}?</b>'
+        f'<div class="why-box"><b style="color:#e5e9f0;font-size:0.82rem">Why score is {health_score:.0f}? (NRI view)</b>'
         f'<ul style="margin:6px 0 0 0;padding-left:18px">{_why_html}</ul></div>',
         unsafe_allow_html=True,
     )
 
 with c2:
-    st.markdown('<div class="section-header">Asset allocation</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Asset allocation · NRI books</div>', unsafe_allow_html=True)
     alloc_df = pd.DataFrame({
-        "Asset": ["Fixed Deposits / Cash", "Mutual Funds", "Stocks", "Gold"],
-        "Value": [total_fd, total_mf, total_stocks, total_gold],
+        "Asset": ["Equity (stocks + non-liquid MF)", "Liquid MF", "INR FD", "FCNR (USD)", "Gold"],
+        "Value": [total_equity, total_liquid_mf, total_inr_fd, total_fcnr, total_gold],
     })
-    colors = ["#3b82f6", "#a855f7", "#f59e0b", "#eab308"]
+    alloc_df = alloc_df[alloc_df["Value"] > 0].reset_index(drop=True)
+    colors = ["#f59e0b", "#22c55e", "#3b82f6", "#06b6d4", "#eab308"]
     fig = px.pie(alloc_df, values="Value", names="Asset", hole=0.62, color_discrete_sequence=colors)
     fig.update_traces(textposition="inside", textinfo="percent", textfont_size=12)
     fig.update_layout(margin=dict(t=5, b=5, l=5, r=5), height=200, showlegend=False,
@@ -1409,13 +1481,16 @@ with c2:
 # FX RETURN ATTRIBUTION — new, addresses the FCNR audit directly
 # ==================================================
 if not fd_valid.empty and (fd_valid["Currency"] == "USD").any():
-    st.markdown('<div class="section-header">FX-denominated FD return attribution</div>', unsafe_allow_html=True)
-    st.caption("Splits your USD FD return into interest earned vs. INR gain/loss from rupee movement since each deposit's own date — previously invisible because both cost and current value used today's rate.")
+    st.markdown('<div class="section-header">FCNR return attribution (interest + FX)</div>', unsafe_allow_html=True)
+    st.caption(
+        "NRI FCNR-style USD deposits: INR return = interest accrued on principal + FX from USD/INR move "
+        "since each deposit's own date (cost basis at deposit-date FX, mark-to-market at today's FX)."
+    )
     usd_fd = fd_valid[fd_valid["Currency"] == "USD"]
     fi1, fi2, fi3 = st.columns(3)
-    fi1.metric("Interest earned (INR)", format_inr(usd_fd["Interest Return (INR)"].sum()))
-    fi2.metric("FX gain/(loss) (INR)", format_inr(total_fx_gain))
-    fi3.metric("Total USD FD return (INR)", format_inr(usd_fd["Interest Return (INR)"].sum() + total_fx_gain))
+    fi1.metric("FCNR interest (INR)", format_inr(usd_fd["Interest Return (INR)"].sum()))
+    fi2.metric("FCNR FX gain/(loss) (INR)", format_inr(total_fx_gain))
+    fi3.metric("Total FCNR return (INR)", format_inr(usd_fd["Interest Return (INR)"].sum() + total_fx_gain))
 
 # ==================================================
 # HISTORY
@@ -1559,7 +1634,7 @@ with snap_r:
 # HOLDINGS DETAIL
 # ==================================================
 st.markdown('<div class="section-header">Holdings detail</div>', unsafe_allow_html=True)
-tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "Fixed Deposits", "Gold"])
+tab1, tab2, tab3, tab4 = st.tabs(["Mutual Funds", "Stocks", "FCNR & INR FDs", "Gold"])
 
 with tab1:
     if not mf.empty:
@@ -1601,21 +1676,36 @@ with tab2:
 
 with tab3:
     if not fd.empty:
-        st.caption("Native currency and INR reporting value shown side by side — a USD FD is never displayed as though it were an INR deposit. Sorted by days to maturity (overdue first).")
-        _fd_view = fd[["Holder Name", "Currency", "Principal (Native)", "Principal (INR, at deposit FX)", "ROI %",
-                        "Days to Maturity", "Current Value (Native)", "Current Value (INR)", "FX Gain/Loss (INR)", "Maturity Date"]].copy()
+        st.caption(
+            "NRI view: USD rows are labeled FCNR (interest + FX vs deposit-date rate). "
+            "INR rows are domestic FDs. Native currency and INR shown side by side — "
+            "a FCNR is never displayed as though it were an INR deposit. Sorted by days to maturity."
+        )
+        _fd_cols = [c for c in [
+            "Holder Name", "Product", "Currency", "Principal (Native)", "Principal (INR, at deposit FX)",
+            "ROI %", "Days to Maturity", "Current Value (Native)", "Current Value (INR)",
+            "Interest Return (INR)", "FX Gain/Loss (INR)", "Maturity Date",
+        ] if c in fd.columns]
+        _fd_view = fd[_fd_cols].copy()
         if "Days to Maturity" in _fd_view.columns:
             _fd_view = _fd_view.sort_values("Days to Maturity", ascending=True, na_position="last")
         st.dataframe(
-            style_money_df(_fd_view, pnl_cols=("FX Gain/Loss (INR)",)),
+            style_money_df(_fd_view, pnl_cols=("FX Gain/Loss (INR)", "Interest Return (INR)")),
             column_config={
                 "Principal (Native)": st.column_config.NumberColumn(format="%.2f"),
                 "Principal (INR, at deposit FX)": st.column_config.NumberColumn(format="₹%d"),
                 "Current Value (Native)": st.column_config.NumberColumn(format="%.2f"),
                 "Current Value (INR)": st.column_config.NumberColumn(format="₹%d"),
+                "Interest Return (INR)": st.column_config.NumberColumn(format="₹%d"),
                 "FX Gain/Loss (INR)": st.column_config.NumberColumn(format="₹%d"),
                 "ROI %": st.column_config.NumberColumn(format="%.2f%%"),
             }, use_container_width=True, height=380)
+        st.markdown(
+            f'<p class="snap-note">FCNR {format_inr(total_fcnr)} ({fcnr_pct:.1f}%) · '
+            f'INR FD {format_inr(total_inr_fd)} ({inr_fd_pct:.1f}%) · '
+            f'Deployable liquidity (liquid MF + ≤90d deposits) {format_inr(total_true_liquid)} ({true_liquid_pct:.1f}%)</p>',
+            unsafe_allow_html=True,
+        )
 
 with tab4:
     if not gold.empty:
@@ -1649,4 +1739,3 @@ src = "AMFI live" if (len(amfi_navs) and not amfi_cache_date) else (f"AMFI cache
 st.caption(
     f"INR · USD {f'{usd_inr:.2f}' if usd_inr else 'n/a'} · {now_ist.strftime('%d %b %Y %H:%M IST')} · "
     f"{src} ({len(amfi_navs)} schemes) · Stocks/Gold ETF: Groww+Yahoo · Gold FoF: AMFI · Gold ₹/10g: goldprice.dev"
-)
