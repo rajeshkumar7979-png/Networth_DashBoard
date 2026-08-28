@@ -15,6 +15,7 @@ pg = st.navigation({
         st.Page("pages/1_Command_Center.py", title="Command Center", icon="📊", default=True),
         st.Page("pages/2_Deep_Health.py", title="Deep Health", icon="🩺"),
         st.Page("pages/3_Asset_Detail.py", title="Asset Detail", icon="📁"),
+        st.Page("pages/4_News.py", title="News", icon="📰"),
     ]
 })
 pg.run()
