@@ -1515,39 +1515,35 @@ else:
 # ==================================================
 # NEWS
 # ==================================================
-st.markdown('<div class="section-header">News on your holdings</div>', unsafe_allow_html=True)
-# Cover stocks, MFs, gold ETFs/SGB, and a few sector anchors so news is portfolio-wide
-news_queries = []
+st.markdown('<div class="section-header">News on your holdings + NRI / Tax</div>', unsafe_allow_html=True)
+
+from lib.news import get_portfolio_news
+
+stock_syms = []
 if not stocks_valid.empty:
-    news_queries += stocks_valid.nlargest(5, "Current Value")["Symbol"].astype(str).tolist()
+    stock_syms = stocks_valid.nlargest(5, "Current Value")["Symbol"].astype(str).tolist()
+
+fund_names = []
 if not mf_valid.empty:
-    news_queries += (
-        mf_valid.nlargest(4, "Current Value")["Fund Name"]
-        .astype(str).str.split(" - ").str[0].str.split(" FUND").str[0].tolist()
-    )
+    fund_names = mf_valid.nlargest(4, "Current Value")["Fund Name"].astype(str).tolist()
+
+gold_syms = []
 if not gold_valid.empty:
-    for sym in gold_valid["Symbol"].astype(str).tolist():
-        if "SGB" in sym.upper():
-            news_queries.append("Sovereign Gold Bond")
-        elif "GOLD" in sym.upper() or sym.upper() == "GOLDBEES":
-            news_queries.append("Gold ETF India")
-        else:
-            news_queries.append(sym)
-# Dedup preserving order
-_seen_q, news_queries_u = set(), []
-for q in news_queries:
-    qn = (q or "").strip()
-    if qn and qn.lower() not in _seen_q:
-        _seen_q.add(qn.lower())
-        news_queries_u.append(qn)
+    gold_syms = gold_valid["Symbol"].astype(str).tolist()
+
 try:
-    news_items = fetch_news_for(news_queries_u) if news_queries_u else []
+    news_items = get_portfolio_news(
+        stock_symbols=stock_syms,
+        fund_names=fund_names,
+        gold_symbols=gold_syms,
+    )
 except Exception:
     news_items = []
+
 if not news_items:
-    st.caption("No recent (last 45 days) news found for your holdings this run.")
+    st.caption("No recent news found this run.")
 else:
-    st.caption(f"Across stocks, funds, and gold · queries: {', '.join(news_queries_u[:8])}{'…' if len(news_queries_u) > 8 else ''}")
+    st.caption("Holdings + NRI tax / FEMA / RBI / FCNR related news")
     for item in news_items:
         st.markdown(
             f"""<div class="news-item"><a href="{item['link']}" target="_blank">{item['title']}</a>
