@@ -1515,23 +1515,22 @@ else:
 # ==================================================
 # NEWS
 # ==================================================
-st.markdown('<div class="section-header">News summary · Holdings + NRI / Tax</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">News pulse · Holdings + NRI</div>', unsafe_allow_html=True)
 
 from lib.news import get_portfolio_news
 
 stock_syms = []
 if not stocks_valid.empty:
-    stock_syms = stocks_valid.nlargest(5, "Current Value")["Symbol"].astype(str).tolist()
+    stock_syms = stocks_valid.nlargest(6, "Current Value")["Symbol"].astype(str).tolist()
 
 fund_names = []
 if not mf_valid.empty:
-    fund_names = mf_valid.nlargest(4, "Current Value")["Fund Name"].astype(str).tolist()
+    fund_names = mf_valid.nlargest(3, "Current Value")["Fund Name"].astype(str).tolist()
 
 gold_syms = []
 if not gold_valid.empty:
     gold_syms = gold_valid["Symbol"].astype(str).tolist()
 
-# Save for the full News page
 st.session_state["stock_syms"] = stock_syms
 st.session_state["fund_names"] = fund_names
 st.session_state["gold_syms"] = gold_syms
@@ -1545,11 +1544,10 @@ try:
 except Exception:
     news_items = []
 
-# Simple sentiment
-POSITIVE = ["gain", "profit", "rise", "up", "growth", "high", "record", "beat", "strong", "surge", "rally"]
-NEGATIVE = ["loss", "fall", "down", "drop", "cut", "weak", "fraud", "probe", "decline", "slash", "risk"]
+POSITIVE = ["gain", "profit", "rise", "up", "growth", "high", "record", "beat", "strong", "surge", "rally", "jump"]
+NEGATIVE = ["loss", "fall", "down", "drop", "cut", "weak", "fraud", "probe", "decline", "slash", "risk", "suit"]
 
-def sentiment(title):
+def get_sentiment(title):
     t = title.lower()
     if any(w in t for w in NEGATIVE):
         return "red"
@@ -1557,24 +1555,29 @@ def sentiment(title):
         return "green"
     return "neutral"
 
-if not news_items:
-    st.caption("No recent news found this run.")
+# Group by query (asset)
+from collections import defaultdict
+groups = defaultdict(list)
+for item in news_items:
+    groups[item.get("query", "General")].append(item)
+
+if not groups:
+    st.caption("No news this run.")
 else:
-    # Show only first 6
-    for item in news_items[:6]:
-        s = sentiment(item["title"])
-        if s == "green":
-            mark = "🟢"
-        elif s == "red":
+    # Show one line per asset
+    for asset, items in list(groups.items())[:8]:
+        sentiments = [get_sentiment(i["title"]) for i in items]
+        if "red" in sentiments:
             mark = "🔴"
+            label = "Negative"
+        elif "green" in sentiments:
+            mark = "🟢"
+            label = "Positive"
         else:
             mark = "⚪"
+            label = "Neutral"
 
-        st.markdown(
-            f"""{mark} <a href="{item['link']}" target="_blank">{item['title'][:90]}{'…' if len(item['title'])>90 else ''}</a>  
-            <span style="color:#888;font-size:0.75rem">{item.get('query','')}</span>""",
-            unsafe_allow_html=True,
-        )
+        st.markdown(f"{mark} **{asset}** — {label}")
 
     st.page_link("pages/4_News.py", label="View all news →", icon="📰")
 
