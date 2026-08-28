@@ -17,3 +17,13 @@ pytz
 plotly
 openpyxl
 streamlit-autorefresh
+streamlit>=1.37.0
+pandas
+numpy
+yfinance
+requests
+feedparser
+pytz
+plotly
+openpyxl
+streamlit-autorefresh
