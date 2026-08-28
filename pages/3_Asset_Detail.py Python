@@ -1,12 +1,10 @@
 import streamlit as st
 
-st.set_page_config(page_title="Asset Detail", page_icon="🔎", layout="wide")
-
 params = st.query_params
 symbol = (params.get("symbol") or "").strip()
 asset_type = (params.get("type") or "auto").strip().lower()
 
-st.markdown("## Asset Deep Health")
+st.markdown("## Asset Detail")
 st.page_link("pages/1_Command_Center.py", label="← Command Center", icon="📊")
 
 if not symbol:
@@ -21,5 +19,5 @@ st.markdown(f"### {symbol}")
 st.caption(f"Type: **{asset_type}**")
 st.info(
     "Stub page. Next: load Excel via lib.portfolio and show the matching row, "
-    "P&L, and related news. Hyperlinks from Command Center will land here."
+    "P&L, and related news."
 )
