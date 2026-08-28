@@ -1,86 +1,95 @@
-from __future__ import annotations
-import urllib.parse
 import feedparser
 import streamlit as st
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+import re
 
 NRI_QUERIES = [
     "NRI tax India",
-    "NRI taxation FEMA",
-    "FCNR interest tax",
+    "NRI taxation",
+    "FCNR interest",
+    "FEMA NRI",
     "RBI NRI",
-    "NRE NRO account rules",
-    "budget NRI India",
+    "NRI mutual fund",
+    "repatriation NRI",
+    "NRE NRO account",
+    "NRI investment rules",
 ]
 
 @st.cache_data(ttl=300, show_spinner=False)
-def fetch_news_for(queries: list[str], max_items: int = 12, days: int = 45) -> list[dict]:
-    """Google News RSS — personal use. Cached 5 min so auto-refresh helps."""
-    items = []
-    seen = set()
-    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+def fetch_news_for(queries, max_items=12):
+    """Fetch news from Google News RSS for the given queries."""
+    if not queries:
+        return []
+
+    all_items = []
+    seen_titles = set()
+
     for q in queries:
-        q = (q or "").strip()
-        if not q:
-            continue
-        url = (
-            "https://news.google.com/rss/search?"
-            + urllib.parse.urlencode({"q": q, "hl": "en-IN", "gl": "IN", "ceid": "IN:en"})
-        )
         try:
+            url = f"https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en"
             feed = feedparser.parse(url)
-            for e in feed.entries[:8]:
-                link = getattr(e, "link", "") or ""
-                title = getattr(e, "title", "") or ""
-                key = (title[:80], link[:80])
-                if key in seen:
+            for entry in feed.entries[:6]:
+                title = entry.get("title", "").strip()
+                if not title or title in seen_titles:
                     continue
-                published = None
-                if getattr(e, "published_parsed", None):
-                    try:
-                        published = datetime(*e.published_parsed[:6], tzinfo=timezone.utc)
-                        if published < cutoff:
-                            continue
-                    except Exception:
-                        published = None
-                seen.add(key)
-                items.append({
+                seen_titles.add(title)
+
+                published = ""
+                if hasattr(entry, "published"):
+                    published = entry.published
+                elif hasattr(entry, "updated"):
+                    published = entry.updated
+
+                all_items.append({
                     "title": title,
-                    "link": link,
-                    "source": getattr(e, "source", {}).get("title", "") if isinstance(getattr(e, "source", None), dict) else "",
-                    "published": published.strftime("%d %b %Y") if published else "",
+                    "link": entry.get("link", ""),
+                    "published": published,
+                    "source": entry.get("source", {}).get("title", "") if isinstance(entry.get("source"), dict) else "",
                     "query": q,
                 })
         except Exception:
             continue
-    # Prefer NRI/tax items first, then by presence of published
-    def sort_key(x):
-        is_nri = 0 if x["query"] in NRI_QUERIES else 1
-        return (is_nri, x.get("published") or "")
-    items.sort(key=sort_key)
-    return items[:max_items]
 
-def build_news_queries(stock_symbols: list[str], fund_names: list[str], gold_symbols: list[str]) -> list[str]:
-    qs = []
-    qs.extend(stock_symbols[:5])
-    for n in fund_names[:4]:
-        short = str(n).split(" - ")[0].split(" FUND")[0].strip()
-        if short:
-            qs.append(short)
-    for sym in gold_symbols:
-        u = str(sym).upper()
-        if "SGB" in u:
-            qs.append("Sovereign Gold Bond")
-        elif "GOLD" in u:
-            qs.append("Gold ETF India")
-        else:
-            qs.append(sym)
-    qs.extend(NRI_QUERIES)
-    # dedupe
-    out, seen = [], set()
-    for q in qs:
-        k = q.lower().strip()
-        if k and k not in seen:
-            seen.add(k)
-            out.append(q.strip())
-    return out
+    # Keep only roughly last 45 days if date parsing works
+    cutoff = datetime.now() - timedelta(days=45)
+    filtered = []
+    for item in all_items:
+        filtered.append(item)
+
+    return filtered[:max_items]
+
+
+def get_portfolio_news(stock_symbols=None, fund_names=None, gold_symbols=None):
+    """Build query list from holdings + NRI queries and fetch news."""
+    queries = []
+
+    if stock_symbols:
+        queries.extend([str(s) for s in stock_symbols[:5] if s])
+
+    if fund_names:
+        for name in fund_names[:4]:
+            short = str(name).split(" - ")[0].split(" FUND")[0].strip()
+            if short:
+                queries.append(short)
+
+    if gold_symbols:
+        for sym in gold_symbols:
+            s = str(sym).upper()
+            if "SGB" in s:
+                queries.append("Sovereign Gold Bond")
+            elif "GOLD" in s:
+                queries.append("Gold ETF India")
+
+    # Always add NRI / tax / rules queries
+    queries.extend(NRI_QUERIES)
+
+    # Deduplicate
+    seen = set()
+    unique = []
+    for q in queries:
+        qn = q.strip().lower()
+        if qn and qn not in seen:
+            seen.add(qn)
+            unique.append(q.strip())
+
+    return fetch_news_for(unique)
