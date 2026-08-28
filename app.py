@@ -1,4 +1,5 @@
 import streamlit as st
+from lib.theme import inject_css
 
 st.set_page_config(
     page_title="Family Net Worth",
@@ -7,24 +8,13 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("Family Net Worth")
-st.markdown(
-    """
-**Portfolio Command Center** for the family book.
+inject_css()
 
-Use the **sidebar** (pages list):
-
-- **Command Center** — live net worth, allocation, holdings  
-- **Deep Health** — decision desk  
-- **Asset Detail** — deep health for one holding (also via links from Command Center)
-"""
-)
-
-st.page_link("pages/1_Command_Center.py", label="Open Command Center", icon="📊")
-st.page_link("pages/2_Deep_Health.py", label="Open Deep Health", icon="🩺")
-st.page_link("pages/3_Asset_Detail.py", label="Open Asset Detail", icon="🔎")
-
-st.caption(
-    "After Streamlit Cloud redeploys, open **Command Center** from the sidebar. "
-    "Root app.py is only the menu."
-)
+pg = st.navigation({
+    "Workspace": [
+        st.Page("pages/1_Command_Center.py", title="Command Center", icon="📊", default=True),
+        st.Page("pages/2_Deep_Health.py", title="Deep Health", icon="🩺"),
+        st.Page("pages/3_Asset_Detail.py", title="Asset Detail", icon="📁"),
+    ]
+})
+pg.run()
