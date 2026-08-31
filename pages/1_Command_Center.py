@@ -1799,3 +1799,15 @@ try:
             st.session_state["mf_holdings_for_health"] = records
 except Exception:
     pass
+# ----- Pass matured FD amount to Deep Health -----
+try:
+    if "attention_flags" in dir() or "flags" in dir():
+        pass  # placeholder
+    # Simple heuristic: look for any variable that looks like matured FD value
+    for varname in ["matured_fd_value", "fd_matured_amount", "uncollected_fd"]:
+        if varname in dir() and globals().get(varname):
+            st.session_state["matured_fd_amount"] = float(globals()[varname])
+            break
+    # Fallback: if you store attention items as text, skip for now
+except Exception:
+    pass
