@@ -24,14 +24,14 @@ div[data-testid="stMetricLabel"] { color: #c8c8c8 !important; }
 """, unsafe_allow_html=True)
 
 st.title("MF Health Check")
-st.caption("Deduped by scheme code · News flags · Monthly-cached overlap")
+st.caption("Codes from Command Center AMFI map · News flags · Monthly-cached overlap")
 
 st.page_link("pages/1_Command_Center.py", label="← Command Center", icon="📊")
 st.markdown("---")
 
 mf_list = st.session_state.get("mf_holdings_for_health", [])
 if not mf_list:
-    st.info("Open **Command Center** once so your funds are loaded here.")
+    st.info("Open **Command Center** once so your funds + scheme codes are loaded here.")
     st.stop()
 
 raw_results = []
@@ -40,7 +40,8 @@ for i, row in enumerate(mf_list):
     name = row.get("Fund Name") or str(row)
     value = float(row.get("Current Value") or 0)
     weight = float(row.get("Weight %") or 0)
-    raw_results.append(analyze_fund(name, value, weight))
+    scheme_code = row.get("Scheme Code")
+    raw_results.append(analyze_fund(name, value, weight, scheme_code))
     progress.progress((i + 1) / len(mf_list))
 progress.empty()
 
