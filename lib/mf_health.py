@@ -1,9 +1,14 @@
 import requests
 import pandas as pd
 import streamlit as st
-from datetime import timedelta
+from datetime import timedelta, datetime
 import re
+import os
+import json
 from collections import defaultdict
+
+HOLDINGS_CACHE_PATH = "data/mf_holdings_cache.json"
+
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def search_scheme(name: str, limit: int = 10):
@@ -259,9 +264,35 @@ def _normalize_holdings(raw):
     return out[:20]
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
-def fetch_holdings_batch(scheme_codes: list):
-    """Use /api/v1/compare — takes scheme codes directly, no family_id."""
+def _load_holdings_cache():
+    try:
+        if not os.path.exists(HOLDINGS_CACHE_PATH):
+            return {}
+        with open(HOLDINGS_CACHE_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_holdings_cache(cache: dict):
+    try:
+        os.makedirs("data", exist_ok=True)
+        with open(HOLDINGS_CACHE_PATH, "w") as f:
+            json.dump(cache, f)
+    except Exception:
+        pass
+
+
+def _is_stale(entry: dict, max_age_days: int = 35) -> bool:
+    try:
+        fetched = datetime.fromisoformat(entry["fetched_at"])
+        return (datetime.now() - fetched).days > max_age_days
+    except Exception:
+        return True
+
+
+def fetch_holdings_batch_live(scheme_codes: list, timeout=30):
+    """Live call only for missing/stale codes."""
     out = {}
     codes = [int(c) for c in scheme_codes if c]
     for i in range(0, len(codes), 10):
@@ -270,7 +301,7 @@ def fetch_holdings_batch(scheme_codes: list):
             r = requests.get(
                 "https://mfdata.in/api/v1/compare",
                 params={"scheme_codes": ",".join(str(c) for c in chunk)},
-                timeout=15,
+                timeout=timeout,
             )
             if r.status_code != 200:
                 continue
@@ -291,3 +322,36 @@ def fetch_holdings_batch(scheme_codes: list):
         except Exception:
             continue
     return out
+
+
+def get_holdings_for_funds(scheme_codes: list, force_refresh: bool = False):
+    """
+    Monthly-cadence cache.
+    Only calls mfdata.in for missing or >35-day-old entries.
+    On failure, still serves last-known-good cache.
+    """
+    cache = _load_holdings_cache()
+    result = {}
+    to_fetch = []
+
+    for code in scheme_codes:
+        key = str(code)
+        entry = cache.get(key)
+        if entry and not _is_stale(entry) and not force_refresh:
+            result[int(code)] = entry["holdings"]
+        else:
+            to_fetch.append(int(code))
+
+    if to_fetch:
+        fresh = fetch_holdings_batch_live(to_fetch)
+        now_iso = datetime.now().isoformat()
+        for code in to_fetch:
+            key = str(code)
+            if code in fresh and fresh[code]:
+                cache[key] = {"holdings": fresh[code], "fetched_at": now_iso}
+                result[code] = fresh[code]
+            elif key in cache:
+                result[code] = cache[key]["holdings"]
+        _save_holdings_cache(cache)
+
+    return result, cache
