@@ -24,7 +24,7 @@ div[data-testid="stMetricLabel"] { color: #c8c8c8 !important; }
 """, unsafe_allow_html=True)
 
 st.title("MF Health Check")
-st.caption("Codes from Command Center AMFI map · News flags · Monthly-cached overlap")
+st.caption("Codes from Command Center AMFI map · History from mfapi (same as Command Center 1Y/3Y/5Y)")
 
 st.page_link("pages/1_Command_Center.py", label="← Command Center", icon="📊")
 st.markdown("---")
@@ -89,12 +89,18 @@ for res in sorted(ok_results, key=lambda x: -x.get("weight_pct", 0)):
             st.caption("No major recent flags.")
 
 if no_metrics:
-    with st.expander(f"Code found but no returns ({len(no_metrics)})", expanded=False):
+    with st.expander(
+        f"History n/a on mfapi ({len(no_metrics)}) — same as Command Center None",
+        expanded=False,
+    ):
         for r in no_metrics:
             st.write(f"• {r['fund_name']} (code {r.get('scheme_code')})")
 
 if fail_results:
-    with st.expander(f"Could not match ({len(fail_results)})", expanded=False):
+    with st.expander(
+        f"No scheme code from Command Center ({len(fail_results)})",
+        expanded=False,
+    ):
         for r in fail_results:
             st.write(f"• {r['fund_name']}")
 
