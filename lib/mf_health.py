@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 import re
 import os
 import json
-from collections import defaultdict
+
 
 HOLDINGS_CACHE_PATH = "data/mf_holdings_cache.json"
 
@@ -292,11 +292,10 @@ def _is_stale(entry: dict, max_age_days: int = 35) -> bool:
 
 
 def fetch_holdings_batch_live(scheme_codes: list, timeout=30):
-    """Live call only for missing/stale codes."""
     out = {}
     codes = [int(c) for c in scheme_codes if c]
     for i in range(0, len(codes), 10):
-        chunk = codes[i : i + 10]
+        chunk = codes[i:i + 10]
         try:
             r = requests.get(
                 "https://mfdata.in/api/v1/compare",
