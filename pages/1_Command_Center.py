@@ -1773,30 +1773,34 @@ _footer = (
     + " (%d schemes) · Stocks/Gold ETF: Groww+Yahoo · Gold FoF: AMFI · Gold Rs/10g: goldprice.dev" % len(amfi_navs)
 )
 st.caption(_footer)
-# ----- Pass MF list to MF Health page -----
+# ----- Pass MF list + trusted AMFI scheme codes to MF Health -----
 try:
     if "mf_valid" in dir() and mf_valid is not None and not mf_valid.empty:
-        temp = mf_valid.copy()
-        # try common column names
-        name_col = None
-        value_col = None
-        for c in temp.columns:
-            cl = c.lower()
-            if name_col is None and ("fund" in cl or "scheme" in cl or "name" in cl):
-                name_col = c
-            if value_col is None and ("current" in cl or "value" in cl or "amount" in cl):
-                value_col = c
+        total = float(mf_valid["Current Value"].sum()) if "Current Value" in mf_valid.columns else 0.0
+        records = []
+        for _, row in mf_valid.iterrows():
+            name = str(row["Fund Name"]) if "Fund Name" in mf_valid.columns else str(row.iloc[0])
+            value = float(row["Current Value"]) if "Current Value" in mf_valid.columns else 0.0
+            weight = (value / total * 100) if total > 0 else 0.0
 
-        if name_col and value_col:
-            total = temp[value_col].sum()
-            records = []
-            for _, row in temp.iterrows():
-                records.append({
-                    "Fund Name": str(row[name_col]),
-                    "Current Value": float(row[value_col]),
-                    "Weight %": float(row[value_col] / total * 100) if total > 0 else 0,
-                })
-            st.session_state["mf_holdings_for_health"] = records
+            scheme_code = None
+            if "amfi_codes" in dir() and amfi_codes and "ISIN" in mf_valid.columns:
+                isin = str(row.get("ISIN", "")).strip()
+                if isin and isin in amfi_codes:
+                    scheme_code = amfi_codes[isin]
+            if scheme_code is None and "Scheme Code" in mf_valid.columns:
+                try:
+                    scheme_code = int(row["Scheme Code"])
+                except Exception:
+                    scheme_code = None
+
+            records.append({
+                "Fund Name": name,
+                "Current Value": value,
+                "Weight %": weight,
+                "Scheme Code": scheme_code,
+            })
+        st.session_state["mf_holdings_for_health"] = records
 except Exception:
     pass
 # ----- Pass matured FD amount to Deep Health -----
