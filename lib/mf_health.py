@@ -150,10 +150,16 @@ def analyze_fund(fund_name: str, current_value: float = 0, weight_pct: float = 0
         }
     nav_df, meta = get_nav_history(code)
     metrics = compute_metrics(nav_df)
-    if not metrics or metrics.get("latest_nav") in (None, 0):
+        if not metrics:
         return {
             "fund_name": fund_name,
             "status": "no_metrics",
+            "message": "Scheme code found but NAV history empty",
+            "scheme_code": code,
+            "meta": meta,
+            "current_value": current_value,
+            "weight_pct": weight_pct,
+        }
             "message": "Scheme code found but NAV/returns empty",
             "scheme_code": code,
             "meta": meta,
