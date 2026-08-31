@@ -11,6 +11,11 @@ NRI_QUERIES = [
     "NRI mutual fund",
     "repatriation NRI",
     "NRE NRO account",
+    "Nifty 50",
+"Sensex",
+"Indian stock market",
+"gold price India",
+"silver price India",
 ]
 
 @st.cache_data(ttl=300, show_spinner=False)
