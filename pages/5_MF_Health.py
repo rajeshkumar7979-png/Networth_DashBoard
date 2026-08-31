@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from collections import defaultdict
-from lib.mf_health import analyze_fund, get_news_flags, fetch_holdings_batch
+from lib.mf_health import analyze_fund, get_news_flags, get_holdings_for_funds
 
 st.markdown("""
 <style>
@@ -24,7 +24,7 @@ div[data-testid="stMetricLabel"] { color: #c8c8c8 !important; }
 """, unsafe_allow_html=True)
 
 st.title("MF Health Check")
-st.caption("Deduped by scheme code · News flags · On-demand overlap")
+st.caption("Deduped by scheme code · News flags · Monthly-cached overlap")
 
 st.page_link("pages/1_Command_Center.py", label="← Command Center", icon="📊")
 st.markdown("---")
@@ -97,50 +97,41 @@ if fail_results:
 
 st.markdown("---")
 st.subheader("Holdings & Stock Overlap")
-st.caption("Uses mfdata.in /compare (best-effort). Spot-check important decisions against AMC factsheet.")
+st.caption(
+    "Cached monthly — SEBI portfolio disclosures do not change daily. "
+    "Only re-fetches once a month per fund (or when you force refresh)."
+)
 
-if st.button("Check Holdings & Overlap", type="primary"):
-    with st.spinner("Fetching holdings…"):
-        codes = [res["scheme_code"] for res in ok_results]
-        holdings_by_code = fetch_holdings_batch(codes)
+force = st.button("Force refresh now (hits mfdata.in live — may be slow)")
 
-        stock_map = defaultdict(list)
-        pulled = 0
-        for res in ok_results:
-            hlist = holdings_by_code.get(res["scheme_code"], [])
-            if hlist:
-                pulled += 1
-            for h in hlist:
-                stock_map[h["name"]].append((res["fund_name"][:36], h["weight"]))
+codes = [res["scheme_code"] for res in ok_results]
+holdings_by_code, cache = get_holdings_for_funds(codes, force_refresh=force)
 
-        if not stock_map:
-            st.warning(
-                "No holdings returned. mfdata.in may be incomplete. "
-                "Use the debug box below or check overlapiq.in / AMC factsheet."
-            )
-        else:
-            st.success(f"Holdings found for {pulled} / {len(ok_results)} funds")
-            ranked = sorted(stock_map.items(), key=lambda x: len(x[1]), reverse=True)
-            rows = []
-            for stock, apps in ranked[:30]:
-                rows.append({
-                    "Stock": stock,
-                    "Funds": len(apps),
-                    "Details": ", ".join([f"{f} ({w:.1f}%)" for f, w in apps]),
-                })
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-
-    with st.expander("Debug: raw API response"):
-        import requests as _rq
-        test_codes = ",".join(str(r["scheme_code"]) for r in ok_results[:3])
-        try:
-            resp = _rq.get(
-                "https://mfdata.in/api/v1/compare",
-                params={"scheme_codes": test_codes},
-                timeout=15,
-            )
-            st.code(f"Status: {resp.status_code}\n\n{resp.text[:3000]}")
-        except Exception as e:
-            st.code(f"Request failed: {e}")
+if not holdings_by_code:
+    st.warning(
+        "No cached holdings yet and mfdata.in did not respond. "
+        "Try Force refresh again later, or check overlapiq.in / AMC factsheet."
+    )
 else:
-    st.caption("Click only when you need overlap (saves calls).")
+    stock_map = defaultdict(list)
+    for res in ok_results:
+        for h in holdings_by_code.get(res["scheme_code"], []):
+            stock_map[h["name"]].append((res["fund_name"][:36], h["weight"]))
+
+    ages = [cache[str(c)]["fetched_at"][:10] for c in codes if str(c) in cache]
+    if ages:
+        st.caption(f"Holdings cached as of {min(ages)} – {max(ages)}.")
+
+    if stock_map:
+        ranked = sorted(stock_map.items(), key=lambda x: len(x[1]), reverse=True)
+        rows = [
+            {
+                "Stock": s,
+                "Funds": len(a),
+                "Details": ", ".join(f"{f} ({w:.1f}%)" for f, w in a),
+            }
+            for s, a in ranked[:30]
+        ]
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    else:
+        st.info("Cache exists but no stock rows parsed yet. Try Force refresh.")
