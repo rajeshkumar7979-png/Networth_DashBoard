@@ -8,7 +8,11 @@ from collections import defaultdict
 @st.cache_data(ttl=3600, show_spinner=False)
 def search_scheme(name: str, limit: int = 10):
     try:
-        r = requests.get("https://api.mfapi.in/mf/search", params={"q": name}, timeout=12)
+        r = requests.get(
+            "https://api.mfapi.in/mf/search",
+            params={"q": name},
+            timeout=12,
+        )
         data = r.json()
         if isinstance(data, list):
             return data[:limit]
@@ -20,7 +24,10 @@ def search_scheme(name: str, limit: int = 10):
 @st.cache_data(ttl=3600, show_spinner=False)
 def get_nav_history(scheme_code: int):
     try:
-        r = requests.get(f"https://api.mfapi.in/mf/{int(scheme_code)}", timeout=15)
+        r = requests.get(
+            f"https://api.mfapi.in/mf/{int(scheme_code)}",
+            timeout=15,
+        )
         data = r.json()
         if data.get("status") == "SUCCESS" and data.get("data"):
             df = pd.DataFrame(data["data"])
@@ -52,14 +59,19 @@ def compute_metrics(nav_df: pd.DataFrame):
         return {}
     nav_df = nav_df.sort_values("date")
     latest = nav_df.iloc[-1]
-    end_nav, end_date = latest["nav"], latest["date"]
-    metrics = {"latest_nav": end_nav, "latest_date": end_date.strftime("%Y-%m-%d")}
+    end_nav = latest["nav"]
+    end_date = latest["date"]
+    metrics = {
+        "latest_nav": end_nav,
+        "latest_date": end_date.strftime("%Y-%m-%d"),
+    }
     for years, label in [(1, "1Y"), (3, "3Y"), (5, "5Y")]:
         target = end_date - timedelta(days=int(365.25 * years))
         past = nav_df[nav_df["date"] <= target]
-        metrics[f"cagr_{label}"] = (
-            calc_cagr(past.iloc[-1]["nav"], end_nav, years) if not past.empty else None
-        )
+        if not past.empty:
+            metrics[f"cagr_{label}"] = calc_cagr(past.iloc[-1]["nav"], end_nav, years)
+        else:
+            metrics[f"cagr_{label}"] = None
     metrics["max_drawdown"] = max_drawdown(nav_df["nav"])
     return metrics
 
@@ -68,16 +80,24 @@ def simple_health_score(metrics, weight_pct=0):
     score = 55
     cagr3 = metrics.get("cagr_3Y")
     if cagr3 is not None:
-        if cagr3 > 0.15: score += 15
-        elif cagr3 > 0.10: score += 8
-        elif cagr3 < 0.05: score -= 12
+        if cagr3 > 0.15:
+            score += 15
+        elif cagr3 > 0.10:
+            score += 8
+        elif cagr3 < 0.05:
+            score -= 12
     dd = metrics.get("max_drawdown")
     if dd is not None:
-        if dd < -0.40: score -= 20
-        elif dd < -0.30: score -= 12
-        elif dd > -0.18: score += 6
-    if weight_pct > 25: score -= 15
-    elif weight_pct > 15: score -= 8
+        if dd < -0.40:
+            score -= 20
+        elif dd < -0.30:
+            score -= 12
+        elif dd > -0.18:
+            score += 6
+    if weight_pct > 25:
+        score -= 15
+    elif weight_pct > 15:
+        score -= 8
     return max(0, min(100, int(score)))
 
 
@@ -90,7 +110,6 @@ def clean_name(name: str) -> str:
     return re.sub(r"\s+", " ", name).strip(" -")
 
 
-# Manual overrides (name fragment → AMFI code)
 MANUAL_CODES = {
     "sbi contra": 119598,
     "invesco india small cap": 120603,
@@ -121,7 +140,8 @@ def match_scheme_code(fund_name: str):
     if len(words) >= 3:
         candidates += [" ".join(words[:4]), " ".join(words[:3])]
 
-    seen, best = set(), None
+    seen = set()
+    best = None
     for q in candidates:
         if len(q) < 4:
             continue
@@ -145,12 +165,14 @@ def analyze_fund(fund_name: str, current_value: float = 0, weight_pct: float = 0
         return {
             "fund_name": fund_name,
             "status": "not_found",
-            "message": "Name matching failed — add to MANUAL_CODES",
+            "message": "Name matching failed",
             "scheme_code": None,
         }
+
     nav_df, meta = get_nav_history(code)
     metrics = compute_metrics(nav_df)
-        if not metrics:
+
+    if not metrics:
         return {
             "fund_name": fund_name,
             "status": "no_metrics",
@@ -160,12 +182,7 @@ def analyze_fund(fund_name: str, current_value: float = 0, weight_pct: float = 0
             "current_value": current_value,
             "weight_pct": weight_pct,
         }
-            "message": "Scheme code found but NAV/returns empty",
-            "scheme_code": code,
-            "meta": meta,
-            "current_value": current_value,
-            "weight_pct": weight_pct,
-        }
+
     return {
         "fund_name": fund_name,
         "scheme_code": code,
@@ -191,7 +208,8 @@ def get_news_flags(fund_name: str):
         ]
         keywords = [
             "manager", "resign", "takes over", "strategy", "sebi",
-            "outflow", "underperform", "crash", "fall", "surge", "rally", "slump", "down",
+            "outflow", "underperform", "crash", "fall", "surge",
+            "rally", "slump", "down",
         ]
         flags = []
         for q in queries:
@@ -201,7 +219,8 @@ def get_news_flags(fund_name: str):
                 title = entry.get("title", "")
                 if any(k in title.lower() for k in keywords):
                     flags.append(title[:110])
-        seen, unique = set(), []
+        seen = set()
+        unique = []
         for f in flags:
             if f not in seen:
                 seen.add(f)
@@ -211,26 +230,26 @@ def get_news_flags(fund_name: str):
         return []
 
 
-# ---------- Holdings via mfdata.in (best-effort) ----------
 @st.cache_data(ttl=86400, show_spinner=False)
 def fetch_holdings_mfdata(scheme_code: int):
-    """Return list of {name, weight_pct} or []."""
     try:
-        # Try scheme endpoint first
-        r = requests.get(f"https://mfdata.in/api/v1/schemes/{int(scheme_code)}", timeout=12)
-        if r.status_code == 200:
-            data = r.json().get("data") or r.json()
-            # common shapes
-            for key in ("holdings", "equity_holdings", "portfolio"):
-                h = data.get(key) if isinstance(data, dict) else None
-                if h:
-                    return _normalize_holdings(h)
-        # Try family-style if scheme has family_id
-        fam = None
-        if isinstance(data, dict):
-            fam = data.get("family_id") or data.get("family")
+        r = requests.get(
+            f"https://mfdata.in/api/v1/schemes/{int(scheme_code)}",
+            timeout=12,
+        )
+        if r.status_code != 200:
+            return []
+        data = r.json().get("data") or r.json()
+        for key in ("holdings", "equity_holdings", "portfolio"):
+            h = data.get(key) if isinstance(data, dict) else None
+            if h:
+                return _normalize_holdings(h)
+        fam = data.get("family_id") if isinstance(data, dict) else None
         if fam:
-            r2 = requests.get(f"https://mfdata.in/api/v1/families/{fam}/holdings", timeout=12)
+            r2 = requests.get(
+                f"https://mfdata.in/api/v1/families/{fam}/holdings",
+                timeout=12,
+            )
             if r2.status_code == 200:
                 d2 = r2.json().get("data") or r2.json()
                 eq = d2.get("equity") or d2.get("equity_holdings") or d2
@@ -249,8 +268,18 @@ def _normalize_holdings(raw):
     for h in raw:
         if not isinstance(h, dict):
             continue
-        name = h.get("name") or h.get("stock_name") or h.get("instrument") or h.get("security")
-        w = h.get("weight_pct") or h.get("weight") or h.get("pct") or h.get("percentage")
+        name = (
+            h.get("name")
+            or h.get("stock_name")
+            or h.get("instrument")
+            or h.get("security")
+        )
+        w = (
+            h.get("weight_pct")
+            or h.get("weight")
+            or h.get("pct")
+            or h.get("percentage")
+        )
         if name and w is not None:
             try:
                 out.append({"name": str(name).strip(), "weight": float(w)})
