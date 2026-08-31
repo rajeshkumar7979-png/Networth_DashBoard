@@ -9,39 +9,29 @@ import json
 HOLDINGS_CACHE_PATH = "data/mf_holdings_cache.json"
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def search_scheme(name: str, limit: int = 10):
-    try:
-        r = requests.get(
-            "https://api.mfapi.in/mf/search",
-            params={"q": name},
-            timeout=12,
-        )
-        data = r.json()
-        if isinstance(data, list):
-            return data[:limit]
-    except Exception:
-        pass
-    return []
-
-
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=21600, show_spinner=False)
 def get_nav_history(scheme_code: int):
+    """Same source + same permissive parse as Command Center get_mf_nav_history."""
     try:
         r = requests.get(
             f"https://api.mfapi.in/mf/{int(scheme_code)}",
-            timeout=15,
+            timeout=12,
         )
-        data = r.json()
-        if data.get("status") == "SUCCESS" and data.get("data"):
-            df = pd.DataFrame(data["data"])
-            df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y", errors="coerce")
-            df["nav"] = pd.to_numeric(df["nav"], errors="coerce")
-            df = df.dropna().sort_values("date")
-            return df, data.get("meta", {})
+        r.raise_for_status()
+        payload = r.json()
+        # Match Command Center: use data array even if status field is missing/odd
+        data = payload.get("data") or []
+        if not data:
+            return pd.DataFrame(), payload.get("meta", {})
+        df = pd.DataFrame(data)
+        df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y", errors="coerce")
+        df["nav"] = pd.to_numeric(df["nav"], errors="coerce")
+        df = df.dropna().sort_values("date")
+        if df.empty:
+            return pd.DataFrame(), payload.get("meta", {})
+        return df, payload.get("meta", {})
     except Exception:
-        pass
-    return pd.DataFrame(), {}
+        return pd.DataFrame(), {}
 
 
 def calc_cagr(start_nav, end_nav, years):
@@ -56,14 +46,14 @@ def max_drawdown(nav_series):
     peak = nav_series.cummax()
     dd = (nav_series - peak) / peak
     val = float(dd.min())
-    # Ignore absurd series (bad data point)
     if val < -0.80:
         return None
     return val
 
 
 def compute_metrics(nav_df: pd.DataFrame):
-    if nav_df.empty or len(nav_df) < 30:
+    # Softer than before (was 30) so short series still get partial metrics
+    if nav_df.empty or len(nav_df) < 10:
         return {}
     nav_df = nav_df.sort_values("date")
     latest = nav_df.iloc[-1]
@@ -125,7 +115,6 @@ def analyze_fund(
     weight_pct: float = 0,
     scheme_code: int = None,
 ):
-    """Prefer scheme_code from Command Center. Same history source as Command Center (mfapi.in)."""
     code = None
     try:
         if scheme_code is not None and str(scheme_code).strip() not in ("", "None", "nan"):
@@ -291,11 +280,6 @@ def fetch_holdings_batch_live(scheme_codes: list, timeout=30):
 
 
 def get_holdings_for_funds(scheme_codes: list, force_refresh: bool = False):
-    """
-    Monthly-cadence cache.
-    Only calls mfdata.in for missing or >35-day-old entries.
-    On failure, still serves last-known-good cache.
-    """
     cache = _load_holdings_cache()
     result = {}
     to_fetch = []
