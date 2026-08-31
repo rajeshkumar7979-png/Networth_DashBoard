@@ -115,62 +115,26 @@ def clean_name(name: str) -> str:
     return re.sub(r"\s+", " ", name).strip(" -")
 
 
-MANUAL_CODES = {
-    "sbi contra": 119598,
-    "invesco india small cap": 120603,
-    "kotak hybrid equity": 119551,
-    "kotak infrastructure": 119713,
-    "hdfc liquid": 119062,
-    "parag parikh liquid": 143269,
-    "hdfc mid cap": 118955,
-    "uti nifty next 50": 120716,
-    "icici prudential bharat 22": 143903,
-    "hdfc large cap": 102000,
-    "edelweiss mid cap": 140175,
-    "quant small cap": 120828,
-    "parag parikh flexi": 122639,
-}
-
-
-def match_scheme_code(fund_name: str):
-    if not fund_name:
-        return None, {}
-    lower = fund_name.lower()
-    for key, code in MANUAL_CODES.items():
-        if key in lower:
-            return int(code), {"schemeName": fund_name, "schemeCode": code}
-
-    candidates = [fund_name, clean_name(fund_name)]
-    words = clean_name(fund_name).split()
-    if len(words) >= 3:
-        candidates += [" ".join(words[:4]), " ".join(words[:3])]
-
-    seen = set()
-    best = None
-    for q in candidates:
-        if len(q) < 4:
-            continue
-        for r in search_scheme(q):
-            code = r.get("schemeCode")
-            name = (r.get("schemeName") or "").lower()
-            if code in seen:
-                continue
-            seen.add(code)
-            if "direct" in name and "growth" in name:
-                return int(code), r
-            if best is None:
-                best = (int(code), r)
-    return best if best else (None, {})
-
-
 @st.cache_data(ttl=1800, show_spinner=False)
-def analyze_fund(fund_name: str, current_value: float = 0, weight_pct: float = 0):
-    code, _ = match_scheme_code(fund_name)
+def analyze_fund(
+    fund_name: str,
+    current_value: float = 0,
+    weight_pct: float = 0,
+    scheme_code: int = None,
+):
+    """Prefer scheme_code from Command Center. Do not fuzzy-guess."""
+    code = None
+    try:
+        if scheme_code is not None and str(scheme_code).strip() not in ("", "None", "nan"):
+            code = int(scheme_code)
+    except Exception:
+        code = None
+
     if not code:
         return {
             "fund_name": fund_name,
             "status": "not_found",
-            "message": "Name matching failed",
+            "message": "No AMFI code supplied from Command Center",
             "scheme_code": None,
         }
 
