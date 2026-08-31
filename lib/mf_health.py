@@ -6,7 +6,6 @@ import re
 import os
 import json
 
-
 HOLDINGS_CACHE_PATH = "data/mf_holdings_cache.json"
 
 
@@ -56,7 +55,11 @@ def max_drawdown(nav_series):
         return None
     peak = nav_series.cummax()
     dd = (nav_series - peak) / peak
-    return float(dd.min())
+    val = float(dd.min())
+    # Ignore absurd series (bad data point)
+    if val < -0.80:
+        return None
+    return val
 
 
 def compute_metrics(nav_df: pd.DataFrame):
@@ -122,7 +125,7 @@ def analyze_fund(
     weight_pct: float = 0,
     scheme_code: int = None,
 ):
-    """Prefer scheme_code from Command Center. Do not fuzzy-guess."""
+    """Prefer scheme_code from Command Center. Same history source as Command Center (mfapi.in)."""
     code = None
     try:
         if scheme_code is not None and str(scheme_code).strip() not in ("", "None", "nan"):
@@ -134,7 +137,7 @@ def analyze_fund(
         return {
             "fund_name": fund_name,
             "status": "not_found",
-            "message": "No AMFI code supplied from Command Center",
+            "message": "No AMFI code from Command Center",
             "scheme_code": None,
         }
 
@@ -145,7 +148,7 @@ def analyze_fund(
         return {
             "fund_name": fund_name,
             "status": "no_metrics",
-            "message": "Scheme code found but NAV history empty",
+            "message": "History n/a (mfapi) — same limit as Command Center 1Y/3Y/5Y",
             "scheme_code": code,
             "meta": meta,
             "current_value": current_value,
