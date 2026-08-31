@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 from datetime import timedelta
 import re
+from collections import defaultdict
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def search_scheme(name: str, limit: int = 10):
@@ -19,7 +20,7 @@ def search_scheme(name: str, limit: int = 10):
 @st.cache_data(ttl=3600, show_spinner=False)
 def get_nav_history(scheme_code: int):
     try:
-        r = requests.get(f"https://api.mfapi.in/mf/{scheme_code}", timeout=15)
+        r = requests.get(f"https://api.mfapi.in/mf/{int(scheme_code)}", timeout=15)
         data = r.json()
         if data.get("status") == "SUCCESS" and data.get("data"):
             df = pd.DataFrame(data["data"])
@@ -56,7 +57,9 @@ def compute_metrics(nav_df: pd.DataFrame):
     for years, label in [(1, "1Y"), (3, "3Y"), (5, "5Y")]:
         target = end_date - timedelta(days=int(365.25 * years))
         past = nav_df[nav_df["date"] <= target]
-        metrics[f"cagr_{label}"] = calc_cagr(past.iloc[-1]["nav"], end_nav, years) if not past.empty else None
+        metrics[f"cagr_{label}"] = (
+            calc_cagr(past.iloc[-1]["nav"], end_nav, years) if not past.empty else None
+        )
     metrics["max_drawdown"] = max_drawdown(nav_df["nav"])
     return metrics
 
@@ -79,13 +82,15 @@ def simple_health_score(metrics, weight_pct=0):
 
 
 def clean_name(name: str) -> str:
-    if not name: return ""
+    if not name:
+        return ""
     name = re.sub(r"[-–]\s*Direct.*", "", str(name), flags=re.I)
     name = re.sub(r"[-–]\s*Regular.*", "", name, flags=re.I)
     name = re.sub(r"\bDirect\b.*|\bGrowth\b.*|\bPlan\b|\bOption\b", "", name, flags=re.I)
     return re.sub(r"\s+", " ", name).strip(" -")
 
 
+# Manual overrides (name fragment → AMFI code)
 MANUAL_CODES = {
     "sbi contra": 119598,
     "invesco india small cap": 120603,
@@ -93,15 +98,23 @@ MANUAL_CODES = {
     "kotak infrastructure": 119713,
     "hdfc liquid": 119062,
     "parag parikh liquid": 143269,
+    "hdfc mid cap": 118955,
+    "uti nifty next 50": 120716,
+    "icici prudential bharat 22": 143903,
+    "hdfc large cap": 102000,
+    "edelweiss mid cap": 140175,
+    "quant small cap": 120828,
+    "parag parikh flexi": 122639,
 }
 
 
 def match_scheme_code(fund_name: str):
-    if not fund_name: return None, {}
+    if not fund_name:
+        return None, {}
     lower = fund_name.lower()
     for key, code in MANUAL_CODES.items():
         if key in lower:
-            return code, {"schemeName": fund_name, "schemeCode": code}
+            return int(code), {"schemeName": fund_name, "schemeCode": code}
 
     candidates = [fund_name, clean_name(fund_name)]
     words = clean_name(fund_name).split()
@@ -110,16 +123,18 @@ def match_scheme_code(fund_name: str):
 
     seen, best = set(), None
     for q in candidates:
-        if len(q) < 4: continue
+        if len(q) < 4:
+            continue
         for r in search_scheme(q):
             code = r.get("schemeCode")
-            name = r.get("schemeName", "").lower()
-            if code in seen: continue
+            name = (r.get("schemeName") or "").lower()
+            if code in seen:
+                continue
             seen.add(code)
             if "direct" in name and "growth" in name:
-                return code, r
+                return int(code), r
             if best is None:
-                best = (code, r)
+                best = (int(code), r)
     return best if best else (None, {})
 
 
@@ -127,9 +142,24 @@ def match_scheme_code(fund_name: str):
 def analyze_fund(fund_name: str, current_value: float = 0, weight_pct: float = 0):
     code, _ = match_scheme_code(fund_name)
     if not code:
-        return {"fund_name": fund_name, "status": "not_found", "message": "Could not find scheme code"}
+        return {
+            "fund_name": fund_name,
+            "status": "not_found",
+            "message": "Name matching failed — add to MANUAL_CODES",
+            "scheme_code": None,
+        }
     nav_df, meta = get_nav_history(code)
     metrics = compute_metrics(nav_df)
+    if not metrics or metrics.get("latest_nav") in (None, 0):
+        return {
+            "fund_name": fund_name,
+            "status": "no_metrics",
+            "message": "Scheme code found but NAV/returns empty",
+            "scheme_code": code,
+            "meta": meta,
+            "current_value": current_value,
+            "weight_pct": weight_pct,
+        }
     return {
         "fund_name": fund_name,
         "scheme_code": code,
@@ -143,7 +173,6 @@ def analyze_fund(fund_name: str, current_value: float = 0, weight_pct: float = 0
 
 
 def get_news_flags(fund_name: str):
-    """Fund-specific + market keywords."""
     try:
         import feedparser
         queries = [
@@ -154,21 +183,19 @@ def get_news_flags(fund_name: str):
             "gold price India",
             "silver price India",
         ]
-        flags = []
         keywords = [
             "manager", "resign", "takes over", "strategy", "sebi",
-            "outflow", "underperform", "crash", "fall", "surge", "rally", "slump"
+            "outflow", "underperform", "crash", "fall", "surge", "rally", "slump", "down",
         ]
+        flags = []
         for q in queries:
             url = f"https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en"
             feed = feedparser.parse(url)
             for entry in feed.entries[:4]:
                 title = entry.get("title", "")
                 if any(k in title.lower() for k in keywords):
-                    flags.append(title[:100])
-        # dedup
-        seen = set()
-        unique = []
+                    flags.append(title[:110])
+        seen, unique = set(), []
         for f in flags:
             if f not in seen:
                 seen.add(f)
@@ -178,27 +205,49 @@ def get_news_flags(fund_name: str):
         return []
 
 
-# ---------- Experimental holdings (mfdata.in) ----------
+# ---------- Holdings via mfdata.in (best-effort) ----------
 @st.cache_data(ttl=86400, show_spinner=False)
-def try_fetch_holdings(scheme_code: int):
-    """Best-effort holdings. Returns list of {name, weight} or empty."""
+def fetch_holdings_mfdata(scheme_code: int):
+    """Return list of {name, weight_pct} or []."""
     try:
-        # mfdata.in family/holdings style (may change)
-        r = requests.get(
-            f"https://mfdata.in/api/v1/schemes/{scheme_code}",
-            timeout=10,
-        )
-        if r.status_code != 200:
-            return []
-        data = r.json()
-        # try common shapes
-        holdings = data.get("data", {}).get("holdings") or data.get("holdings") or []
-        out = []
-        for h in holdings[:15]:
-            name = h.get("name") or h.get("stock_name") or h.get("instrument")
-            w = h.get("weight_pct") or h.get("weight") or h.get("pct")
-            if name and w is not None:
-                out.append({"name": str(name), "weight": float(w)})
-        return out
+        # Try scheme endpoint first
+        r = requests.get(f"https://mfdata.in/api/v1/schemes/{int(scheme_code)}", timeout=12)
+        if r.status_code == 200:
+            data = r.json().get("data") or r.json()
+            # common shapes
+            for key in ("holdings", "equity_holdings", "portfolio"):
+                h = data.get(key) if isinstance(data, dict) else None
+                if h:
+                    return _normalize_holdings(h)
+        # Try family-style if scheme has family_id
+        fam = None
+        if isinstance(data, dict):
+            fam = data.get("family_id") or data.get("family")
+        if fam:
+            r2 = requests.get(f"https://mfdata.in/api/v1/families/{fam}/holdings", timeout=12)
+            if r2.status_code == 200:
+                d2 = r2.json().get("data") or r2.json()
+                eq = d2.get("equity") or d2.get("equity_holdings") or d2
+                return _normalize_holdings(eq)
     except Exception:
-        return []
+        pass
+    return []
+
+
+def _normalize_holdings(raw):
+    out = []
+    if not raw:
+        return out
+    if isinstance(raw, dict):
+        raw = raw.get("equity") or raw.get("holdings") or []
+    for h in raw:
+        if not isinstance(h, dict):
+            continue
+        name = h.get("name") or h.get("stock_name") or h.get("instrument") or h.get("security")
+        w = h.get("weight_pct") or h.get("weight") or h.get("pct") or h.get("percentage")
+        if name and w is not None:
+            try:
+                out.append({"name": str(name).strip(), "weight": float(w)})
+            except Exception:
+                continue
+    return out[:20]
