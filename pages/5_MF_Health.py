@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from collections import defaultdict
-from lib.mf_health import analyze_fund, get_news_flags, fetch_holdings_mfdata
+from lib.mf_health import analyze_fund, get_news_flags, fetch_holdings_batch
 
 st.markdown("""
 <style>
@@ -34,7 +34,6 @@ if not mf_list:
     st.info("Open **Command Center** once so your funds are loaded here.")
     st.stop()
 
-# Analyze
 raw_results = []
 progress = st.progress(0)
 for i, row in enumerate(mf_list):
@@ -45,7 +44,7 @@ for i, row in enumerate(mf_list):
     progress.progress((i + 1) / len(mf_list))
 progress.empty()
 
-# Dedupe by scheme_code (keep highest weight)
+# Dedupe by scheme_code
 by_code = {}
 no_code = []
 for r in raw_results:
@@ -96,17 +95,19 @@ if fail_results:
         for r in fail_results:
             st.write(f"• {r['fund_name']}")
 
-# ---------- Holdings & Overlap ----------
 st.markdown("---")
 st.subheader("Holdings & Stock Overlap")
-st.caption("Uses mfdata.in (free, best-effort). Spot-check important decisions against AMC factsheet.")
+st.caption("Uses mfdata.in /compare (best-effort). Spot-check important decisions against AMC factsheet.")
 
 if st.button("Check Holdings & Overlap", type="primary"):
     with st.spinner("Fetching holdings…"):
+        codes = [res["scheme_code"] for res in ok_results]
+        holdings_by_code = fetch_holdings_batch(codes)
+
         stock_map = defaultdict(list)
         pulled = 0
         for res in ok_results:
-            hlist = fetch_holdings_mfdata(res["scheme_code"])
+            hlist = holdings_by_code.get(res["scheme_code"], [])
             if hlist:
                 pulled += 1
             for h in hlist:
@@ -114,8 +115,8 @@ if st.button("Check Holdings & Overlap", type="primary"):
 
         if not stock_map:
             st.warning(
-                "No holdings returned. mfdata.in may be incomplete today. "
-                "You can manually check overlapiq.in or the AMC monthly portfolio PDF."
+                "No holdings returned. mfdata.in may be incomplete. "
+                "Use the debug box below or check overlapiq.in / AMC factsheet."
             )
         else:
             st.success(f"Holdings found for {pulled} / {len(ok_results)} funds")
@@ -128,5 +129,18 @@ if st.button("Check Holdings & Overlap", type="primary"):
                     "Details": ", ".join([f"{f} ({w:.1f}%)" for f, w in apps]),
                 })
             st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+
+    with st.expander("Debug: raw API response"):
+        import requests as _rq
+        test_codes = ",".join(str(r["scheme_code"]) for r in ok_results[:3])
+        try:
+            resp = _rq.get(
+                "https://mfdata.in/api/v1/compare",
+                params={"scheme_codes": test_codes},
+                timeout=15,
+            )
+            st.code(f"Status: {resp.status_code}\n\n{resp.text[:3000]}")
+        except Exception as e:
+            st.code(f"Request failed: {e}")
 else:
     st.caption("Click only when you need overlap (saves calls).")
