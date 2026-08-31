@@ -1786,3 +1786,29 @@ try:
     # Fallback: if you store attention items as text, skip for now
 except Exception:
     pass
+# ----- Read-only handoff to MF Health (does not change mf_valid or returns) -----
+try:
+    if "mf_valid" in dir() and mf_valid is not None and not mf_valid.empty:
+        total = float(mf_valid["Current Value"].sum()) if "Current Value" in mf_valid.columns else 0.0
+        records = []
+        for _, row in mf_valid.iterrows():
+            name = str(row["Fund Name"]) if "Fund Name" in mf_valid.columns else ""
+            value = float(row["Current Value"]) if "Current Value" in mf_valid.columns else 0.0
+            weight = (value / total * 100.0) if total > 0 else 0.0
+            scheme_code = None
+            if "amfi_codes" in dir() and amfi_codes and "ISIN" in mf_valid.columns:
+                isin = str(row.get("ISIN", "")).strip()
+                if isin and isin in amfi_codes:
+                    try:
+                        scheme_code = int(amfi_codes[isin])
+                    except Exception:
+                        scheme_code = amfi_codes[isin]
+            records.append({
+                "Fund Name": name,
+                "Current Value": value,
+                "Weight %": weight,
+                "Scheme Code": scheme_code,
+            })
+        st.session_state["mf_holdings_for_health"] = records
+except Exception:
+    pass
