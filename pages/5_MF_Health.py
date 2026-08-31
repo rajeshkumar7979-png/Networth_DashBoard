@@ -1,30 +1,53 @@
 import streamlit as st
-import pandas as pd
 from lib.mf_health import analyze_fund, get_news_flags
 
 st.markdown("""
 <style>
-div[data-testid="stExpander"] details summary p {
+/* Force readable text everywhere on this page */
+html, body, [class*="css"] {
     color: #e8e8e8 !important;
-    font-weight: 600;
 }
+
+/* Expander title */
+div[data-testid="stExpander"] details summary p,
+div[data-testid="stExpander"] details summary span {
+    color: #f1f1f1 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+}
+
+/* Metric numbers */
 div[data-testid="stMetricValue"] {
-    color: #f0f0f0 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
 }
+
+/* Metric labels */
 div[data-testid="stMetricLabel"] {
-    color: #aaaaaa !important;
+    color: #c0c0c0 !important;
 }
-.fund-card {
-    background: #1e1e2e;
-    border: 1px solid #333;
-    border-radius: 10px;
-    padding: 14px 18px;
-    margin-bottom: 12px;
+
+/* Caption text */
+.stCaption, [data-testid="stCaptionContainer"] {
+    color: #b0b0b0 !important;
 }
-.score-good { color: #4ade80; }
-.score-ok   { color: #facc15; }
-.score-bad  { color: #f87171; }
-.flag-item  { color: #fbbf24; font-size: 0.9rem; }
+
+/* General markdown */
+.stMarkdown, .stMarkdown p {
+    color: #e0e0e0 !important;
+}
+
+/* Score colors */
+.score-good { color: #4ade80 !important; }
+.score-ok   { color: #facc15 !important; }
+.score-bad  { color: #f87171 !important; }
+
+/* News flag */
+.flag-item {
+    color: #fbbf24 !important;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -40,7 +63,7 @@ if not mf_list:
     st.info("Open **Command Center** once so your funds are loaded here.")
     st.stop()
 
-# ---- Analyze ----
+# Analyze
 results = []
 progress = st.progress(0)
 for i, row in enumerate(mf_list):
@@ -55,34 +78,38 @@ progress.empty()
 ok_results = [r for r in results if r["status"] == "ok"]
 fail_results = [r for r in results if r["status"] != "ok"]
 
-# ---- Summary ----
-st.subheader(f"Health Overview  ·  {len(ok_results)} funds")
+st.subheader(f"Health Overview · {len(ok_results)} funds")
 
 for res in ok_results:
     m = res["metrics"]
     score = res["health_score"]
+
     if score >= 70:
         badge = "🟢"
-        cls = "score-good"
     elif score >= 50:
         badge = "🟡"
-        cls = "score-ok"
     else:
         badge = "🔴"
-        cls = "score-bad"
 
-    with st.expander(f"{badge}  {res['fund_name']}   ·   Score {score}/100", expanded=False):
+    title = f"{badge}  {res['fund_name']}   ·   Score {score}/100"
+
+    with st.expander(title, expanded=False):
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("1Y CAGR", f"{m['cagr_1Y']*100:.1f}%" if m.get("cagr_1Y") is not None else "—")
-        c2.metric("3Y CAGR", f"{m['cagr_3Y']*100:.1f}%" if m.get("cagr_3Y") is not None else "—")
-        c3.metric("5Y CAGR", f"{m['cagr_5Y']*100:.1f}%" if m.get("cagr_5Y") is not None else "—")
-        c4.metric("Max DD", f"{m['max_drawdown']*100:.1f}%" if m.get("max_drawdown") is not None else "—")
+
+        def fmt_pct(val):
+            return f"{val*100:.1f}%" if val is not None else "—"
+
+        c1.metric("1Y CAGR", fmt_pct(m.get("cagr_1Y")))
+        c2.metric("3Y CAGR", fmt_pct(m.get("cagr_3Y")))
+        c3.metric("5Y CAGR", fmt_pct(m.get("cagr_5Y")))
+        c4.metric("Max DD", fmt_pct(m.get("max_drawdown")))
 
         st.caption(
-            f"Code: {res['scheme_code']}  ·  NAV: {m.get('latest_nav', '—')} ({m.get('latest_date', '')})  ·  Weight: {res['weight_pct']:.1f}%"
+            f"Code: {res['scheme_code']}  ·  "
+            f"NAV: {m.get('latest_nav', '—')} ({m.get('latest_date', '')})  ·  "
+            f"Weight: {res['weight_pct']:.1f}%"
         )
 
-        # News flags
         flags = get_news_flags(res["fund_name"])
         if flags:
             st.markdown("**News flags**")
@@ -91,11 +118,10 @@ for res in ok_results:
         else:
             st.caption("No major manager/strategy news found recently.")
 
-# ---- Failed ones (collapsed) ----
 if fail_results:
     with st.expander(f"Could not match ({len(fail_results)} funds)", expanded=False):
         for r in fail_results:
             st.write(f"• {r['fund_name']}")
 
 st.markdown("---")
-st.info("Holdings & stock overlap will be added next as an on-demand button.")
+st.info("Next: on-demand Holdings & stock overlap button.")
