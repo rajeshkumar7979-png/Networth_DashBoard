@@ -44,7 +44,6 @@ for i, row in enumerate(mf_list):
     progress.progress((i + 1) / len(mf_list))
 progress.empty()
 
-# Dedupe by scheme_code
 by_code = {}
 no_code = []
 for r in raw_results:
@@ -68,14 +67,17 @@ for res in sorted(ok_results, key=lambda x: -x.get("weight_pct", 0)):
     badge = "🟢" if score >= 70 else ("🟡" if score >= 50 else "🔴")
     with st.expander(f"{badge}  {res['fund_name']}   ·   Score {score}/100", expanded=False):
         c1, c2, c3, c4 = st.columns(4)
+
         def fmt(v):
             return f"{v*100:.1f}%" if v is not None else "—"
+
         c1.metric("1Y CAGR", fmt(m.get("cagr_1Y")))
         c2.metric("3Y CAGR", fmt(m.get("cagr_3Y")))
         c3.metric("5Y CAGR", fmt(m.get("cagr_5Y")))
         c4.metric("Max DD", fmt(m.get("max_drawdown")))
         st.caption(
-            f"Code: {res['scheme_code']} · NAV: {m.get('latest_nav', '—')} ({m.get('latest_date', '')}) · Weight: {res['weight_pct']:.1f}%"
+            f"Code: {res['scheme_code']} · NAV: {m.get('latest_nav', '—')} "
+            f"({m.get('latest_date', '')}) · Weight: {res['weight_pct']:.1f}%"
         )
         flags = get_news_flags(res["fund_name"])
         if flags:
