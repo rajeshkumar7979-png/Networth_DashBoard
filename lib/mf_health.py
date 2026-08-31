@@ -230,35 +230,6 @@ def get_news_flags(fund_name: str):
         return []
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
-def fetch_holdings_mfdata(scheme_code: int):
-    try:
-        r = requests.get(
-            f"https://mfdata.in/api/v1/schemes/{int(scheme_code)}",
-            timeout=12,
-        )
-        if r.status_code != 200:
-            return []
-        data = r.json().get("data") or r.json()
-        for key in ("holdings", "equity_holdings", "portfolio"):
-            h = data.get(key) if isinstance(data, dict) else None
-            if h:
-                return _normalize_holdings(h)
-        fam = data.get("family_id") if isinstance(data, dict) else None
-        if fam:
-            r2 = requests.get(
-                f"https://mfdata.in/api/v1/families/{fam}/holdings",
-                timeout=12,
-            )
-            if r2.status_code == 200:
-                d2 = r2.json().get("data") or r2.json()
-                eq = d2.get("equity") or d2.get("equity_holdings") or d2
-                return _normalize_holdings(eq)
-    except Exception:
-        pass
-    return []
-
-
 def _normalize_holdings(raw):
     out = []
     if not raw:
@@ -286,3 +257,37 @@ def _normalize_holdings(raw):
             except Exception:
                 continue
     return out[:20]
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def fetch_holdings_batch(scheme_codes: list):
+    """Use /api/v1/compare — takes scheme codes directly, no family_id."""
+    out = {}
+    codes = [int(c) for c in scheme_codes if c]
+    for i in range(0, len(codes), 10):
+        chunk = codes[i : i + 10]
+        try:
+            r = requests.get(
+                "https://mfdata.in/api/v1/compare",
+                params={"scheme_codes": ",".join(str(c) for c in chunk)},
+                timeout=15,
+            )
+            if r.status_code != 200:
+                continue
+            payload = r.json()
+            data = payload.get("data") or payload
+            entries = data if isinstance(data, list) else data.get("schemes", [])
+            for entry in entries:
+                code = entry.get("scheme_code") or entry.get("code")
+                if code is None:
+                    continue
+                raw = (
+                    entry.get("top_holdings")
+                    or entry.get("holdings")
+                    or entry.get("equity_holdings")
+                    or []
+                )
+                out[int(code)] = _normalize_holdings(raw)
+        except Exception:
+            continue
+    return out
