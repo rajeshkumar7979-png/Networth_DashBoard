@@ -3,17 +3,17 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from datetime import datetime, timedelta
-from difflib import get_close_matches
+import re
 
 # ---------- Helpers ----------
 @st.cache_data(ttl=3600, show_spinner=False)
-def search_scheme(name: str, limit: int = 5):
+def search_scheme(name: str, limit: int = 8):
     """Search mfapi.in for scheme code by name."""
     try:
         r = requests.get(
             "https://api.mfapi.in/mf/search",
             params={"q": name},
-            timeout=10,
+            timeout=12,
         )
         data = r.json()
         if isinstance(data, list):
@@ -56,7 +56,6 @@ def max_drawdown(nav_series):
 
 
 def compute_metrics(nav_df: pd.DataFrame):
-    """Return 1Y/3Y/5Y CAGR + max drawdown."""
     if nav_df.empty or len(nav_df) < 30:
         return {}
 
@@ -65,7 +64,10 @@ def compute_metrics(nav_df: pd.DataFrame):
     end_nav = latest["nav"]
     end_date = latest["date"]
 
-    metrics = {"latest_nav": end_nav, "latest_date": end_date.strftime("%Y-%m-%d")}
+    metrics = {
+        "latest_nav": end_nav,
+        "latest_date": end_date.strftime("%Y-%m-%d"),
+    }
 
     for years, label in [(1, "1Y"), (3, "3Y"), (5, "5Y")]:
         target = end_date - timedelta(days=int(365.25 * years))
@@ -82,9 +84,7 @@ def compute_metrics(nav_df: pd.DataFrame):
 
 
 def simple_health_score(metrics: dict, weight_pct: float = 0):
-    """Very simple 0-100 score."""
     score = 50
-    # Returns boost
     cagr3 = metrics.get("cagr_3Y")
     if cagr3 is not None:
         if cagr3 > 0.15:
@@ -94,7 +94,6 @@ def simple_health_score(metrics: dict, weight_pct: float = 0):
         elif cagr3 < 0.05:
             score -= 10
 
-    # Drawdown penalty
     dd = metrics.get("max_drawdown")
     if dd is not None:
         if dd < -0.35:
@@ -104,7 +103,6 @@ def simple_health_score(metrics: dict, weight_pct: float = 0):
         elif dd > -0.15:
             score += 5
 
-    # Concentration penalty
     if weight_pct > 25:
         score -= 15
     elif weight_pct > 15:
@@ -113,29 +111,79 @@ def simple_health_score(metrics: dict, weight_pct: float = 0):
     return max(0, min(100, int(score)))
 
 
-def match_scheme_code(fund_name: str):
-    """Best-effort match from fund name to scheme code."""
-    results = search_scheme(fund_name)
-    if not results:
-        # try shorter name
-        short = fund_name.split(" - ")[0].split(" FUND")[0]
-        results = search_scheme(short)
+def clean_name(name: str) -> str:
+    """Remove common noise so search works better."""
+    if not name:
+        return ""
+    name = str(name)
+    # remove plan / option noise
+    name = re.sub(r"[-–]\s*Direct.*", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"[-–]\s*Regular.*", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"\bDirect\b.*", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"\bGrowth\b.*", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"\bPlan\b", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"\bOption\b", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"\s+", " ", name).strip(" -")
+    return name
 
-    if not results:
+
+def match_scheme_code(fund_name: str):
+    """Improved matching – tries several cleaned versions."""
+    if not fund_name:
         return None, {}
 
-    # Prefer Direct + Growth
-    for r in results:
-        name = r.get("schemeName", "").lower()
-        if "direct" in name and "growth" in name:
-            return r.get("schemeCode"), r
+    candidates = []
+    original = fund_name.strip()
 
-    return results[0].get("schemeCode"), results[0]
+    # 1. original
+    candidates.append(original)
+
+    # 2. cleaned
+    cleaned = clean_name(original)
+    if cleaned and cleaned != original:
+        candidates.append(cleaned)
+
+    # 3. first 4–6 words
+    words = cleaned.split()
+    if len(words) > 3:
+        candidates.append(" ".join(words[:5]))
+        candidates.append(" ".join(words[:4]))
+        candidates.append(" ".join(words[:3]))
+
+    # 4. remove common fund house suffixes that confuse search
+    for c in list(candidates):
+        c2 = re.sub(r"\b(Fund|Mutual Fund)\b", "", c, flags=re.IGNORECASE).strip()
+        if c2 and c2 not in candidates:
+            candidates.append(c2)
+
+    seen_codes = set()
+    best = None
+
+    for q in candidates:
+        if len(q) < 4:
+            continue
+        results = search_scheme(q)
+        for r in results:
+            code = r.get("schemeCode")
+            name = r.get("schemeName", "").lower()
+            if code in seen_codes:
+                continue
+            seen_codes.add(code)
+
+            # Strong preference for Direct Growth
+            if "direct" in name and "growth" in name:
+                return code, r
+
+            if best is None:
+                best = (code, r)
+
+    if best:
+        return best
+    return None, {}
 
 
 @st.cache_data(ttl=1800, show_spinner=False)
 def analyze_fund(fund_name: str, current_value: float = 0, weight_pct: float = 0):
-    """Full light analysis for one fund."""
     code, raw = match_scheme_code(fund_name)
     if not code:
         return {
