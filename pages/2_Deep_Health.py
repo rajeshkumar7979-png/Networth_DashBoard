@@ -11,13 +11,16 @@ st.subheader("1. Money that needs a decision")
 
 col1, col2 = st.columns(2)
 with col1:
-    decision_amount = st.number_input(
-        "Amount available (₹)",
-        min_value=0,
-        value=0,
-        step=50000,
-        help="Usually a maturing FD or surplus cash",
-    )
+    # Pre-fill from Command Center if available
+default_amount = float(st.session_state.get("matured_fd_amount", 0) or 0)
+
+decision_amount = st.number_input(
+    "Amount available (₹)",
+    min_value=0,
+    value=int(default_amount) if default_amount > 0 else 0,
+    step=50000,
+    help="Usually a maturing FD or surplus cash. Auto-filled if Command Center detected a matured FD.",
+)
 with col2:
     days_to_need = st.selectbox(
         "When do you need this money?",
