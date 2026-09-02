@@ -1,26 +1,44 @@
-name: Update MF Holdings Cache
+name: Refresh MF Holdings
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 3 1 * *"
-  workflow_dispatch: {}
+    # Monthly portfolio disclosures are due within 10 calendar days of month-end.
+    # Run daily so the first newly published disclosure is picked up automatically.
+    - cron: "30 4 * * *"
 
 permissions:
   contents: write
 
 jobs:
-  update:
+  refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install pandas requests openpyxl
-      - run: python scripts/update_holdings_cache.py
-      - run: |
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh complete MF holdings
+        run: python scripts/update_holdings_cache.py
+
+      - name: Commit updated holdings cache
+        run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/mf_holdings_cache.json
-          git diff --cached --quiet || git commit -m "chore: refresh MF holdings cache"
-          git push
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/mf_holdings_cache.json data/mf_holdings_meta.json data/amfi_scheme_universe.json
+          if git diff --cached --quiet; then
+            echo "No holdings changes to commit."
+          else
+            git commit -m "chore: refresh complete MF holdings"
+            git push
+          fi
