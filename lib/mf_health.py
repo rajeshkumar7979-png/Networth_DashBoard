@@ -248,31 +248,31 @@ def _is_stale(entry: dict, max_age_days: int = 35) -> bool:
 
 
 def fetch_holdings_batch_live(scheme_codes: list, timeout=30):
-    """Refresh complete holdings using the Phase 1 ingestion engine.
-
-    The previous implementation used mfdata /compare, which can return only
-    top holdings and silently downgrade a complete portfolio.
-    """
+    """Fetch COMPLETE holdings; never use mfdata /compare top-holdings here."""
     out = {}
     try:
-        from lib.mf_holdings import ingest_scheme_holdings
+        from lib.mf_holdings import ingest_scheme_holdings, build_session
     except Exception:
         return out
 
-    session = requests.Session()
+    try:
+        session = build_session()
+    except Exception:
+        import requests as _requests
+        session = _requests.Session()
+
     for raw_code in scheme_codes:
         try:
-            code = int(raw_code)
+            code = str(int(raw_code))
         except (TypeError, ValueError):
             continue
         try:
-            holdings, _meta = ingest_scheme_holdings(session, str(code))
-            if isinstance(holdings, list) and holdings:
-                out[code] = holdings
+            holdings, _meta = ingest_scheme_holdings(session, code)
+            if holdings:
+                out[int(code)] = holdings
         except Exception:
             continue
     return out
-
 
 def get_holdings_for_funds(codes, force_refresh=False):
     """Load complete holdings and return them in the format used by MF Health.
