@@ -248,195 +248,152 @@ def _is_stale(entry: dict, max_age_days: int = 35) -> bool:
 
 
 def fetch_holdings_batch_live(scheme_codes: list, timeout=30):
+    """Refresh complete holdings using the Phase 1 ingestion engine.
+
+    The previous implementation used mfdata /compare, which can return only
+    top holdings and silently downgrade a complete portfolio.
+    """
     out = {}
-    codes = [int(c) for c in scheme_codes if c]
-    for i in range(0, len(codes), 10):
-        chunk = codes[i:i + 10]
-        try:
-            r = requests.get(
-                "https://mfdata.in/api/v1/compare",
-                params={"scheme_codes": ",".join(str(c) for c in chunk)},
-                timeout=timeout,
-            )
-            if r.status_code != 200:
-                continue
-            payload = r.json()
-            data = payload.get("data") or payload
-            entries = data if isinstance(data, list) else data.get("schemes", [])
-            for entry in entries:
-                code = entry.get("scheme_code") or entry.get("code")
-                if code is None:
-                    continue
-                raw = entry.get("top_holdings") or entry.get("holdings") or entry.get("equity_holdings") or []
-                out[int(code)] = _normalize_holdings(raw)
-        except Exception:
-            continue
-    return out
-def get_holdings_for_funds(codes, force_refresh=False):
-    """
-    Load complete mutual-fund holdings.
-
-    Supports:
-      - New cache format:
-        {"scheme_code": [holding, holding, ...]}
-
-      - Old cache format:
-        {"scheme_code": {"holdings": [holding, ...]}}
-
-    The function never assumes one cache structure.
-    """
-
-    result = {}
-    cache = {}
-
-    # ---------------------------------------------------------
-    # LOAD CACHE
-    # ---------------------------------------------------------
     try:
-        if os.path.exists(HOLDINGS_CACHE_PATH):
-            with open(HOLDINGS_CACHE_PATH, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-
-            if isinstance(loaded, dict):
-                cache = loaded
-
+        from lib.mf_holdings import ingest_scheme_holdings
     except Exception:
-        cache = {}
+        return out
 
-    # ---------------------------------------------------------
-    # READ CACHED HOLDINGS
-    # ---------------------------------------------------------
-    missing_codes = []
-
-    for raw_code in codes:
-
+    session = requests.Session()
+    for raw_code in scheme_codes:
         try:
             code = int(raw_code)
         except (TypeError, ValueError):
             continue
+        try:
+            holdings, _meta = ingest_scheme_holdings(session, str(code))
+            if isinstance(holdings, list) and holdings:
+                out[code] = holdings
+        except Exception:
+            continue
+    return out
 
-        key = str(code)
 
-        entry = cache.get(key)
+def get_holdings_for_funds(codes, force_refresh=False):
+    """Load complete holdings and return them in the format used by MF Health.
 
-        holdings = None
+    Supports both the new cache format (scheme -> list) and the legacy format
+    (scheme -> {holdings: [...]}) and derives holding weights from market value
+    when the disclosure source does not publish weight_pct.
+    """
+    result = {}
+    cache = {}
 
-        # NEW FORMAT
+    try:
+        if os.path.exists(HOLDINGS_CACHE_PATH):
+            with open(HOLDINGS_CACHE_PATH, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+            if isinstance(loaded, dict):
+                cache = loaded
+    except Exception:
+        cache = {}
+
+    def extract_holdings(entry):
         if isinstance(entry, list):
-            holdings = entry
+            return entry
+        if isinstance(entry, dict):
+            for key in ("holdings", "top_holdings", "equity_holdings", "portfolio", "equity"):
+                value = entry.get(key)
+                if isinstance(value, list):
+                    return value
+        return []
 
-        # OLD FORMAT
-        elif isinstance(entry, dict):
+    def prepare_holdings(raw_holdings):
+        if not isinstance(raw_holdings, list):
+            return []
+        cleaned = []
+        for h in raw_holdings:
+            if not isinstance(h, dict):
+                continue
+            name = (h.get("name") or h.get("stock_name") or h.get("instrument")
+                    or h.get("security") or h.get("security_name"))
+            if not name:
+                continue
+            weight = h.get("weight_pct") if h.get("weight_pct") is not None else h.get("weight")
+            try:
+                weight = float(weight) if weight is not None else None
+            except (TypeError, ValueError):
+                weight = None
+            market_value = h.get("market_value")
+            try:
+                market_value = float(market_value) if market_value is not None else None
+            except (TypeError, ValueError):
+                market_value = None
+            cleaned.append({
+                "name": str(name).strip(),
+                "weight": weight,
+                "market_value": market_value,
+                "isin": h.get("isin"),
+                "sector": h.get("sector"),
+                "instrument_type": h.get("instrument_type"),
+                "market_cap": h.get("market_cap"),
+                "credit_rating": h.get("credit_rating"),
+                "maturity_date": h.get("maturity_date"),
+                "coupon_rate": h.get("coupon_rate"),
+                "source": h.get("source"),
+            })
 
-            holdings = entry.get("holdings")
+        total_market_value = sum(
+            h["market_value"] for h in cleaned
+            if h["market_value"] is not None and h["market_value"] > 0
+        )
+        if total_market_value > 0:
+            for h in cleaned:
+                if h["weight"] is None and h["market_value"] is not None:
+                    h["weight"] = h["market_value"] / total_market_value * 100.0
 
-            if not isinstance(holdings, list) or not holdings:
-                holdings = entry.get("top_holdings")
+        return [h for h in cleaned if isinstance(h.get("weight"), (int, float))]
 
-            if not isinstance(holdings, list) or not holdings:
-                holdings = entry.get("equity_holdings")
-
-            if not isinstance(holdings, list) or not holdings:
-                holdings = entry.get("portfolio")
-
-        # Valid cached holdings
-        if isinstance(holdings, list) and len(holdings) > 0:
+    missing_codes = []
+    for raw_code in codes:
+        try:
+            code = int(raw_code)
+        except (TypeError, ValueError):
+            continue
+        holdings = prepare_holdings(extract_holdings(cache.get(str(code))))
+        if holdings:
             result[code] = holdings
         else:
             missing_codes.append(code)
 
-    # ---------------------------------------------------------
-    # FORCE REFRESH
-    # ---------------------------------------------------------
     if force_refresh:
         missing_codes = []
-
         for raw_code in codes:
             try:
                 code = int(raw_code)
-                if code not in missing_codes:
-                    missing_codes.append(code)
             except (TypeError, ValueError):
                 continue
+            if code not in missing_codes:
+                missing_codes.append(code)
 
-    # ---------------------------------------------------------
-    # LIVE FETCH FOR MISSING FUNDS
-    # ---------------------------------------------------------
     if missing_codes:
-
         try:
             fresh = fetch_holdings_batch_live(missing_codes)
-
         except Exception:
             fresh = {}
-
         if isinstance(fresh, dict):
-
             for raw_code in missing_codes:
-
                 try:
                     code = int(raw_code)
                 except (TypeError, ValueError):
                     continue
-
-                entry = fresh.get(code)
-
-                if entry is None:
-                    entry = fresh.get(str(code))
-
-                holdings = None
-
-                # New live response
-                if isinstance(entry, list):
-                    holdings = entry
-
-                # Dictionary response
-                elif isinstance(entry, dict):
-
-                    holdings = entry.get("holdings")
-
-                    if not isinstance(holdings, list) or not holdings:
-                        holdings = entry.get("top_holdings")
-
-                    if not isinstance(holdings, list) or not holdings:
-                        holdings = entry.get("equity_holdings")
-
-                    if not isinstance(holdings, list) or not holdings:
-                        holdings = entry.get("portfolio")
-
-                if isinstance(holdings, list) and len(holdings) > 0:
-
+                entry = fresh.get(code, fresh.get(str(code)))
+                holdings = prepare_holdings(extract_holdings(entry))
+                if holdings:
                     result[code] = holdings
+                    cache[str(code)] = entry if isinstance(entry, list) else extract_holdings(entry)
 
-                    # Always save in the NEW format
-                    cache[str(code)] = holdings
-
-    # ---------------------------------------------------------
-    # SAVE UPDATED CACHE
-    # ---------------------------------------------------------
     try:
-
-        os.makedirs(
-            os.path.dirname(HOLDINGS_CACHE_PATH),
-            exist_ok=True
-        )
-
-        with open(
-            HOLDINGS_CACHE_PATH,
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            json.dump(
-                cache,
-                f,
-                ensure_ascii=False,
-                indent=2
-            )
-
+        os.makedirs(os.path.dirname(HOLDINGS_CACHE_PATH), exist_ok=True)
+        with open(HOLDINGS_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
     except Exception:
         pass
 
-    return result
-
+    return result, cache
 
