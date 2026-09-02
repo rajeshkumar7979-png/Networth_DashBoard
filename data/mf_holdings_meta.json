@@ -18,7 +18,7 @@
     "amfi_code": "120828",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/120828",
-    "retrieved_at": "2026-09-02T03:14:16+00:00",
+    "retrieved_at": "2026-09-02T04:37:13+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 128,
@@ -49,7 +49,7 @@
     "amfi_code": "133036",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/133036",
-    "retrieved_at": "2026-09-02T03:14:17+00:00",
+    "retrieved_at": "2026-09-02T04:37:14+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 122,
@@ -80,7 +80,7 @@
     "amfi_code": "133801",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/133801",
-    "retrieved_at": "2026-09-02T03:14:17+00:00",
+    "retrieved_at": "2026-09-02T04:37:15+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 50,
@@ -111,7 +111,7 @@
     "amfi_code": "120465",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/120465",
-    "retrieved_at": "2026-09-02T03:14:18+00:00",
+    "retrieved_at": "2026-09-02T04:37:15+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 51,
@@ -142,7 +142,7 @@
     "amfi_code": "120323",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/120323",
-    "retrieved_at": "2026-09-02T03:14:18+00:00",
+    "retrieved_at": "2026-09-02T04:37:15+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 79,
@@ -173,7 +173,7 @@
     "amfi_code": "143903",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/143903",
-    "retrieved_at": "2026-09-02T03:14:18+00:00",
+    "retrieved_at": "2026-09-02T04:37:16+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 6,
@@ -204,7 +204,7 @@
     "amfi_code": "119250",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/119250",
-    "retrieved_at": "2026-09-02T03:14:19+00:00",
+    "retrieved_at": "2026-09-02T04:37:16+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 46,
@@ -235,7 +235,7 @@
     "amfi_code": "102000",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/102000",
-    "retrieved_at": "2026-09-02T03:14:19+00:00",
+    "retrieved_at": "2026-09-02T04:37:17+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 48,
@@ -266,7 +266,7 @@
     "amfi_code": "115833",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/115833",
-    "retrieved_at": "2026-09-02T03:14:20+00:00",
+    "retrieved_at": "2026-09-02T04:37:18+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 8,
@@ -297,7 +297,7 @@
     "amfi_code": "146381",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/146381",
-    "retrieved_at": "2026-09-02T03:14:21+00:00",
+    "retrieved_at": "2026-09-02T04:37:18+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 52,
@@ -328,7 +328,7 @@
     "amfi_code": "140228",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/140228",
-    "retrieved_at": "2026-09-02T03:14:22+00:00",
+    "retrieved_at": "2026-09-02T04:37:19+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 97,
@@ -359,7 +359,7 @@
     "amfi_code": "119091",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/119091",
-    "retrieved_at": "2026-09-02T03:14:23+00:00",
+    "retrieved_at": "2026-09-02T04:37:20+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 152,
@@ -390,7 +390,7 @@
     "amfi_code": "120621",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/120621",
-    "retrieved_at": "2026-09-02T03:14:23+00:00",
+    "retrieved_at": "2026-09-02T04:37:20+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 80,
@@ -421,7 +421,7 @@
     "amfi_code": "147919",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/147919",
-    "retrieved_at": "2026-09-02T03:14:24+00:00",
+    "retrieved_at": "2026-09-02T04:37:20+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 84,
@@ -452,7 +452,7 @@
     "amfi_code": "122639",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/122639",
-    "retrieved_at": "2026-09-02T03:14:24+00:00",
+    "retrieved_at": "2026-09-02T04:37:21+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 121,
@@ -483,7 +483,7 @@
     "amfi_code": "119835",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/119835",
-    "retrieved_at": "2026-09-02T03:14:25+00:00",
+    "retrieved_at": "2026-09-02T04:37:22+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 94,
@@ -514,7 +514,7 @@
     "amfi_code": "119132",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/119132",
-    "retrieved_at": "2026-09-02T03:14:26+00:00",
+    "retrieved_at": "2026-09-02T04:37:22+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 3,
@@ -545,7 +545,7 @@
     "amfi_code": "118989",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/118989",
-    "retrieved_at": "2026-09-02T03:14:27+00:00",
+    "retrieved_at": "2026-09-02T04:37:23+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 81,
@@ -564,7 +564,7 @@
     "amfi_scheme_code": "145137",
     "amfi_scheme_name": "Invesco India Small Cap Fund",
     "error": "fund-disclosures: GET failed: https://fund-holdings-browser.vercel.app/api/amfi/145137: 404 Client Error: Not Found for url: https://fund-holdings-browser.vercel.app/api/amfi/145137 | mfdata: GET failed: https://mfdata.in/api/v1/schemes/145137: 522 Server Error: <none> for url: https://mfdata.in/api/v1/schemes/145137",
-    "updated_at": "2026-09-02T03:15:35.218419+00:00",
+    "updated_at": "2026-09-02T04:38:31.241143+00:00",
     "cache_preserved": false
   },
   "143269": {
@@ -586,7 +586,7 @@
     "amfi_code": "143269",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/143269",
-    "retrieved_at": "2026-09-02T03:15:36+00:00",
+    "retrieved_at": "2026-09-02T04:38:32+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 59,
@@ -617,7 +617,7 @@
     "amfi_code": "143341",
     "source": "fund-disclosures",
     "endpoint": "https://fund-holdings-browser.vercel.app/api/amfi/143341",
-    "retrieved_at": "2026-09-02T03:15:36+00:00",
+    "retrieved_at": "2026-09-02T04:38:32+00:00",
     "http_request_id": null,
     "validation": {
       "holding_count": 51,
