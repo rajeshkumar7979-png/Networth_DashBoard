@@ -3,8 +3,6 @@ name: Refresh MF Holdings
 on:
   workflow_dispatch:
   schedule:
-    # Monthly portfolio disclosures are due within 10 calendar days of month-end.
-    # Run daily so the first newly published disclosure is picked up automatically.
     - cron: "30 4 * * *"
 
 permissions:
@@ -13,32 +11,69 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
       - name: Refresh complete MF holdings
         run: python scripts/update_holdings_cache.py
 
+      - name: Verify generated cache
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          cache = Path("data/mf_holdings_cache.json")
+          meta = Path("data/mf_holdings_meta.json")
+          universe = Path("data/amfi_scheme_universe.json")
+
+          if not cache.exists():
+              raise SystemExit("ERROR: data/mf_holdings_cache.json was not created")
+
+          data = json.loads(cache.read_text(encoding="utf-8"))
+          funds = [k for k in data if str(k).isdigit() and data[k]]
+          print(f"Cache file: {cache}")
+          print(f"Funds with holdings: {len(funds)}")
+          print(f"Metadata exists: {meta.exists()}")
+          print(f"AMFI universe exists: {universe.exists()}")
+
+          if not funds:
+              raise SystemExit("ERROR: holdings cache is empty; refusing to publish empty cache")
+          PY
+
       - name: Commit updated holdings cache
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add data/mf_holdings_cache.json data/mf_holdings_meta.json data/amfi_scheme_universe.json
+
           if git diff --cached --quiet; then
             echo "No holdings changes to commit."
-          else
-            git commit -m "chore: refresh complete MF holdings"
-            git push
+            exit 0
           fi
+
+          git commit -m "chore: refresh complete MF holdings"
+
+          # Explicitly authenticate the push. This fixes the exit-code-128
+          # failure seen when the runner cannot authenticate the git remote.
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
