@@ -163,31 +163,77 @@ def overlap_pillar_score(overlap_pct):
 codes = [r["scheme_code"] for r in ok_results]
 holdings_by_code, cache = get_holdings_for_funds(codes, force_refresh=False)
 
-stock_exposure = defaultdict(list)  # stock -> [(fund_name, weight_in_fund, fund_value_in_portfolio)]
+def _is_equity_holding(h):
+    """Only real equity positions belong in the stock-overlap analysis."""
+    typ = str(h.get("instrument_type") or "").strip().lower()
+    if typ:
+        return typ in {"equity", "stock", "listed_equity", "equity_share"}
+    # Conservative fallback when an old cache has no instrument_type.
+    name = str(h.get("name") or "").lower()
+    blocked = ("bond", "debenture", "certificate of deposit", "treasury",
+               "t-bill", "g-sec", "government security", "commercial paper",
+               "money market", "cash", "liquid fund", "etf", "fund of fund")
+    return not any(x in name for x in blocked)
+
+def _holding_key(h):
+    isin = str(h.get("isin") or "").strip().upper()
+    if isin and isin != "-":
+        return "ISIN:" + isin
+    name = re.sub(r"[^A-Z0-9]", "", str(h.get("name") or "").upper())
+    return "NAME:" + name if name else None
+
+# security key -> [(fund_name, weight_in_fund, fund_value, display_name)]
+stock_exposure = defaultdict(list)
 for r in ok_results:
-    for h in holdings_by_code.get(r["scheme_code"], []):
-        stock_exposure[h["name"]].append((r["fund_name"], h["weight"], r["current_value"]))
-
-overlap_available = len(stock_exposure) > 0
-
-# Overlapped exposure = value of holdings sitting in >1 fund, as % of total MF value (approx)
-per_fund_overlap_pct = {}
-if overlap_available:
-    for r in ok_results:
-        code = r["scheme_code"]
-        hlist = holdings_by_code.get(code, [])
-        if not hlist:
-            per_fund_overlap_pct[code] = None
+    code = r["scheme_code"]
+    for h in holdings_by_code.get(code, []):
+        if not _is_equity_holding(h):
             continue
-        overlapped_wt = sum(
-            h["weight"] for h in hlist
-            if len(stock_exposure.get(h["name"], [])) > 1
-        )
-        per_fund_overlap_pct[code] = overlapped_wt  # % of THIS fund's disclosed holdings
-    all_overlap_vals = [v for v in per_fund_overlap_pct.values() if v is not None]
-    portfolio_overlap_pct = float(np.mean(all_overlap_vals)) if all_overlap_vals else None
+        key = _holding_key(h)
+        weight = h.get("weight")
+        if not key or not isinstance(weight, (int, float)) or weight <= 0:
+            continue
+        stock_exposure[key].append((
+            r["fund_name"], float(weight), float(r["current_value"]),
+            str(h.get("name") or "—")
+        ))
+
+overlap_available = any(len({x[0] for x in apps}) > 1 for apps in stock_exposure.values())
+
+# Per-fund overlap = percentage of that fund's disclosed portfolio invested in
+# stocks that are also held by at least one other fund in this portfolio.
+per_fund_overlap_pct = {}
+for r in ok_results:
+    code = r["scheme_code"]
+    hlist = holdings_by_code.get(code, [])
+    if not hlist:
+        per_fund_overlap_pct[code] = None
+        continue
+    overlapped_keys = {k for k, apps in stock_exposure.items()
+                       if len({x[0] for x in apps}) > 1}
+    overlap_weight = 0.0
+    seen_keys = set()
+    for h in hlist:
+        if not _is_equity_holding(h):
+            continue
+        key = _holding_key(h)
+        weight = h.get("weight")
+        if key in overlapped_keys and key not in seen_keys and isinstance(weight, (int, float)):
+            overlap_weight += float(weight)
+            seen_keys.add(key)
+    per_fund_overlap_pct[code] = overlap_weight
+
+# Portfolio overlap is based on YOUR actual MF allocation, not the average of fund percentages.
+# This prevents a small liquid fund and a large equity fund from having equal influence.
+overlap_user_value = 0.0
+if overlap_available and total_value > 0:
+    for key, apps in stock_exposure.items():
+        if len({x[0] for x in apps}) < 2:
+            continue
+        for fund_name, weight, fund_value, _display_name in apps:
+            overlap_user_value += fund_value * (weight / 100.0)
+    portfolio_overlap_pct = float(np.clip(overlap_user_value / total_value * 100.0, 0, 100))
 else:
-    per_fund_overlap_pct = {r["scheme_code"]: None for r in ok_results}
     portfolio_overlap_pct = None
 
 def overlap_badge(pct):
@@ -335,17 +381,21 @@ with c2:
 
 with c3:
     st.markdown('<div class="mfh-card">', unsafe_allow_html=True)
-    st.markdown("**Top Overlapped Stocks**")
+    st.markdown("**Top Overlapped Stocks (Equity Only)**")
     if overlap_available:
         rows2 = []
-        for stock, apps in stock_exposure.items():
-            if len(apps) < 2:
+        for key, apps in stock_exposure.items():
+            fund_count = len({x[0] for x in apps})
+            if fund_count < 2:
                 continue
-            total_exp = sum(fv * (w / 100) for _, w, fv in apps)
-            rows2.append({"Stock": stock, "In Funds": len(apps),
+            total_exp = sum(fv * (w / 100.0) for _, w, fv, _ in apps)
+            display_name = max(apps, key=lambda x: x[1])[3]
+            rows2.append({"Stock": display_name, "In Funds": fund_count,
                           "Total Exposure": total_exp, "% of MF Portfolio": total_exp / total_value * 100})
         if rows2:
-            top_df = pd.DataFrame(rows2).sort_values("In Funds", ascending=False).head(5)
+            top_df = pd.DataFrame(rows2).sort_values(
+                ["In Funds", "Total Exposure"], ascending=[False, False]
+            ).head(5)
             for _, rr in top_df.iterrows():
                 st.markdown(
                     f"<div class='fund-row' style='display:flex;justify-content:space-between'>"
