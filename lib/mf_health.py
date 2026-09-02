@@ -217,7 +217,7 @@ def _normalize_holdings(raw):
                 out.append({"name": str(name).strip(), "weight": float(w)})
             except Exception:
                 continue
-    return out[:20]
+    return out
 
 
 def _load_holdings_cache():
