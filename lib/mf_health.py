@@ -274,31 +274,128 @@ def fetch_holdings_batch_live(scheme_codes: list, timeout=30):
     return out
 
 
-def get_holdings_for_funds(scheme_codes: list, force_refresh: bool = False):
-    cache = _load_holdings_cache()
+def get_holdings_for_funds(codes, force_refresh=False):
+    """
+    Load complete MF holdings.
+
+    Supports both:
+      1. New cache format:
+         {"scheme_code": [holding, holding, ...]}
+
+      2. Old cache format:
+         {"scheme_code": {"holdings": [holding, holding, ...], ...}}
+
+    Never crashes because of cache format differences.
+    """
+
+    cache = {}
+
+    try:
+        if os.path.exists(HOLDINGS_CACHE_PATH):
+            with open(HOLDINGS_CACHE_PATH, "r", encoding="utf-8") as f:
+                cache = json.load(f)
+
+            if not isinstance(cache, dict):
+                cache = {}
+
+    except Exception:
+        cache = {}
+
     result = {}
-    to_fetch = []
+    missing = []
 
-    for code in scheme_codes:
-        if not code:
+    # ---------------------------------------------------------
+    # READ EXISTING CACHE
+    # ---------------------------------------------------------
+    for code in codes:
+        try:
+            code_int = int(code)
+            key = str(code_int)
+        except Exception:
             continue
-        key = str(code)
+
         entry = cache.get(key)
-        if entry and not _is_stale(entry) and not force_refresh:
-            result[int(code)] = entry["holdings"]
+
+        holdings = None
+
+        if isinstance(entry, list):
+            # NEW FORMAT
+            holdings = entry
+
+        elif isinstance(entry, dict):
+            # OLD FORMAT
+            holdings = entry.get("holdings")
+
+            # Some versions may store the holdings directly
+            # under another common key.
+            if not holdings:
+                holdings = (
+                    entry.get("top_holdings")
+                    or entry.get("equity_holdings")
+                    or entry.get("portfolio")
+                )
+
+        if isinstance(holdings, list) and holdings:
+            result[code_int] = holdings
         else:
-            to_fetch.append(int(code))
+            missing.append(code_int)
 
-    if to_fetch:
-        fresh = fetch_holdings_batch_live(to_fetch)
-        now_iso = datetime.now().isoformat()
-        for code in to_fetch:
-            key = str(code)
-            if code in fresh and fresh[code]:
-                cache[key] = {"holdings": fresh[code], "fetched_at": now_iso}
-                result[code] = fresh[code]
-            elif key in cache:
-                result[code] = cache[key]["holdings"]
-        _save_holdings_cache(cache)
+    # ---------------------------------------------------------
+    # FETCH MISSING / FORCE REFRESH
+    # ---------------------------------------------------------
+    fetch_codes = [int(c) for c in codes] if force_refresh else missing
 
-    return result, cache
+    if fetch_codes:
+        try:
+            fresh = fetch_holdings_batch_live(fetch_codes)
+
+            if isinstance(fresh, dict):
+                for code in fetch_codes:
+                    key = str(int(code))
+
+                    entry = fresh.get(code)
+
+                    if entry is None:
+                        entry = fresh.get(key)
+
+                    holdings = None
+
+                    if isinstance(entry, list):
+                        holdings = entry
+
+                    elif isinstance(entry, dict):
+                        holdings = (
+                            entry.get("holdings")
+                            or entry.get("top_holdings")
+                            or entry.get("equity_holdings")
+                            or entry.get("portfolio")
+                        )
+
+                    if isinstance(holdings, list) and holdings:
+                        result[int(code)] = holdings
+
+                        # Keep the cache in the NEW simple format.
+                        cache[key] = holdings
+
+        except Exception:
+            # Do not destroy usable cached data if live fetching fails.
+            pass
+
+    # ---------------------------------------------------------
+    # SAVE CACHE
+    # ---------------------------------------------------------
+    try:
+        os.makedirs(os.path.dirname(HOLDINGS_CACHE_PATH), exist_ok=True)
+
+        with open(HOLDINGS_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(
+                cache,
+                f,
+                ensure_ascii=False,
+                indent=2
+            )
+
+    except Exception:
+        pass
+
+    return result
