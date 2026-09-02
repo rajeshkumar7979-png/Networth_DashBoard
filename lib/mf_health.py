@@ -272,122 +272,161 @@ def fetch_holdings_batch_live(scheme_codes: list, timeout=30):
         except Exception:
             continue
     return out
-
-
 def get_holdings_for_funds(codes, force_refresh=False):
     """
-    Load complete MF holdings.
+    Load complete mutual-fund holdings.
 
-    Supports both:
-      1. New cache format:
-         {"scheme_code": [holding, holding, ...]}
+    Supports:
+      - New cache format:
+        {"scheme_code": [holding, holding, ...]}
 
-      2. Old cache format:
-         {"scheme_code": {"holdings": [holding, holding, ...], ...}}
+      - Old cache format:
+        {"scheme_code": {"holdings": [holding, ...]}}
 
-    Never crashes because of cache format differences.
+    The function never assumes one cache structure.
     """
 
+    result = {}
     cache = {}
 
+    # ---------------------------------------------------------
+    # LOAD CACHE
+    # ---------------------------------------------------------
     try:
         if os.path.exists(HOLDINGS_CACHE_PATH):
             with open(HOLDINGS_CACHE_PATH, "r", encoding="utf-8") as f:
-                cache = json.load(f)
+                loaded = json.load(f)
 
-            if not isinstance(cache, dict):
-                cache = {}
+            if isinstance(loaded, dict):
+                cache = loaded
 
     except Exception:
         cache = {}
 
-    result = {}
-    missing = []
+    # ---------------------------------------------------------
+    # READ CACHED HOLDINGS
+    # ---------------------------------------------------------
+    missing_codes = []
 
-    # ---------------------------------------------------------
-    # READ EXISTING CACHE
-    # ---------------------------------------------------------
-    for code in codes:
+    for raw_code in codes:
+
         try:
-            code_int = int(code)
-            key = str(code_int)
-        except Exception:
+            code = int(raw_code)
+        except (TypeError, ValueError):
             continue
+
+        key = str(code)
 
         entry = cache.get(key)
 
         holdings = None
 
+        # NEW FORMAT
         if isinstance(entry, list):
-            # NEW FORMAT
             holdings = entry
 
+        # OLD FORMAT
         elif isinstance(entry, dict):
-            # OLD FORMAT
+
             holdings = entry.get("holdings")
 
-            # Some versions may store the holdings directly
-            # under another common key.
-            if not holdings:
-                holdings = (
-                    entry.get("top_holdings")
-                    or entry.get("equity_holdings")
-                    or entry.get("portfolio")
-                )
+            if not isinstance(holdings, list) or not holdings:
+                holdings = entry.get("top_holdings")
 
-        if isinstance(holdings, list) and holdings:
-            result[code_int] = holdings
+            if not isinstance(holdings, list) or not holdings:
+                holdings = entry.get("equity_holdings")
+
+            if not isinstance(holdings, list) or not holdings:
+                holdings = entry.get("portfolio")
+
+        # Valid cached holdings
+        if isinstance(holdings, list) and len(holdings) > 0:
+            result[code] = holdings
         else:
-            missing.append(code_int)
+            missing_codes.append(code)
 
     # ---------------------------------------------------------
-    # FETCH MISSING / FORCE REFRESH
+    # FORCE REFRESH
     # ---------------------------------------------------------
-    fetch_codes = [int(c) for c in codes] if force_refresh else missing
+    if force_refresh:
+        missing_codes = []
 
-    if fetch_codes:
+        for raw_code in codes:
+            try:
+                code = int(raw_code)
+                if code not in missing_codes:
+                    missing_codes.append(code)
+            except (TypeError, ValueError):
+                continue
+
+    # ---------------------------------------------------------
+    # LIVE FETCH FOR MISSING FUNDS
+    # ---------------------------------------------------------
+    if missing_codes:
+
         try:
-            fresh = fetch_holdings_batch_live(fetch_codes)
-
-            if isinstance(fresh, dict):
-                for code in fetch_codes:
-                    key = str(int(code))
-
-                    entry = fresh.get(code)
-
-                    if entry is None:
-                        entry = fresh.get(key)
-
-                    holdings = None
-
-                    if isinstance(entry, list):
-                        holdings = entry
-
-                    elif isinstance(entry, dict):
-                        holdings = (
-                            entry.get("holdings")
-                            or entry.get("top_holdings")
-                            or entry.get("equity_holdings")
-                            or entry.get("portfolio")
-                        )
-
-                    if isinstance(holdings, list) and holdings:
-                        result[int(code)] = holdings
-
-                        # Keep the cache in the NEW simple format.
-                        cache[key] = holdings
+            fresh = fetch_holdings_batch_live(missing_codes)
 
         except Exception:
-            # Do not destroy usable cached data if live fetching fails.
-            pass
+            fresh = {}
+
+        if isinstance(fresh, dict):
+
+            for raw_code in missing_codes:
+
+                try:
+                    code = int(raw_code)
+                except (TypeError, ValueError):
+                    continue
+
+                entry = fresh.get(code)
+
+                if entry is None:
+                    entry = fresh.get(str(code))
+
+                holdings = None
+
+                # New live response
+                if isinstance(entry, list):
+                    holdings = entry
+
+                # Dictionary response
+                elif isinstance(entry, dict):
+
+                    holdings = entry.get("holdings")
+
+                    if not isinstance(holdings, list) or not holdings:
+                        holdings = entry.get("top_holdings")
+
+                    if not isinstance(holdings, list) or not holdings:
+                        holdings = entry.get("equity_holdings")
+
+                    if not isinstance(holdings, list) or not holdings:
+                        holdings = entry.get("portfolio")
+
+                if isinstance(holdings, list) and len(holdings) > 0:
+
+                    result[code] = holdings
+
+                    # Always save in the NEW format
+                    cache[str(code)] = holdings
 
     # ---------------------------------------------------------
-    # SAVE CACHE
+    # SAVE UPDATED CACHE
     # ---------------------------------------------------------
     try:
-        os.makedirs(os.path.dirname(HOLDINGS_CACHE_PATH), exist_ok=True)
 
-        with open(HOLDINGS_CACHE_PATH, "w", encoding="utf-8") as f:
+        os.makedirs(
+            os.path.dirname(HOLDINGS_CACHE_PATH),
+            exist_ok=True
+        )
+
+        with open(
+            HOLDINGS_CACHE_PATH,
+            "w",
+            encoding="utf-8"
+        ) as f:
+
             json.dump(
                 cache,
                 f,
@@ -399,3 +438,5 @@ def get_holdings_for_funds(codes, force_refresh=False):
         pass
 
     return result
+
+
