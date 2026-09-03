@@ -1444,7 +1444,7 @@ else:
 # ==================================================
 st.markdown('<div class="section-header">News pulse · Holdings + NRI</div>', unsafe_allow_html=True)
 
-from lib.news import get_portfolio_news
+from lib.news import get_portfolio_news, get_sentiment, pick_balanced, time_ago
 
 stock_syms = []
 if not stocks_valid.empty:
@@ -1471,40 +1471,20 @@ try:
 except Exception:
     news_items = []
 
-POSITIVE = ["gain", "profit", "rise", "up", "growth", "high", "record", "beat", "strong", "surge", "rally", "jump"]
-NEGATIVE = ["loss", "fall", "down", "drop", "cut", "weak", "fraud", "probe", "decline", "slash", "risk", "suit"]
-
-def get_sentiment(title):
-    t = title.lower()
-    if any(w in t for w in NEGATIVE):
-        return "red"
-    if any(w in t for w in POSITIVE):
-        return "green"
-    return "neutral"
-
-# Group by query (asset)
-from collections import defaultdict
-groups = defaultdict(list)
-for item in news_items:
-    groups[item.get("query", "General")].append(item)
-
-if not groups:
-    st.caption("No news this run.")
+if not news_items:
+    st.caption("No recent news this run.")
 else:
-    # Show one line per asset
-    for asset, items in list(groups.items())[:8]:
-        sentiments = [get_sentiment(i["title"]) for i in items]
-        if "red" in sentiments:
-            mark = "🔴"
-            label = "Negative"
-        elif "green" in sentiments:
-            mark = "🟢"
-            label = "Positive"
-        else:
-            mark = "⚪"
-            label = "Neutral"
-
-        st.markdown(f"{mark} **{asset}** — {label}")
+    # Guarantees NRI/tax news survives even when holdings queries return many items.
+    summary_items = pick_balanced(news_items, total=8, min_nri_tax=2)
+    for item in summary_items:
+        s = get_sentiment(item["title"])
+        mark = "🔴" if s == "red" else ("🟢" if s == "green" else "⚪")
+        age = time_ago(item.get("published_dt"))
+        st.markdown(
+            f"{mark} **[{item['title']}]({item['link']})** "
+            f"<span style='color:#6b7688;font-size:0.72rem'>· {age} · {item.get('source','')}</span>",
+            unsafe_allow_html=True,
+        )
 
     st.page_link("pages/4_News.py", label="View all news →", icon="📰")
 
