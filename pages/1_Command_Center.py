@@ -12,7 +12,8 @@ from plotly.subplots import make_subplots
 import os
 import re
 import time
-
+from lib.formatters import safe_float, format_inr_indian, format_inr, format_inr_compact
+from lib.portfolio import load_excel as load_data
 st.set_page_config(page_title="Family Net Worth", page_icon="💰", layout="wide", initial_sidebar_state="expanded")
 
 IST = pytz.timezone("Asia/Kolkata")
@@ -508,81 +509,7 @@ def get_sgb_price(raw_ticker: str):
         pass
     return None
 
-def safe_float(val, default=0.0):
-    try:
-        v = pd.to_numeric(val, errors="coerce")
-        return default if pd.isna(v) else float(v)
-    except Exception:
-        return default
 
-def format_inr_indian(num, decimals=0):
-    """Indian grouping: 2,68,12,952.00 (lakhs/crores), not Western 26,812,952."""
-    if num is None or (isinstance(num, float) and np.isnan(num)):
-        return "₹0" if decimals == 0 else "₹0.00"
-    try:
-        n = float(num)
-    except Exception:
-        return "₹0"
-    sign = "-" if n < 0 else ""
-    n = abs(n)
-    if decimals <= 0:
-        int_part = str(int(round(n)))
-        frac = ""
-    else:
-        s = f"{n:.{decimals}f}"
-        int_part, frac = s.split(".")
-        frac = "." + frac
-    # Indian: last 3 digits, then groups of 2
-    if len(int_part) <= 3:
-        grouped = int_part
-    else:
-        last3 = int_part[-3:]
-        rest = int_part[:-3]
-        groups = []
-        while rest:
-            groups.append(rest[-2:])
-            rest = rest[:-2]
-        grouped = ",".join(reversed(groups)) + "," + last3
-    return f"{sign}₹{grouped}{frac}"
-
-def format_inr(num):
-    return format_inr_indian(num, decimals=0)
-
-def format_inr_compact(num):
-    """Use Cr / Lakh for large headline metrics."""
-    if num is None or (isinstance(num, float) and np.isnan(num)):
-        return "₹0"
-    try:
-        n = float(num)
-    except Exception:
-        return "₹0"
-    sign = "-" if n < 0 else ""
-    a = abs(n)
-    if a >= 1e7:
-        return f"{sign}₹{a/1e7:.2f} Cr"
-    if a >= 1e5:
-        return f"{sign}₹{a/1e5:.2f} L"
-    return format_inr_indian(n, decimals=0)
-
-def load_data(uploaded_file=None):
-    if uploaded_file is not None:
-        xls = pd.ExcelFile(uploaded_file)
-    else:
-        try:
-            xls = pd.ExcelFile("data/Networth_Raw_Data.xlsx")
-        except Exception:
-            st.error("Could not load data/Networth_Raw_Data.xlsx")
-            st.stop()
-    sheet_map = {s.lower().strip(): s for s in xls.sheet_names}
-    def find_sheet(*names):
-        for n in names:
-            if n in sheet_map:
-                return sheet_map[n]
-        return list(xls.sheet_names)[0]
-    fd = pd.read_excel(xls, find_sheet("fd", "fixed deposits", "fixed_deposits"))
-    mf = pd.read_excel(xls, find_sheet("mf", "mutual funds", "mutual_funds"))
-    stocks = pd.read_excel(xls, find_sheet("stocks", "stock", "equities"))
-    return fd, mf, stocks
 
 CATEGORY_RULES = [
     ("Liquid", r"liquid"), ("Money Market", r"money\s*market"), ("Overnight", r"overnight"),
