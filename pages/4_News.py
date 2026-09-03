@@ -1,14 +1,10 @@
 import streamlit as st
-from lib.news import get_portfolio_news
+from lib.news import get_portfolio_news, get_sentiment, time_ago
 
 st.title("News · Holdings + NRI / Tax")
-st.caption("Full list. Command Center shows only a short summary.")
+st.caption("Full list, sorted newest first. Command Center shows only a short summary.")
 
 st.page_link("pages/1_Command_Center.py", label="← Back to Command Center", icon="📊")
-
-# We need the same data the main page uses.
-# For now this page works standalone with empty holdings
-# (we will connect real symbols later if needed)
 
 stock_syms = st.session_state.get("stock_syms", [])
 fund_names = st.session_state.get("fund_names", [])
@@ -24,33 +20,20 @@ except Exception:
     news_items = []
 
 if not news_items:
-    st.info("No news found this run.")
+    st.info("No recent news found this run.")
     st.stop()
 
-# Simple sentiment
-POSITIVE = ["gain", "profit", "rise", "up", "growth", "high", "record", "beat", "strong", "surge", "rally"]
-NEGATIVE = ["loss", "fall", "down", "drop", "cut", "weak", "fraud", "probe", "decline", "slash", "risk"]
-
-def sentiment(title):
-    t = title.lower()
-    if any(w in t for w in NEGATIVE):
-        return "red"
-    if any(w in t for w in POSITIVE):
-        return "green"
-    return "neutral"
+CATEGORY_LABELS = {"holding": "Holding", "nri_tax": "NRI / Tax", "macro": "Market"}
 
 for item in news_items:
-    s = sentiment(item["title"])
-    if s == "green":
-        mark = "🟢"
-    elif s == "red":
-        mark = "🔴"
-    else:
-        mark = "⚪"
+    s = get_sentiment(item["title"])
+    mark = "🟢" if s == "green" else ("🔴" if s == "red" else "⚪")
+    age = time_ago(item.get("published_dt"))
+    cat_label = CATEGORY_LABELS.get(item.get("category"), "")
 
     st.markdown(
         f"""{mark} **[{item['title']}]({item['link']})**  
-        <span style="color:#888;font-size:0.8rem">{item.get('source','')} · {item.get('published','')} · {item.get('query','')}</span>""",
+        <span style="color:#888;font-size:0.8rem">{item.get('source','')} · {age} · {cat_label} · {item.get('query','')}</span>""",
         unsafe_allow_html=True,
     )
     st.markdown("")
