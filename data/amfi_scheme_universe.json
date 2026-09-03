@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-02T04:37:11+00:00",
+  "fetched_at": "2026-09-03T05:37:25+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -30187,7 +30187,7 @@
       "isin_secondary": "",
       "scheme_name": "Sundaram Small Cap Fund",
       "nav": null,
-      "nav_date": "IDCW (Income Distribution CUM Capital Withdrawal)",
+      "nav_date": "GROWTH",
       "amc": "Sundaram Mutual Fund",
       "category": "Open Ended Schemes(Equity Scheme - Small Cap Fund)"
     },
@@ -30197,7 +30197,7 @@
       "isin_secondary": "INF903J01462",
       "scheme_name": "Sundaram Small Cap Fund",
       "nav": null,
-      "nav_date": "GROWTH",
+      "nav_date": "IDCW (Income Distribution CUM Capital Withdrawal)",
       "amc": "Sundaram Mutual Fund",
       "category": "Open Ended Schemes(Equity Scheme - Small Cap Fund)"
     },
@@ -31000,6 +31000,46 @@
       "nav_date": "IDCW Option",
       "amc": "Union Mutual Fund",
       "category": "Open Ended Schemes(Equity Scheme - Value Fund)"
+    },
+    {
+      "scheme_code": "154599",
+      "isin_primary": "INF194KB1LC0",
+      "isin_secondary": "INF194KB1LD8",
+      "scheme_name": "Bandhan Contra Fund",
+      "nav": null,
+      "nav_date": "Annual IDCW",
+      "amc": "Bandhan Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Contra Fund)"
+    },
+    {
+      "scheme_code": "154600",
+      "isin_primary": "INF194KB1KX8",
+      "isin_secondary": "",
+      "scheme_name": "Bandhan Contra Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Bandhan Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Contra Fund)"
+    },
+    {
+      "scheme_code": "154601",
+      "isin_primary": "INF194KB1LA4",
+      "isin_secondary": "INF194KB1LB2",
+      "scheme_name": "Bandhan Contra Fund",
+      "nav": null,
+      "nav_date": "Annual IDCW",
+      "amc": "Bandhan Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Contra Fund)"
+    },
+    {
+      "scheme_code": "154598",
+      "isin_primary": "INF194KB1KU4",
+      "isin_secondary": "",
+      "scheme_name": "Bandhan Contra Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Bandhan Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Contra Fund)"
     },
     {
       "scheme_code": "120348",
@@ -38806,6 +38846,16 @@
       "isin_primary": "INF846K01X63",
       "isin_secondary": "",
       "scheme_name": "Axis NIFTY Bank ETF",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Equity ETF)"
+    },
+    {
+      "scheme_code": "154627",
+      "isin_primary": "INF846KA1598",
+      "isin_secondary": "",
+      "scheme_name": "Axis Nifty Energy ETF",
       "nav": null,
       "nav_date": "",
       "amc": "Axis Mutual Fund",
@@ -60522,6 +60572,86 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
     },
     {
+      "scheme_code": "154591",
+      "isin_primary": "",
+      "isin_secondary": "INF2XUU01039",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "154589",
+      "isin_primary": "INF2XUU01013",
+      "isin_secondary": "",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "154592",
+      "isin_primary": "INF2XUU01112",
+      "isin_secondary": "INF2XUU01120",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "154583",
+      "isin_primary": "INF2XUU01070",
+      "isin_secondary": "INF2XUU01088",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Weekly IDCW",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "154586",
+      "isin_primary": "",
+      "isin_secondary": "INF2XUU01047",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "154581",
+      "isin_primary": "INF2XUU01021",
+      "isin_secondary": "",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "154590",
+      "isin_primary": "INF2XUU01096",
+      "isin_secondary": "INF2XUU01104",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "154587",
+      "isin_primary": "INF2XUU01054",
+      "isin_secondary": "INF2XUU01062",
+      "scheme_name": "ASK Liquid Fund",
+      "nav": null,
+      "nav_date": "Weekly IDCW",
+      "amc": "ASK MUTUAL FUND",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
       "scheme_code": "128954",
       "isin_primary": "INF846K01NH4",
       "isin_secondary": "",
@@ -71832,6 +71962,16 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
     },
     {
+      "scheme_code": "154636",
+      "isin_primary": "INF22M001234",
+      "isin_secondary": "",
+      "scheme_name": "JioBlackRock Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Jio BlackRock Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
       "scheme_code": "154081",
       "isin_primary": "INF22M001150",
       "isin_secondary": "",
@@ -74328,6 +74468,26 @@
       "scheme_name": "Axis Nifty Capital Markets Index Fund",
       "nav": null,
       "nav_date": "",
+      "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Equity Funds)"
+    },
+    {
+      "scheme_code": "154594",
+      "isin_primary": "INF846KA1580",
+      "isin_secondary": "",
+      "scheme_name": "Axis Nifty Energy Index Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Equity Funds)"
+    },
+    {
+      "scheme_code": "154597",
+      "isin_primary": "INF846KA1572",
+      "isin_secondary": "",
+      "scheme_name": "Axis Nifty Energy Index Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
       "amc": "Axis Mutual Fund",
       "category": "Open Ended Schemes(Index Funds - Equity Funds)"
     },
