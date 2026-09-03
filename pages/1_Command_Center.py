@@ -1775,15 +1775,18 @@ _footer = (
 st.caption(_footer)
 
 # ----- Pass matured FD amount to Deep Health -----
+# Sums the INR current value of any FD that is already overdue (Days to
+# Maturity < 0) or maturing within the next 14 days, so Deep Health's
+# "Amount available" field is pre-filled with money that actually needs a
+# decision right now. Falls back to 0 (no pre-fill) if fd/fd_valid aren't
+# available or nothing qualifies.
 try:
-    if "attention_flags" in dir() or "flags" in dir():
-        pass  # placeholder
-    # Simple heuristic: look for any variable that looks like matured FD value
-    for varname in ["matured_fd_value", "fd_matured_amount", "uncollected_fd"]:
-        if varname in dir() and globals().get(varname):
-            st.session_state["matured_fd_amount"] = float(globals()[varname])
-            break
-    # Fallback: if you store attention items as text, skip for now
+    if "fd" in dir() and fd is not None and not fd.empty and "Days to Maturity" in fd.columns:
+        actionable = fd[fd["Days to Maturity"] <= 14]
+        if not actionable.empty and "Current Value (INR)" in actionable.columns:
+            matured_total = float(actionable["Current Value (INR)"].dropna().sum())
+            if matured_total > 0:
+                st.session_state["matured_fd_amount"] = matured_total
 except Exception:
     pass
 # ----- Read-only handoff to MF Health (does not change mf_valid or returns) -----
