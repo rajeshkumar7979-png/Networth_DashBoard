@@ -1444,7 +1444,7 @@ else:
 # ==================================================
 st.markdown('<div class="section-header">News pulse · Holdings + NRI</div>', unsafe_allow_html=True)
 
-from lib.news import get_portfolio_news, get_sentiment, pick_balanced, time_ago
+from lib.news import get_portfolio_news, group_by_asset
 
 stock_syms = []
 if not stocks_valid.empty:
@@ -1474,17 +1474,11 @@ except Exception:
 if not news_items:
     st.caption("No recent news this run.")
 else:
-    # Guarantees NRI/tax news survives even when holdings queries return many items.
-    summary_items = pick_balanced(news_items, total=8, min_nri_tax=2)
-    for item in summary_items:
-        s = get_sentiment(item["title"])
-        mark = "🔴" if s == "red" else ("🟢" if s == "green" else "⚪")
-        age = time_ago(item.get("published_dt"))
-        st.markdown(
-            f"{mark} **[{item['title']}]({item['link']})** "
-            f"<span style='color:#6b7688;font-size:0.72rem'>· {age} · {item.get('source','')}</span>",
-            unsafe_allow_html=True,
-        )
+    groups = group_by_asset(news_items, max_groups=8, min_nri_tax_groups=1, min_macro_groups=1)
+    for g in groups:
+        mark = "🔴" if g["sentiment"] == "red" else ("🟢" if g["sentiment"] == "green" else "⚪")
+        label = "Negative" if g["sentiment"] == "red" else ("Positive" if g["sentiment"] == "green" else "Neutral")
+        st.markdown(f"{mark} **{g['asset']}** — {label}")
 
     st.page_link("pages/4_News.py", label="View all news →", icon="📰")
 
