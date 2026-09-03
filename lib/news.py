@@ -43,8 +43,8 @@ NEGATIVE_WORDS = ["loss", "fall", "down", "drop", "cut", "weak", "fraud",
 # or two; NRI/FEMA/tax rule changes stay relevant for weeks. One blanket
 # cutoff for everything under- or over-filters depending on category.
 MAX_AGE_DAYS_BY_CATEGORY = {
-    "holding": 5,
-    "macro": 3,
+    "holding": 10,
+    "macro": 5,
     "nri_tax": 30,
 }
 DEFAULT_MAX_AGE_DAYS = 10  # fallback if category is unrecognized
@@ -144,13 +144,15 @@ def get_portfolio_news(stock_symbols=None, fund_names=None, gold_symbols=None):
     holding_queries = []
 
     if stock_symbols:
-        for s in stock_symbols[:6]:
-            if s:
-                # Appending "share price" anchors the search to a financial
-                # context. Without it, short tickers that are also ordinary
-                # words (e.g. ETERNAL, BLS) pull in unrelated pop-culture or
-                # government-statistics results that happen to share the word.
-                holding_queries.append(f"{str(s).strip()} share price")
+        holding_queries.extend([str(s).strip() for s in stock_symbols[:6] if s])
+        # NOTE: bare ticker queries are used deliberately for recall. A prior
+        # attempt to disambiguate homonym tickers (e.g. ETERNAL, BLS) by
+        # appending "share price" was reverted — it collapsed news coverage
+        # to near-zero for most holdings because that exact phrase mostly
+        # matches live stock-quote widget pages, not news articles, on
+        # Google News RSS. The News page shows each item's source query
+        # (e.g. "Holding · ETERNAL") so occasional homonym mismatches are
+        # visible and easy to spot-check.
     if fund_names:
         for name in fund_names[:3]:
             short = str(name).split(" - ")[0].split(" FUND")[0].strip()
@@ -184,6 +186,57 @@ def get_portfolio_news(stock_symbols=None, fund_names=None, gold_symbols=None):
     # Newest first. Unknown-date items (published_dt is None) sort last.
     all_items.sort(key=lambda x: x["published_dt"] or datetime.min, reverse=True)
     return all_items
+
+
+def group_by_asset(news_items, max_groups=8, min_nri_tax_groups=1, min_macro_groups=1):
+    """Group news items by asset/query for a compact dashboard summary —
+    one line per asset with an overall sentiment, the way Command Center
+    originally displayed news (colored dot + asset name), rather than a
+    full headline list (that's what the dedicated News page is for).
+
+    Groups are ordered newest-first (since news_items is already sorted
+    that way and this preserves first-seen order). Reserves a minimum
+    number of nri_tax and macro groups so a handful of highly-covered
+    holdings can't crowd the NRI/tax and market-pulse categories out of
+    the summary entirely.
+
+    Returns a list of dicts: {"asset": query, "category": ..., "items": [...],
+    "sentiment": "red"|"green"|"neutral"}.
+    """
+    groups = {}
+    order = []
+    for item in news_items:
+        q = item.get("query", "General")
+        if q not in groups:
+            groups[q] = {"asset": q, "category": item["category"], "items": []}
+            order.append(q)
+        groups[q]["items"].append(item)
+
+    for q in order:
+        sentiments = [get_sentiment(i["title"]) for i in groups[q]["items"]]
+        if "red" in sentiments:
+            groups[q]["sentiment"] = "red"
+        elif "green" in sentiments:
+            groups[q]["sentiment"] = "green"
+        else:
+            groups[q]["sentiment"] = "neutral"
+
+    if len(order) <= max_groups:
+        return [groups[q] for q in order]
+
+    nri_qs = [q for q in order if groups[q]["category"] == "nri_tax"]
+    macro_qs = [q for q in order if groups[q]["category"] == "macro"]
+
+    reserved = nri_qs[:min_nri_tax_groups] + macro_qs[:min_macro_groups]
+    selected = list(reserved)
+    for q in order:
+        if len(selected) >= max_groups:
+            break
+        if q not in selected:
+            selected.append(q)
+    selected = set(selected[:max_groups])
+
+    return [groups[q] for q in order if q in selected]
 
 
 def pick_balanced(news_items, total=8, min_nri_tax=2):
