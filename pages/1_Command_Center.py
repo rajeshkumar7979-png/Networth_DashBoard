@@ -940,7 +940,7 @@ for _, row in fd_raw.iterrows():
             integrity_issues.append(("HIGH", f"FD {account or 'no-acct'} ({holder}): unrecognized currency '{currency}' — treated as INR."))
             currency = "INR"
 
-                mat_date = to_naive_ts(row.get("Maturity Date"))
+        mat_date = to_naive_ts(row.get("Maturity Date"))
         dep_date = to_naive_ts(row.get("Deposit Date"))
         roi = safe_float(row.get("ROI % p.a.", row.get("ROI_Percent_pa", 6.5)))
         maturity_amt = _safe_maturity_amount(row)
