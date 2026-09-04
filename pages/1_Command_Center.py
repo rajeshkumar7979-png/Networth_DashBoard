@@ -1636,34 +1636,48 @@ else:
 # ==================================================
 # NEWS
 # ==================================================
-# --- News Pulse (3-column layout) ---
+from lib.news import get_portfolio_news, group_by_asset, get_sentiment
+
 st.markdown('<div class="section-header">News Pulse · Holdings + NRI</div>', unsafe_allow_html=True)
 
-if news_items:  # whatever your list variable is called
-    cols = st.columns(3)
-    for i, item in enumerate(news_items):
-        with cols[i % 3]:
-            # keep your existing card / sentiment rendering here
-            # e.g. colour dot + name + sentiment
-            sentiment = item.get("sentiment", "Neutral")
-            color = {"Positive": "#22c55e", "Negative": "#ef4444", "Neutral": "#94a3b8"}.get(sentiment, "#94a3b8")
-            st.markdown(
-                f'<div style="padding:6px 0;border-bottom:1px solid #1c2333;">'
-                f'<span style="color:{color};font-size:1.1rem;">●</span> '
-                f'<b>{item.get("symbol", "")}</b> — {sentiment}'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-else:
-    st.caption("No news items.")
-else:
-    groups = group_by_asset(news_items, max_groups=8, min_nri_tax_groups=1, min_macro_groups=1)
-    for g in groups:
-        mark = "🔴" if g["sentiment"] == "red" else ("🟢" if g["sentiment"] == "green" else "⚪")
-        label = "Negative" if g["sentiment"] == "red" else ("Positive" if g["sentiment"] == "green" else "Neutral")
-        st.markdown(f"{mark} **{g['asset']}** — {label}")
+# Build symbol lists for news (safe even if a sheet is empty)
+_stock_syms = []
+if not stocks_valid.empty and "Symbol" in stocks_valid.columns:
+    _stock_syms = stocks_valid["Symbol"].dropna().astype(str).head(6).tolist()
+_fund_names = []
+if not mf_valid.empty and "Fund Name" in mf_valid.columns:
+    _fund_names = mf_valid["Fund Name"].dropna().astype(str).head(3).tolist()
+_gold_syms = []
+if not gold_valid.empty and "Symbol" in gold_valid.columns:
+    _gold_syms = gold_valid["Symbol"].dropna().astype(str).head(3).tolist()
 
+# Store for the dedicated News page
+st.session_state["stock_syms"] = _stock_syms
+st.session_state["fund_names"] = _fund_names
+st.session_state["gold_syms"] = _gold_syms
+
+try:
+    news_items = get_portfolio_news(
+        stock_symbols=_stock_syms,
+        fund_names=_fund_names,
+        gold_symbols=_gold_syms,
+    )
+except Exception:
+    news_items = []
+
+if news_items:
+    groups = group_by_asset(news_items, max_groups=9, min_nri_tax_groups=1, min_macro_groups=1)
+    cols = st.columns(3)
+    for i, g in enumerate(groups):
+        with cols[i % 3]:
+            mark = "🔴" if g["sentiment"] == "red" else ("🟢" if g["sentiment"] == "green" else "⚪")
+            label = "Negative" if g["sentiment"] == "red" else ("Positive" if g["sentiment"] == "green" else "Neutral")
+            st.markdown(f"{mark} **{g['asset']}** — {label}")
     st.page_link("pages/4_News.py", label="View all news →", icon="📰")
+else:
+    st.caption("No recent news this run.")
+
+st.markdown("---")
 
 st.markdown("---")
 
