@@ -453,6 +453,98 @@ def get_historical_usd_inr(date_str: str):
         return rates.get("INR")
     except Exception:
         return None
+        # -------------------------------------------------
+# Phase 1 — FD valuation + FCNR attribution helpers
+# -------------------------------------------------
+def _safe_maturity_amount(row):
+    """Try common column name variants for bank-supplied maturity / current accrued amount."""
+    for col in (
+        "Maturity Amount", "Maturity_Amount", "Maturity Value",
+        "Current Accrued Amount", "Current Value", "Accrued Amount",
+        "Maturity Amt", "MaturityAmount"
+    ):
+        v = safe_float(row.get(col))
+        if v is not None and v > 0:
+            return v
+    return None
+
+
+def compute_fd_current_native(principal, roi, dep_date, mat_date, today, maturity_amt=None):
+    """
+    Returns (current_value_native, accrued_native, method, notes)
+
+    Priority:
+    1. If maturity_amt is supplied → linear interpolation between principal and maturity_amt
+       (much closer to bank reality than pure simple interest from a possibly multi-year-old deposit date).
+    2. Else → simple interest from deposit date (old behaviour) + flag.
+    """
+    notes = []
+    if principal is None or principal <= 0:
+        return None, None, "invalid", ["principal missing/zero"]
+
+    days_elapsed = max((today - dep_date).days, 0) if dep_date is not None else 0
+    total_tenor_days = None
+    if dep_date is not None and mat_date is not None and mat_date > dep_date:
+        total_tenor_days = (mat_date - dep_date).days
+
+    # --- Preferred path: bank-supplied maturity amount ---
+    if maturity_amt is not None and maturity_amt > 0 and total_tenor_days and total_tenor_days > 0:
+        # Linear interpolation (conservative mid-point estimate)
+        frac = min(max(days_elapsed / total_tenor_days, 0.0), 1.0)
+        current = principal + (maturity_amt - principal) * frac
+        accrued = current - principal
+        method = "maturity_interp"
+        notes.append(f"interpolated using maturity amount (frac={frac:.3f})")
+        # Safety: never go above maturity amount before maturity
+        if days_elapsed < total_tenor_days:
+            current = min(current, maturity_amt)
+            accrued = current - principal
+        return current, accrued, method, notes
+
+    # --- Fallback: simple interest (original behaviour) ---
+    accrued = principal * (roi / 100.0) * (days_elapsed / 365.0)
+    current = principal + accrued
+    method = "simple_interest"
+    notes.append("fallback simple interest from deposit date")
+    if total_tenor_days and total_tenor_days > 400 and days_elapsed > 400:
+        notes.append("WARNING: long tenor – simple interest may overstate value")
+    return current, accrued, method, notes
+
+
+def compute_fcnr_attribution(principal_native, accrued_native, fx_deposit, fx_today):
+    """
+    Full FCNR attribution that reconciles.
+
+    Returns dict with:
+      cost_basis_inr, current_value_inr,
+      interest_at_current_fx, fx_on_principal, fx_on_interest,
+      total_attribution, pnl, reconciled (bool)
+    """
+    if fx_today is None or fx_deposit is None or fx_today <= 0 or fx_deposit <= 0:
+        return None
+
+    cost_basis_inr = principal_native * fx_deposit
+    current_value_inr = (principal_native + accrued_native) * fx_today
+
+    interest_at_current_fx = accrued_native * fx_today
+    fx_on_principal = principal_native * (fx_today - fx_deposit)
+    fx_on_interest = accrued_native * (fx_today - fx_deposit)   # the missing piece
+
+    total_attribution = interest_at_current_fx + fx_on_principal + fx_on_interest
+    # equivalent: current_value_inr - cost_basis_inr
+    pnl = current_value_inr - cost_basis_inr
+    reconciled = abs(total_attribution - pnl) < 1.0   # allow ₹1 rounding
+
+    return {
+        "cost_basis_inr": cost_basis_inr,
+        "current_value_inr": current_value_inr,
+        "interest_at_current_fx": interest_at_current_fx,
+        "fx_on_principal": fx_on_principal,
+        "fx_on_interest": fx_on_interest,
+        "total_attribution": total_attribution,
+        "pnl": pnl,
+        "reconciled": reconciled,
+    }
 
 @st.cache_data(ttl=300, show_spinner=False)
 def get_groww_ltp(nse_symbol: str):
@@ -794,7 +886,7 @@ if not gold.empty and {"Owner", "Symbol", "Quantity", "Invested", "Current Value
     )
     gold = g_sum
 
-# ---- FD: full native/reporting currency model (Phase 2 & 6 fix) ----
+# ---- FD: Phase-1 corrected valuation + full FCNR attribution ----
 fd_rows = []
 seen_accounts = set()
 seen_fingerprints = set()  # catches exact clones when Account Number is blank/missing
@@ -816,6 +908,7 @@ for _, row in fd_raw.iterrows():
         mat_date = to_naive_ts(row.get("Maturity Date"))
         dep_date = to_naive_ts(row.get("Deposit Date"))
         roi = safe_float(row.get("ROI % p.a.", row.get("ROI_Percent_pa", 6.5)))
+        maturity_amt = _safe_maturity_amount(row)   # NEW – may be None
 
         # Dedup key: prefer real account number; otherwise fingerprint of the deposit itself
         if account:
@@ -845,10 +938,27 @@ for _, row in fd_raw.iterrows():
         if roi <= 0 or roi > 15:
             integrity_issues.append(("MEDIUM", f"FD {account or 'no-acct'} ({holder}): ROI {roi}% p.a. is outside a normal FD range — verify."))
 
-        accrued_native = principal_native * (roi / 100) * (max(days_elapsed, 0) / 365)
-        current_value_native = principal_native + accrued_native
+        # ----- Phase-1 valuation -----
+        current_value_native, accrued_native, val_method, val_notes = compute_fd_current_native(
+            principal_native, roi, dep_date, mat_date, TODAY_NAIVE, maturity_amt
+        )
+        if current_value_native is None:
+            continue
 
-        # Native/reporting split: principal at deposit-date FX; current value at today's FX
+        if val_method == "simple_interest" and maturity_amt is None:
+            integrity_issues.append((
+                "MEDIUM",
+                f"FD {account or 'no-acct'} ({holder}): no Maturity Amount in Excel — using simple interest from deposit date. "
+                f"Add Maturity Amount column for higher accuracy."
+            ))
+        if "WARNING: long tenor" in " ".join(val_notes):
+            integrity_issues.append((
+                "HIGH",
+                f"FD {account or 'no-acct'} ({holder}): deposit→maturity span is very long; simple-interest fallback may overstate value. "
+                f"Prefer supplying Maturity Amount."
+            ))
+
+        # ----- FX setup -----
         fx_today = usd_inr if currency == "USD" else 1.0
         fx_deposit = 1.0
         if currency == "USD" and dep_date is not None and usd_inr is not None:
@@ -856,32 +966,67 @@ for _, row in fd_raw.iterrows():
         elif currency == "USD":
             fx_deposit = usd_inr or 1.0
 
-        principal_inr_at_cost = principal_native * fx_deposit if fx_today is not None else None
-        current_value_inr = current_value_native * fx_today if fx_today is not None else None
-        interest_return_inr = (accrued_native * fx_deposit) if (currency == "USD" and fx_today is not None) else accrued_native
-        fx_gain_inr = ((principal_native * fx_today) - (principal_native * fx_deposit)) if (currency == "USD" and fx_today is not None) else 0.0
+        # ----- Phase-1 FCNR attribution (full reconciliation) -----
+        if currency == "USD" and fx_today is not None and fx_deposit is not None:
+            attr = compute_fcnr_attribution(principal_native, accrued_native, fx_deposit, fx_today)
+            if attr is None:
+                principal_inr_at_cost = None
+                current_value_inr = None
+                interest_return_inr = None
+                fx_gain_inr = 0.0
+                fx_on_interest_inr = 0.0
+            else:
+                principal_inr_at_cost = attr["cost_basis_inr"]
+                current_value_inr = attr["current_value_inr"]
+                # Keep old column name "Interest Return (INR)" for compatibility,
+                # but now it is interest converted at *current* FX (correct).
+                interest_return_inr = attr["interest_at_current_fx"]
+                # Old column "FX Gain/Loss (INR)" now = FX on principal only
+                # (we also expose FX on interest separately).
+                fx_gain_inr = attr["fx_on_principal"]
+                fx_on_interest_inr = attr["fx_on_interest"]
+                if not attr["reconciled"]:
+                    integrity_issues.append((
+                        "HIGH",
+                        f"FCNR {account or 'no-acct'} ({holder}): attribution does not reconcile "
+                        f"(diff ₹{abs(attr['total_attribution'] - attr['pnl']):.0f}). Check FX rates."
+                    ))
+        else:
+            # INR FD path (unchanged economics)
+            principal_inr_at_cost = principal_native
+            current_value_inr = current_value_native
+            interest_return_inr = accrued_native
+            fx_gain_inr = 0.0
+            fx_on_interest_inr = 0.0
 
-        # NRI book: USD deposits are treated as FCNR (interest + FX), not resident INR FDs
         product = "FCNR" if currency == "USD" else "INR FD"
         fd_rows.append({
-            "Holder Name": holder, "Account Number": account, "Currency": currency,
+            "Holder Name": holder,
+            "Account Number": account,
+            "Currency": currency,
             "Product": product,
             "Principal (Native)": round(principal_native, 2),
             "Principal (INR, at deposit FX)": round(principal_inr_at_cost, 0) if principal_inr_at_cost is not None else None,
-            "ROI %": roi, "Days to Maturity": days_to_mat,
+            "ROI %": roi,
+            "Days to Maturity": days_to_mat,
             "Current Value (Native)": round(current_value_native, 2),
             "Current Value (INR)": round(current_value_inr, 0) if current_value_inr is not None else None,
+            # Compatibility columns (names kept so downstream tables keep working)
             "Interest Return (INR)": round(interest_return_inr, 0) if interest_return_inr is not None else None,
-            "FX Gain/Loss (INR)": round(fx_gain_inr, 0),
+            "FX Gain/Loss (INR)": round(fx_gain_inr, 0),          # now = FX on principal only
+            # New transparency columns (safe to ignore if UI doesn't show them yet)
+            "FX on Interest (INR)": round(fx_on_interest_inr, 0),
+            "Valuation Method": val_method,
+            "Maturity Amount (Native)": round(maturity_amt, 2) if maturity_amt is not None else None,
             "Maturity Date": mat_date.strftime("%Y-%m-%d") if mat_date is not None else "",
         })
     except Exception:
         continue
+
 fd = pd.DataFrame(fd_rows)
 fd_fx_unavailable = fd["Current Value (INR)"].isna().sum() if not fd.empty else 0
 if fd_fx_unavailable:
     integrity_issues.append(("CRITICAL", f"{fd_fx_unavailable} USD FD(s) excluded from INR totals — live FX rate unavailable this run."))
-
 # -------------------------------------------------
 # AGGREGATES — only rows with a real current value count toward totals
 # -------------------------------------------------
