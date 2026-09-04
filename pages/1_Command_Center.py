@@ -1133,8 +1133,30 @@ gold_pct = _pct(total_gold)
 fd_pct = _pct(total_fd)
 true_liquid_pct = _pct(total_true_liquid)
 
-top5_mf_pct = (mf_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100) if not mf_valid.empty and total_mf > 0 else 0
-top5_stock_pct = (stocks_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100) if not stocks_valid.empty and total_stocks > 0 else 0
+# Phase 2A — family-level concentration (same fund/stock across members counted once)
+if not mf_valid.empty and total_mf > 0 and "ISIN" in mf_valid.columns:
+    _mf_by_isin = (
+        mf_valid.dropna(subset=["Current Value"])
+        .groupby("ISIN", as_index=False)["Current Value"]
+        .sum()
+    )
+    top5_mf_pct = float(_mf_by_isin.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100)
+elif not mf_valid.empty and total_mf > 0:
+    top5_mf_pct = float(mf_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_mf * 100)
+else:
+    top5_mf_pct = 0.0
+
+if not stocks_valid.empty and total_stocks > 0 and "Symbol" in stocks_valid.columns:
+    _stk_by_sym = (
+        stocks_valid.dropna(subset=["Current Value"])
+        .groupby("Symbol", as_index=False)["Current Value"]
+        .sum()
+    )
+    top5_stock_pct = float(_stk_by_sym.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100)
+elif not stocks_valid.empty and total_stocks > 0:
+    top5_stock_pct = float(stocks_valid.nlargest(5, "Current Value")["Current Value"].sum() / total_stocks * 100)
+else:
+    top5_stock_pct = 0.0
 total_fx_gain = fd_valid["FX Gain/Loss (INR)"].sum() if not fd_valid.empty else 0
 total_fcnr_interest = 0.0
 if not fd_valid.empty and "Product" in fd_valid.columns and "Interest Return (INR)" in fd_valid.columns:
