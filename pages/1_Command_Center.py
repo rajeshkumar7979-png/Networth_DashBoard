@@ -501,9 +501,9 @@ def compute_fd_current_native(principal, roi, dep_date, mat_date, today,
     """
     Returns (current_value_native, accrued_native, method, notes)
 
-    Priority:
-    1. Available Balance (bank's current value) if supplied
-    2. Maturity Amount → linear interpolation
+    Priority for this workbook:
+    1. Maturity Amount → linear interpolation (best)
+    2. Available Balance only if it is meaningfully > principal (real accrued value)
     3. Simple interest from deposit date
     """
     notes = []
@@ -515,15 +515,7 @@ def compute_fd_current_native(principal, roi, dep_date, mat_date, today,
     if dep_date is not None and mat_date is not None and mat_date > dep_date:
         total_tenor_days = (mat_date - dep_date).days
 
-    # --- 1. Bank's Available Balance (best) ---
-    if available_balance is not None and available_balance > 0:
-        current = float(available_balance)
-        accrued = current - principal
-        method = "available_balance"
-        notes.append("using Available Balance from bank")
-        return current, accrued, method, notes
-
-    # --- 2. Maturity Amount interpolation ---
+    # --- 1. Maturity Amount interpolation (preferred) ---
     if maturity_amt is not None and maturity_amt > 0 and total_tenor_days and total_tenor_days > 0:
         frac = min(max(days_elapsed / total_tenor_days, 0.0), 1.0)
         current = principal + (maturity_amt - principal) * frac
@@ -535,6 +527,18 @@ def compute_fd_current_native(principal, roi, dep_date, mat_date, today,
             accrued = current - principal
         return current, accrued, method, notes
 
+    # --- 2. Available Balance only if it looks like real accrued value ---
+    # (skip when it is essentially equal to principal — common in this Excel)
+    if available_balance is not None and available_balance > 0:
+        if available_balance > principal * 1.001:  # at least 0.1% above principal
+            current = float(available_balance)
+            accrued = current - principal
+            method = "available_balance"
+            notes.append("using Available Balance from bank (above principal)")
+            return current, accrued, method, notes
+        else:
+            notes.append("Available Balance ≈ principal — ignored")
+
     # --- 3. Simple interest fallback ---
     accrued = principal * (roi / 100.0) * (days_elapsed / 365.0)
     current = principal + accrued
@@ -542,7 +546,7 @@ def compute_fd_current_native(principal, roi, dep_date, mat_date, today,
     notes.append("fallback simple interest from deposit date")
     if total_tenor_days and total_tenor_days > 400 and days_elapsed > 400:
         notes.append("WARNING: long tenor – simple interest may overstate value")
-    return current, accrued, method, notes
+    return current, accrued, method, notess
 
 
 def compute_fcnr_attribution(principal_native, accrued_native, fx_deposit, fx_today):
