@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-03T05:37:25+00:00",
+  "fetched_at": "2026-09-04T04:36:44+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -23812,46 +23812,6 @@
       "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
     },
     {
-      "scheme_code": "151751",
-      "isin_primary": "INF179KC1GL9",
-      "isin_secondary": "",
-      "scheme_name": "HDFC Defence Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "151750",
-      "isin_primary": "INF179KC1GI5",
-      "isin_secondary": "",
-      "scheme_name": "HDFC Defence Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "151748",
-      "isin_primary": "INF179KC1GM7",
-      "isin_secondary": "INF179KC1GN5",
-      "scheme_name": "HDFC Defence Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "151749",
-      "isin_primary": "INF179KC1GJ3",
-      "isin_secondary": "INF179KC1GK1",
-      "scheme_name": "HDFC Defence Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
       "scheme_code": "141923",
       "isin_primary": "INF179KC1AX7",
       "isin_secondary": "",
@@ -24086,46 +24046,6 @@
       "isin_primary": "INF179KC1HP8",
       "isin_secondary": "INF179KC1HQ6",
       "scheme_name": "HDFC Pharma and Healthcare Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "152058",
-      "isin_primary": "INF179KC1HF9",
-      "isin_secondary": "",
-      "scheme_name": "HDFC Technology Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "152059",
-      "isin_primary": "INF179KC1HI3",
-      "isin_secondary": "",
-      "scheme_name": "HDFC Technology Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "152057",
-      "isin_primary": "INF179KC1HG7",
-      "isin_secondary": "INF179KC1HH5",
-      "scheme_name": "HDFC Technology Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "HDFC Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "152060",
-      "isin_primary": "INF179KC1HJ1",
-      "isin_secondary": "INF179KC1HK9",
-      "scheme_name": "HDFC Technology Fund",
       "nav": null,
       "nav_date": "IDCW Option",
       "amc": "HDFC Mutual Fund",
@@ -26729,46 +26649,6 @@
       "nav": null,
       "nav_date": "Bonus Option",
       "amc": "Nippon India Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "153039",
-      "isin_primary": "INF663L01Z45",
-      "isin_secondary": "",
-      "scheme_name": "PGIM India Healthcare Fund",
-      "nav": null,
-      "nav_date": "Direct Growth",
-      "amc": "PGIM India Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "153037",
-      "isin_primary": "INF663L01Z60",
-      "isin_secondary": "INF663L01Z78",
-      "scheme_name": "PGIM India Healthcare Fund",
-      "nav": null,
-      "nav_date": "Direct IDCW",
-      "amc": "PGIM India Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "153040",
-      "isin_primary": "INF663L01Z52",
-      "isin_secondary": "",
-      "scheme_name": "PGIM India Healthcare Fund",
-      "nav": null,
-      "nav_date": "Regular Growth",
-      "amc": "PGIM India Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "153038",
-      "isin_primary": "INF663L01Z86",
-      "isin_secondary": "INF663L01Z94",
-      "scheme_name": "PGIM India Healthcare Fund",
-      "nav": null,
-      "nav_date": "Regular IDCW",
-      "amc": "PGIM India Mutual Fund",
       "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
     },
     {
@@ -36912,6 +36792,86 @@
       "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
     },
     {
+      "scheme_code": "151751",
+      "isin_primary": "INF179KC1GL9",
+      "isin_secondary": "",
+      "scheme_name": "HDFC Defence Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "151750",
+      "isin_primary": "INF179KC1GI5",
+      "isin_secondary": "",
+      "scheme_name": "HDFC Defence Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "151748",
+      "isin_primary": "INF179KC1GM7",
+      "isin_secondary": "INF179KC1GN5",
+      "scheme_name": "HDFC Defence Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "151749",
+      "isin_primary": "INF179KC1GJ3",
+      "isin_secondary": "INF179KC1GK1",
+      "scheme_name": "HDFC Defence Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "152058",
+      "isin_primary": "INF179KC1HF9",
+      "isin_secondary": "",
+      "scheme_name": "HDFC Technology Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "152059",
+      "isin_primary": "INF179KC1HI3",
+      "isin_secondary": "",
+      "scheme_name": "HDFC Technology Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "152057",
+      "isin_primary": "INF179KC1HG7",
+      "isin_secondary": "INF179KC1HH5",
+      "scheme_name": "HDFC Technology Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "152060",
+      "isin_primary": "INF179KC1HJ1",
+      "isin_secondary": "INF179KC1HK9",
+      "scheme_name": "HDFC Technology Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "HDFC Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
       "scheme_code": "151142",
       "isin_primary": "INF917K01RI2",
       "isin_secondary": "",
@@ -38009,6 +37969,46 @@
       "nav": null,
       "nav_date": "IDCW Payout Option",
       "amc": "NJ Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "153039",
+      "isin_primary": "INF663L01Z45",
+      "isin_secondary": "",
+      "scheme_name": "PGIM India Healthcare Fund",
+      "nav": null,
+      "nav_date": "Direct Growth",
+      "amc": "PGIM India Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "153037",
+      "isin_primary": "INF663L01Z60",
+      "isin_secondary": "INF663L01Z78",
+      "scheme_name": "PGIM India Healthcare Fund",
+      "nav": null,
+      "nav_date": "Direct IDCW",
+      "amc": "PGIM India Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "153040",
+      "isin_primary": "INF663L01Z52",
+      "isin_secondary": "",
+      "scheme_name": "PGIM India Healthcare Fund",
+      "nav": null,
+      "nav_date": "Regular Growth",
+      "amc": "PGIM India Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "153038",
+      "isin_primary": "INF663L01Z86",
+      "isin_secondary": "INF663L01Z94",
+      "scheme_name": "PGIM India Healthcare Fund",
+      "nav": null,
+      "nav_date": "Regular IDCW",
+      "amc": "PGIM India Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
     },
     {
@@ -40142,6 +40142,46 @@
       "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
     },
     {
+      "scheme_code": "153924",
+      "isin_primary": "INF846KA1283",
+      "isin_secondary": "",
+      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
+      "nav": null,
+      "nav_date": "Growth Option Option",
+      "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153925",
+      "isin_primary": "INF846KA1309",
+      "isin_secondary": "INF846KA1325",
+      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153927",
+      "isin_primary": "INF846KA1275",
+      "isin_secondary": "",
+      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153926",
+      "isin_primary": "INF846KA1291",
+      "isin_secondary": "INF846KA1317",
+      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
       "scheme_code": "149847",
       "isin_primary": "INF846K011G9",
       "isin_secondary": "",
@@ -41859,6 +41899,46 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "Mirae Asset Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154646",
+      "isin_primary": "INF204KC1HO0",
+      "isin_secondary": "",
+      "scheme_name": "Nippon India Income Plus Arbitrage Omni Fund of Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Nippon India Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154647",
+      "isin_primary": "INF204KC1HP7",
+      "isin_secondary": "INF204KC1HQ5",
+      "scheme_name": "Nippon India Income Plus Arbitrage Omni Fund of Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Nippon India Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154649",
+      "isin_primary": "INF204KC1HM4",
+      "isin_secondary": "",
+      "scheme_name": "Nippon India Income Plus Arbitrage Omni Fund of Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Nippon India Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154648",
+      "isin_primary": "INF204KC1HN2",
+      "isin_secondary": "INF204KC1HR3",
+      "scheme_name": "Nippon India Income Plus Arbitrage Omni Fund of Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Nippon India Mutual Fund",
       "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
     },
     {
@@ -61552,6 +61632,16 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
     },
     {
+      "scheme_code": "154605",
+      "isin_primary": "INF174KA1D91",
+      "isin_secondary": "INF174KA1E17",
+      "scheme_name": "Kotak Liquid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Kotak Mahindra Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
       "scheme_code": "139535",
       "isin_primary": "",
       "isin_secondary": "INF174V01051",
@@ -73408,46 +73498,6 @@
       "scheme_name": "Axis CRISIL-IBX Financial Services 3-6 Months Debt Index Fund",
       "nav": null,
       "nav_date": "IDCW option",
-      "amc": "Axis Mutual Fund",
-      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
-    },
-    {
-      "scheme_code": "153924",
-      "isin_primary": "INF846KA1283",
-      "isin_secondary": "",
-      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
-      "nav": null,
-      "nav_date": "Growth Option Option",
-      "amc": "Axis Mutual Fund",
-      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
-    },
-    {
-      "scheme_code": "153925",
-      "isin_primary": "INF846KA1309",
-      "isin_secondary": "INF846KA1325",
-      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Axis Mutual Fund",
-      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
-    },
-    {
-      "scheme_code": "153927",
-      "isin_primary": "INF846KA1275",
-      "isin_secondary": "",
-      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Axis Mutual Fund",
-      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
-    },
-    {
-      "scheme_code": "153926",
-      "isin_primary": "INF846KA1291",
-      "isin_secondary": "INF846KA1317",
-      "scheme_name": "Axis Income Plus Arbitrage Passive FOF",
-      "nav": null,
-      "nav_date": "IDCW Option",
       "amc": "Axis Mutual Fund",
       "category": "Open Ended Schemes(Index Funds - Debt Funds)"
     },
