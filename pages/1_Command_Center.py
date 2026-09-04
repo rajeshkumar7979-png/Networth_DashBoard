@@ -1188,8 +1188,26 @@ def score_diversification(mf_df):
     hhi = ((cat / cat.sum()) ** 2).sum()
     return min(100, max(0, (1 - hhi) * 100 / 0.85))
 def score_performance(mf_df):
-    valid = mf_df.dropna(subset=["1Y %", "vs Nifty50 1Y"])
-    return (valid["1Y %"] > valid["vs Nifty50 1Y"]).mean() * 100 if not valid.empty else 60
+    """
+    Phase 2B — value-weighted beat rate vs Nifty50 1Y.
+    A ₹50L fund that beats the index counts far more than a ₹50k fund.
+    Falls back to equal-weight if Current Value is missing.
+    """
+    if mf_df is None or mf_df.empty:
+        return 60.0
+    need = ["1Y %", "vs Nifty50 1Y"]
+    if not all(c in mf_df.columns for c in need):
+        return 60.0
+    valid = mf_df.dropna(subset=need).copy()
+    if valid.empty:
+        return 60.0
+    beat = (valid["1Y %"] > valid["vs Nifty50 1Y"]).astype(float)
+    if "Current Value" in valid.columns:
+        w = pd.to_numeric(valid["Current Value"], errors="coerce").fillna(0.0)
+        wsum = float(w.sum())
+        if wsum > 0:
+            return float((beat * w).sum() / wsum * 100.0)
+    return float(beat.mean() * 100.0)
 
 alloc_score = score_allocation(equity_pct)
 conc_score = min(score_concentration(top5_mf_pct), score_concentration(top5_stock_pct) if not stocks_valid.empty else 100)
