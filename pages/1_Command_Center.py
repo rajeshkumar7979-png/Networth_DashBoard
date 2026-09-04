@@ -1812,22 +1812,25 @@ with tab3:
         _fd_view = fd[_fd_cols].copy()
         if "Days to Maturity" in _fd_view.columns:
             _fd_view = _fd_view.sort_values("Days to Maturity", ascending=True, na_position="last")
-        st.dataframe(
+st.dataframe(
             style_money_df(_fd_view, pnl_cols=("FX Gain/Loss (INR)", "Interest Return (INR)")),
             column_config={
-    "Holder Name": st.column_config.TextColumn("Holder Name", width="medium"),
-    "Product": st.column_config.TextColumn("Product", width="small"),
-    "Currency": st.column_config.TextColumn("Ccy", width="small"),
-    "Principal (Native)": st.column_config.NumberColumn("Principal\n(Native)", format="%.2f"),
-    "Principal (INR, at deposit FX)": st.column_config.NumberColumn("Principal\n(INR @ dep FX)", format="%.0f"),
-    "ROI %": st.column_config.NumberColumn("ROI %", format="%.2f%%", width="small"),
-    "Days to Maturity": st.column_config.NumberColumn("Days to\nMaturity", width="small"),
-    "Current Value (Native)": st.column_config.NumberColumn("Current Value\n(Native)", format="%.2f"),
-    "Current Value (INR)": st.column_config.NumberColumn("Current Value\n(INR)", format="%.0f"),
-    "Interest Return (INR)": st.column_config.NumberColumn("Interest\nReturn (INR)", format="%.0f"),
-    "FX Gain/Loss (INR)": st.column_config.NumberColumn("FX Gain/Loss\n(INR)", format="%.0f"),
-    "Maturity Date": st.column_config.TextColumn("Maturity\nDate", width="small"),
-}
+                "Holder Name": st.column_config.TextColumn("Holder Name", width="medium"),
+                "Product": st.column_config.TextColumn("Product", width="small"),
+                "Currency": st.column_config.TextColumn("Ccy", width="small"),
+                "Principal (Native)": st.column_config.NumberColumn("Principal\n(Native)", format="%.2f"),
+                "Principal (INR, at deposit FX)": st.column_config.NumberColumn("Principal\n(INR @ dep FX)", format="%.0f"),
+                "ROI %": st.column_config.NumberColumn("ROI %", format="%.2f%%", width="small"),
+                "Days to Maturity": st.column_config.NumberColumn("Days to\nMaturity", width="small"),
+                "Current Value (Native)": st.column_config.NumberColumn("Current Value\n(Native)", format="%.2f"),
+                "Current Value (INR)": st.column_config.NumberColumn("Current Value\n(INR)", format="%.0f"),
+                "Interest Return (INR)": st.column_config.NumberColumn("Interest\nReturn (INR)", format="%.0f"),
+                "FX Gain/Loss (INR)": st.column_config.NumberColumn("FX Gain/Loss\n(INR)", format="%.0f"),
+                "Maturity Date": st.column_config.TextColumn("Maturity\nDate", width="small"),
+            },
+            use_container_width=True,
+            hide_index=True,
+        )
 
 with tab4:
     if not gold.empty:
