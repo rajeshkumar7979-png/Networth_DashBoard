@@ -513,12 +513,15 @@ def compute_fd_current_native(principal, roi, dep_date, mat_date, today, maturit
 
 def compute_fcnr_attribution(principal_native, accrued_native, fx_deposit, fx_today):
     """
-    Full FCNR attribution that reconciles.
+    Full FCNR attribution that reconciles exactly.
 
-    Returns dict with:
-      cost_basis_inr, current_value_inr,
-      interest_at_current_fx, fx_on_principal, fx_on_interest,
-      total_attribution, pnl, reconciled (bool)
+    Decomposition chosen for clarity:
+      - Interest valued at *current* FX
+      - FX gain/loss only on the original principal
+
+    Identity (must hold):
+      interest_at_current_fx + fx_on_principal
+      == current_value_inr - cost_basis_inr
     """
     if fx_today is None or fx_deposit is None or fx_today <= 0 or fx_deposit <= 0:
         return None
@@ -528,19 +531,18 @@ def compute_fcnr_attribution(principal_native, accrued_native, fx_deposit, fx_to
 
     interest_at_current_fx = accrued_native * fx_today
     fx_on_principal = principal_native * (fx_today - fx_deposit)
-    fx_on_interest = accrued_native * (fx_today - fx_deposit)   # the missing piece
 
-    total_attribution = interest_at_current_fx + fx_on_principal + fx_on_interest
-    # equivalent: current_value_inr - cost_basis_inr
+    # No separate "fx_on_interest" — interest is already at current FX.
+    total_attribution = interest_at_current_fx + fx_on_principal
     pnl = current_value_inr - cost_basis_inr
-    reconciled = abs(total_attribution - pnl) < 1.0   # allow ₹1 rounding
+    reconciled = abs(total_attribution - pnl) < 1.0  # ₹1 tolerance for float noise
 
     return {
         "cost_basis_inr": cost_basis_inr,
         "current_value_inr": current_value_inr,
         "interest_at_current_fx": interest_at_current_fx,
         "fx_on_principal": fx_on_principal,
-        "fx_on_interest": fx_on_interest,
+        "fx_on_interest": 0.0,          # kept for column compatibility; always 0 in this model
         "total_attribution": total_attribution,
         "pnl": pnl,
         "reconciled": reconciled,
