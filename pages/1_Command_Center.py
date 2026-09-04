@@ -457,26 +457,54 @@ def get_historical_usd_inr(date_str: str):
 # Phase 1 — FD valuation + FCNR attribution helpers
 # -------------------------------------------------
 def _safe_maturity_amount(row):
-    """Try common column name variants for bank-supplied maturity / current accrued amount."""
-    for col in (
-        "Maturity Amount", "Maturity_Amount", "Maturity Value",
-        "Current Accrued Amount", "Current Value", "Accrued Amount",
-        "Maturity Amt", "MaturityAmount"
-    ):
-        v = safe_float(row.get(col))
-        if v is not None and v > 0:
-            return v
+    """
+    Robust lookup for bank-supplied maturity / current accrued amount.
+    Handles trailing spaces, case differences, and common alternate names.
+    Also falls back to Available Balance when it looks like a real accrued value.
+    """
+    # Build a normalised map of the row's columns once
+    col_map = {}
+    for c in row.index if hasattr(row, "index") else row.keys():
+        key = str(c).strip().lower().replace("_", " ")
+        col_map[key] = c
+
+    # Preferred names (highest priority first)
+    candidates = [
+        "maturity amount",
+        "maturity value",
+        "maturity amt",
+        "maturityamount",
+        "current accrued amount",
+        "accrued amount",
+        "current value",
+    ]
+
+    for name in candidates:
+        if name in col_map:
+            v = safe_float(row.get(col_map[name]))
+            if v is not None and v > 0:
+                return v
+
+    # Secondary: Available Balance (only if it is meaningfully different from principal
+    # or equal to principal — still better than pure simple-interest guess)
+    for name in ("available balance", "available balanc", "available amount"):
+        if name in col_map:
+            v = safe_float(row.get(col_map[name]))
+            if v is not None and v > 0:
+                return v
+
     return None
 
 
-def compute_fd_current_native(principal, roi, dep_date, mat_date, today, maturity_amt=None):
+def compute_fd_current_native(principal, roi, dep_date, mat_date, today,
+                              maturity_amt=None, available_balance=None):
     """
     Returns (current_value_native, accrued_native, method, notes)
 
     Priority:
-    1. If maturity_amt is supplied → linear interpolation between principal and maturity_amt
-       (much closer to bank reality than pure simple interest from a possibly multi-year-old deposit date).
-    2. Else → simple interest from deposit date (old behaviour) + flag.
+    1. Available Balance (bank's current value) if supplied
+    2. Maturity Amount → linear interpolation
+    3. Simple interest from deposit date
     """
     notes = []
     if principal is None or principal <= 0:
@@ -487,21 +515,27 @@ def compute_fd_current_native(principal, roi, dep_date, mat_date, today, maturit
     if dep_date is not None and mat_date is not None and mat_date > dep_date:
         total_tenor_days = (mat_date - dep_date).days
 
-    # --- Preferred path: bank-supplied maturity amount ---
+    # --- 1. Bank's Available Balance (best) ---
+    if available_balance is not None and available_balance > 0:
+        current = available_balance
+        accrued = current - principal
+        method = "available_balance"
+        notes.append("using Available Balance from bank")
+        return current, accrued, method, notes
+
+    # --- 2. Maturity Amount interpolation ---
     if maturity_amt is not None and maturity_amt > 0 and total_tenor_days and total_tenor_days > 0:
-        # Linear interpolation (conservative mid-point estimate)
         frac = min(max(days_elapsed / total_tenor_days, 0.0), 1.0)
         current = principal + (maturity_amt - principal) * frac
         accrued = current - principal
         method = "maturity_interp"
         notes.append(f"interpolated using maturity amount (frac={frac:.3f})")
-        # Safety: never go above maturity amount before maturity
         if days_elapsed < total_tenor_days:
             current = min(current, maturity_amt)
             accrued = current - principal
         return current, accrued, method, notes
 
-    # --- Fallback: simple interest (original behaviour) ---
+    # --- 3. Simple interest fallback ---
     accrued = principal * (roi / 100.0) * (days_elapsed / 365.0)
     current = principal + accrued
     method = "simple_interest"
@@ -909,8 +943,20 @@ for _, row in fd_raw.iterrows():
         mat_date = to_naive_ts(row.get("Maturity Date"))
         dep_date = to_naive_ts(row.get("Deposit Date"))
         roi = safe_float(row.get("ROI % p.a.", row.get("ROI_Percent_pa", 6.5)))
-        maturity_amt = _safe_maturity_amount(row)   # NEW – may be None
+        maturity_amt = _safe_maturity_amount(row)
 
+# Also try to read Available Balance directly
+available_balance = None
+for col in row.index if hasattr(row, "index") else []:
+    if str(col).strip().lower().replace("_", " ") in ("available balance", "available balanc", "available amount"):
+        available_balance = safe_float(row.get(col))
+        break
+
+current_value_native, accrued_native, val_method, val_notes = compute_fd_current_native(
+    principal_native, roi, dep_date, mat_date, TODAY_NAIVE,
+    maturity_amt=maturity_amt,
+    available_balance=available_balance,
+)
         # Dedup key: prefer real account number; otherwise fingerprint of the deposit itself
         if account:
             dedup_key = f"acct:{account}"
