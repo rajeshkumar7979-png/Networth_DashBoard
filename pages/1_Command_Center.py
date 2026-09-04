@@ -515,37 +515,36 @@ def compute_fcnr_attribution(principal_native, accrued_native, fx_deposit, fx_to
     """
     Full FCNR attribution that reconciles exactly.
 
-    Decomposition chosen for clarity:
-      - Interest valued at *current* FX
-      - FX gain/loss only on the original principal
+    Model:
+      - Interest is valued at *current* FX
+      - FX gain/loss is calculated only on the original principal
 
-    Identity (must hold):
+    Identity (must hold within ₹1):
       interest_at_current_fx + fx_on_principal
       == current_value_inr - cost_basis_inr
     """
     if fx_today is None or fx_deposit is None or fx_today <= 0 or fx_deposit <= 0:
         return None
 
-    cost_basis_inr = principal_native * fx_deposit
-    current_value_inr = (principal_native + accrued_native) * fx_today
+    cost_basis_inr     = principal_native * fx_deposit
+    current_value_inr  = (principal_native + accrued_native) * fx_today
 
     interest_at_current_fx = accrued_native * fx_today
-    fx_on_principal = principal_native * (fx_today - fx_deposit)
+    fx_on_principal        = principal_native * (fx_today - fx_deposit)
 
-    # No separate "fx_on_interest" — interest is already at current FX.
     total_attribution = interest_at_current_fx + fx_on_principal
-    pnl = current_value_inr - cost_basis_inr
-    reconciled = abs(total_attribution - pnl) < 1.0  # ₹1 tolerance for float noise
+    pnl               = current_value_inr - cost_basis_inr
+    reconciled        = abs(total_attribution - pnl) < 1.0
 
     return {
-        "cost_basis_inr": cost_basis_inr,
-        "current_value_inr": current_value_inr,
-        "interest_at_current_fx": interest_at_current_fx,
-        "fx_on_principal": fx_on_principal,
-        "fx_on_interest": 0.0,          # kept for column compatibility; always 0 in this model
-        "total_attribution": total_attribution,
-        "pnl": pnl,
-        "reconciled": reconciled,
+        "cost_basis_inr":          cost_basis_inr,
+        "current_value_inr":       current_value_inr,
+        "interest_at_current_fx":  interest_at_current_fx,
+        "fx_on_principal":         fx_on_principal,
+        "fx_on_interest":          0.0,   # kept for column compatibility; always 0 in this model
+        "total_attribution":       total_attribution,
+        "pnl":                     pnl,
+        "reconciled":              reconciled,
     }
 
 @st.cache_data(ttl=300, show_spinner=False)
