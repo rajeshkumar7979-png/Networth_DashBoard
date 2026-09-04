@@ -1163,6 +1163,13 @@ gold_pct = _pct(total_gold)
 # Backward-compatible: all deposits as share of NW (history still uses this key)
 fd_pct = _pct(total_fd)
 true_liquid_pct = _pct(total_true_liquid)
+# Deep Health defaults
+st.session_state["cc_equity_pct"] = float(equity_pct)
+st.session_state["cc_liquid_pct"] = float(liquid_mf_pct)
+st.session_state["cc_inr_fd_pct"] = float(inr_fd_pct)
+st.session_state["cc_fcnr_pct"] = float(fcnr_pct)
+st.session_state["cc_gold_pct"] = float(gold_pct)
+st.session_state["cc_net_worth"] = float(total_networth)
 
 # Phase 2A — family-level concentration (same fund/stock across members counted once)
 if not mf_valid.empty and total_mf > 0 and "ISIN" in mf_valid.columns:
