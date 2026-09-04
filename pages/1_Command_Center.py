@@ -849,8 +849,7 @@ for _, row in mf_agg.iterrows():
             ret = (pnl / invested * 100) if invested > 0 else 0.0
         else:
             current_value = pnl = ret = None
-                amfi_official = amfi_names.get(isin) if "amfi_names" in dir() else None
-                amfi_official = amfi_names.get(isin) if isinstance(amfi_names, dict) else None
+                        amfi_official = amfi_names.get(isin) if isinstance(amfi_names, dict) else None
         category = infer_category(fund_name, amfi_official)
 
         # Route pure gold FoFs/ETFs out of Mutual Funds into the unified Gold book
