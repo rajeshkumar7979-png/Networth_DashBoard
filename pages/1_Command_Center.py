@@ -1636,11 +1636,13 @@ else:
 # ==================================================
 # NEWS
 # ==================================================
+# ==================================================
+# NEWS
+# ==================================================
 from lib.news import get_portfolio_news, group_by_asset, get_sentiment
 
 st.markdown('<div class="section-header">News Pulse · Holdings + NRI</div>', unsafe_allow_html=True)
 
-# Build symbol lists for news (safe even if a sheet is empty)
 _stock_syms = []
 if not stocks_valid.empty and "Symbol" in stocks_valid.columns:
     _stock_syms = stocks_valid["Symbol"].dropna().astype(str).head(6).tolist()
@@ -1651,7 +1653,6 @@ _gold_syms = []
 if not gold_valid.empty and "Symbol" in gold_valid.columns:
     _gold_syms = gold_valid["Symbol"].dropna().astype(str).head(3).tolist()
 
-# Store for the dedicated News page
 st.session_state["stock_syms"] = _stock_syms
 st.session_state["fund_names"] = _fund_names
 st.session_state["gold_syms"] = _gold_syms
@@ -1676,8 +1677,6 @@ if news_items:
     st.page_link("pages/4_News.py", label="View all news →", icon="📰")
 else:
     st.caption("No recent news this run.")
-
-st.markdown("---")
 
 st.markdown("---")
 
