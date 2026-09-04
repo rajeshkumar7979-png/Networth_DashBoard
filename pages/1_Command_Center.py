@@ -643,7 +643,6 @@ def get_sgb_price(raw_ticker: str):
 
 
 CATEGORY_RULES = [
-    # Cash / debt-like first (order matters — first match wins)
     ("Overnight", r"overnight"),
     ("Liquid", r"\bliquid\b"),
     ("Money Market", r"money\s*market"),
@@ -657,7 +656,6 @@ CATEGORY_RULES = [
     ("Conservative Hybrid", r"conservative\s*hybrid|hybrid\s*conservative"),
     ("Aggressive Hybrid", r"aggressive\s*hybrid|hybrid\s*aggressive|balanced\s*advantage|dynamic\s*asset"),
     ("Hybrid", r"\bhybrid\b|\bbalanced\b"),
-    # Equity styles
     ("Small Cap", r"small\s*cap"),
     ("Mid Cap", r"mid\s*cap"),
     ("Large Cap", r"large\s*cap|blue\s*chip|bluechip"),
@@ -671,11 +669,17 @@ CATEGORY_RULES = [
     ("Sectoral/Thematic", r"infra|defence|pharma|healthcare|banking|financial|consumption|digital|technology|manufacturing|energy|commodity|reform|bharat\s*22|business\s*cycle|special\s*situations|thematic|sector"),
 ]
 
-# Treat as non-equity for vs-Nifty and liquid-bucket logic
 DEBT_LIKE = {
     "Overnight", "Liquid", "Money Market", "Ultra Short", "Low Duration",
     "Short Duration", "Corporate Bond", "Banking PSU", "Gilt", "Arbitrage",
 }
+
+SGB_TICKER_PATTERN = re.compile(r"^SGB.*-GB$", re.IGNORECASE)
+GOLD_ETF_TICKERS = {"GOLDBEES", "GOLDSHARE", "GOLDCASE", "AXISGOLD", "QGOLDHALF", "BSLGOLDETF", "IVZINGOLD"}
+GOLD_FUND_NAME_RE = re.compile(
+    r"gold\s*(etf|fof|fund\s*of\s*fund|fund\s*of\s*funds)|\bgold\b.*\b(etf|fof)\b",
+    re.IGNORECASE,
+)
 
 def is_gold_symbol(symbol: str) -> bool:
     s = (symbol or "").strip().upper()
@@ -690,14 +694,9 @@ def is_gold_symbol(symbol: str) -> bool:
 def is_gold_fund(fund_name: str) -> bool:
     return bool(GOLD_FUND_NAME_RE.search(fund_name or ""))
 
-def infer_category(fund_name: str, amfi_name: str | None = None) -> str:
-    """
-    Phase 2C — prefer AMFI official name when available (cleaner than Excel labels),
-    then regex rules. Gold is checked first so FoFs don't fall into Sectoral.
-    """
+def infer_category(fund_name: str, amfi_name=None) -> str:
     if is_gold_fund(fund_name) or (amfi_name and is_gold_fund(amfi_name)):
         return "Gold"
-    # Prefer longer/official name for matching
     candidates = []
     if amfi_name and str(amfi_name).strip():
         candidates.append(str(amfi_name).strip())
@@ -709,7 +708,6 @@ def infer_category(fund_name: str, amfi_name: str | None = None) -> str:
     for label, pattern in CATEGORY_RULES:
         if re.search(pattern, blob, flags=re.IGNORECASE):
             return label
-    # Debt catch-all before labeling as equity
     if re.search(r"debt|income|bond|gilt|duration|money\s*market", blob, flags=re.IGNORECASE):
         return "Other Debt"
     return "Other Equity"
@@ -852,6 +850,7 @@ for _, row in mf_agg.iterrows():
         else:
             current_value = pnl = ret = None
                 amfi_official = amfi_names.get(isin) if "amfi_names" in dir() else None
+                amfi_official = amfi_names.get(isin) if isinstance(amfi_names, dict) else None
         category = infer_category(fund_name, amfi_official)
 
         # Route pure gold FoFs/ETFs out of Mutual Funds into the unified Gold book
