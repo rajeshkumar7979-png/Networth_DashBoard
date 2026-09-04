@@ -1636,37 +1636,26 @@ else:
 # ==================================================
 # NEWS
 # ==================================================
-st.markdown('<div class="section-header">News pulse · Holdings + NRI</div>', unsafe_allow_html=True)
+# --- News Pulse (3-column layout) ---
+st.markdown('<div class="section-header">News Pulse · Holdings + NRI</div>', unsafe_allow_html=True)
 
-from lib.news import get_portfolio_news, group_by_asset
-
-stock_syms = []
-if not stocks_valid.empty:
-    stock_syms = stocks_valid.nlargest(6, "Current Value")["Symbol"].astype(str).tolist()
-
-fund_names = []
-if not mf_valid.empty:
-    fund_names = mf_valid.nlargest(3, "Current Value")["Fund Name"].astype(str).tolist()
-
-gold_syms = []
-if not gold_valid.empty:
-    gold_syms = gold_valid["Symbol"].astype(str).tolist()
-
-st.session_state["stock_syms"] = stock_syms
-st.session_state["fund_names"] = fund_names
-st.session_state["gold_syms"] = gold_syms
-
-try:
-    news_items = get_portfolio_news(
-        stock_symbols=stock_syms,
-        fund_names=fund_names,
-        gold_symbols=gold_syms,
-    )
-except Exception:
-    news_items = []
-
-if not news_items:
-    st.caption("No recent news this run.")
+if news_items:  # whatever your list variable is called
+    cols = st.columns(3)
+    for i, item in enumerate(news_items):
+        with cols[i % 3]:
+            # keep your existing card / sentiment rendering here
+            # e.g. colour dot + name + sentiment
+            sentiment = item.get("sentiment", "Neutral")
+            color = {"Positive": "#22c55e", "Negative": "#ef4444", "Neutral": "#94a3b8"}.get(sentiment, "#94a3b8")
+            st.markdown(
+                f'<div style="padding:6px 0;border-bottom:1px solid #1c2333;">'
+                f'<span style="color:{color};font-size:1.1rem;">●</span> '
+                f'<b>{item.get("symbol", "")}</b> — {sentiment}'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+else:
+    st.caption("No news items.")
 else:
     groups = group_by_asset(news_items, max_groups=8, min_nri_tax_groups=1, min_macro_groups=1)
     for g in groups:
@@ -1813,20 +1802,19 @@ with tab3:
         st.dataframe(
             style_money_df(_fd_view, pnl_cols=("FX Gain/Loss (INR)", "Interest Return (INR)")),
             column_config={
-                "Principal (Native)": st.column_config.NumberColumn(format="%.2f"),
-                "Principal (INR, at deposit FX)": st.column_config.NumberColumn(format="₹%d"),
-                "Current Value (Native)": st.column_config.NumberColumn(format="%.2f"),
-                "Current Value (INR)": st.column_config.NumberColumn(format="₹%d"),
-                "Interest Return (INR)": st.column_config.NumberColumn(format="₹%d"),
-                "FX Gain/Loss (INR)": st.column_config.NumberColumn(format="₹%d"),
-                "ROI %": st.column_config.NumberColumn(format="%.2f%%"),
-            }, use_container_width=True, height=380)
-        st.markdown(
-            f'<p class="snap-note">FCNR {format_inr(total_fcnr)} ({fcnr_pct:.1f}%) · '
-            f'INR FD {format_inr(total_inr_fd)} ({inr_fd_pct:.1f}%) · '
-            f'Deployable liquidity (liquid MF + ≤90d deposits) {format_inr(total_true_liquid)} ({true_liquid_pct:.1f}%)</p>',
-            unsafe_allow_html=True,
-        )
+    "Holder Name": st.column_config.TextColumn("Holder Name", width="medium"),
+    "Product": st.column_config.TextColumn("Product", width="small"),
+    "Currency": st.column_config.TextColumn("Ccy", width="small"),
+    "Principal (Native)": st.column_config.NumberColumn("Principal\n(Native)", format="%.2f"),
+    "Principal (INR, at deposit FX)": st.column_config.NumberColumn("Principal\n(INR @ dep FX)", format="%.0f"),
+    "ROI %": st.column_config.NumberColumn("ROI %", format="%.2f%%", width="small"),
+    "Days to Maturity": st.column_config.NumberColumn("Days to\nMaturity", width="small"),
+    "Current Value (Native)": st.column_config.NumberColumn("Current Value\n(Native)", format="%.2f"),
+    "Current Value (INR)": st.column_config.NumberColumn("Current Value\n(INR)", format="%.0f"),
+    "Interest Return (INR)": st.column_config.NumberColumn("Interest\nReturn (INR)", format="%.0f"),
+    "FX Gain/Loss (INR)": st.column_config.NumberColumn("FX Gain/Loss\n(INR)", format="%.0f"),
+    "Maturity Date": st.column_config.TextColumn("Maturity\nDate", width="small"),
+}
 
 with tab4:
     if not gold.empty:
