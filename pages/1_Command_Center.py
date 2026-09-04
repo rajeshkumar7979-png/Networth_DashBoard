@@ -517,7 +517,7 @@ def compute_fd_current_native(principal, roi, dep_date, mat_date, today,
 
     # --- 1. Bank's Available Balance (best) ---
     if available_balance is not None and available_balance > 0:
-        current = available_balance
+        current = float(available_balance)
         accrued = current - principal
         method = "available_balance"
         notes.append("using Available Balance from bank")
@@ -940,23 +940,20 @@ for _, row in fd_raw.iterrows():
             integrity_issues.append(("HIGH", f"FD {account or 'no-acct'} ({holder}): unrecognized currency '{currency}' — treated as INR."))
             currency = "INR"
 
-        mat_date = to_naive_ts(row.get("Maturity Date"))
+                mat_date = to_naive_ts(row.get("Maturity Date"))
         dep_date = to_naive_ts(row.get("Deposit Date"))
         roi = safe_float(row.get("ROI % p.a.", row.get("ROI_Percent_pa", 6.5)))
         maturity_amt = _safe_maturity_amount(row)
 
-# Also try to read Available Balance directly
-available_balance = None
-for col in row.index if hasattr(row, "index") else []:
-    if str(col).strip().lower().replace("_", " ") in ("available balance", "available balanc", "available amount"):
-        available_balance = safe_float(row.get(col))
-        break
+        # Also try to read Available Balance directly
+        available_balance = None
+        for col in row.index if hasattr(row, "index") else []:
+            if str(col).strip().lower().replace("_", " ") in (
+                "available balance", "available balanc", "available amount"
+            ):
+                available_balance = safe_float(row.get(col))
+                break
 
-current_value_native, accrued_native, val_method, val_notes = compute_fd_current_native(
-    principal_native, roi, dep_date, mat_date, TODAY_NAIVE,
-    maturity_amt=maturity_amt,
-    available_balance=available_balance,
-)
         # Dedup key: prefer real account number; otherwise fingerprint of the deposit itself
         if account:
             dedup_key = f"acct:{account}"
@@ -987,22 +984,23 @@ current_value_native, accrued_native, val_method, val_notes = compute_fd_current
 
         # ----- Phase-1 valuation -----
         current_value_native, accrued_native, val_method, val_notes = compute_fd_current_native(
-            principal_native, roi, dep_date, mat_date, TODAY_NAIVE, maturity_amt
+            principal_native, roi, dep_date, mat_date, TODAY_NAIVE,
+            maturity_amt=maturity_amt,
+            available_balance=available_balance,
         )
         if current_value_native is None:
             continue
 
-        if val_method == "simple_interest" and maturity_amt is None:
+        if val_method == "simple_interest" and maturity_amt is None and available_balance is None:
             integrity_issues.append((
                 "MEDIUM",
-                f"FD {account or 'no-acct'} ({holder}): no Maturity Amount in Excel — using simple interest from deposit date. "
-                f"Add Maturity Amount column for higher accuracy."
+                f"FD {account or 'no-acct'} ({holder}): no Maturity Amount / Available Balance in Excel — using simple interest from deposit date."
             ))
         if "WARNING: long tenor" in " ".join(val_notes):
             integrity_issues.append((
                 "HIGH",
                 f"FD {account or 'no-acct'} ({holder}): deposit→maturity span is very long; simple-interest fallback may overstate value. "
-                f"Prefer supplying Maturity Amount."
+                f"Prefer supplying Maturity Amount or Available Balance."
             ))
 
         # ----- FX setup -----
