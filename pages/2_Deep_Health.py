@@ -183,4 +183,77 @@ if decision_amount > 0 and total_nw > 0:
         if target is None:
             # 50/50 FD + Liquid
             half = decision_amount / 2.0
-            if 
+            if is_reallocation:
+                # pull full amount from source once, then split the put
+                available = {
+                    "Equity": eq0,
+                    "Liquid MF": liq0,
+                    "INR FD": inr0,
+                    "FCNR": fcnr0,
+                    "Gold": gold0,
+                }[source_bucket]
+                take = min(decision_amount, available)
+                buckets = {
+                    "Equity": eq0,
+                    "Liquid MF": liq0,
+                    "INR FD": inr0,
+                    "FCNR": fcnr0,
+                    "Gold": gold0,
+                }
+                buckets[source_bucket] = available - take
+                buckets["INR FD"] = buckets["INR FD"] + take / 2.0
+                buckets["Liquid MF"] = buckets["Liquid MF"] + take / 2.0
+                new_nw = total_nw
+            else:
+                buckets = {
+                    "Equity": eq0,
+                    "Liquid MF": liq0 + half,
+                    "INR FD": inr0 + half,
+                    "FCNR": fcnr0,
+                    "Gold": gold0,
+                }
+                new_nw = total_nw + decision_amount
+
+            def pct(x, nw=new_nw):
+                return round(x / nw * 100.0, 1) if nw > 0 else 0.0
+
+            row = {
+                "Scenario": label,
+                "Equity %": pct(buckets["Equity"]),
+                "Liquid %": pct(buckets["Liquid MF"]),
+                "INR FD %": pct(buckets["INR FD"]),
+                "FCNR %": pct(buckets["FCNR"]),
+                "Gold %": pct(buckets["Gold"]),
+                "New NW (₹)": int(round(new_nw, 0)),
+            }
+        else:
+            row = {"Scenario": label}
+            row.update(_apply_move(eq0, liq0, inr0, fcnr0, gold0, decision_amount, target, src))
+        scenarios.append(row)
+
+    # Baseline row for comparison
+    baseline = {
+        "Scenario": "Current (no change)",
+        "Equity %": round(curr_equity, 1),
+        "Liquid %": round(curr_liquid, 1),
+        "INR FD %": round(curr_inr_fd, 1),
+        "FCNR %": round(curr_fcnr, 1),
+        "Gold %": round(curr_gold, 1),
+        "New NW (₹)": int(round(total_nw, 0)),
+    }
+    out = pd.DataFrame([baseline] + scenarios)
+    st.dataframe(out, use_container_width=True, hide_index=True)
+
+    # Sanity: each scenario's displayed weights should be near 100%
+    for r in scenarios:
+        s = r["Equity %"] + r["Liquid %"] + r["INR FD %"] + r["FCNR %"] + r["Gold %"]
+        if abs(s - 100.0) > 2.0:
+            st.caption(f"Note: “{r['Scenario']}” weights sum to {s:.1f}% (rounding or capped source).")
+            break
+else:
+    st.info("Enter amount and net worth to see impact scenarios.")
+
+st.markdown("---")
+st.caption(
+    "This is only a decision helper. Final choice depends on your cash needs, risk comfort and tax situation."
+)
