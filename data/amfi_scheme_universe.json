@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-04T04:36:44+00:00",
+  "fetched_at": "2026-09-07T04:38:49+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -3452,146 +3452,6 @@
       "category": "Open Ended Schemes(Debt Scheme - Dynamic Bond)"
     },
     {
-      "scheme_code": "149007",
-      "isin_primary": "INF277KA1026",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149037",
-      "isin_primary": "",
-      "isin_secondary": "INF277KA1075",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Monthly Dividend Reinvestment Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149000",
-      "isin_primary": "INF277KA1042",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Monthly Payout Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149033",
-      "isin_primary": "",
-      "isin_secondary": "INF277KA1067",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Periodic Dividend Reinvestment Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149002",
-      "isin_primary": "INF277KA1034",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Periodic Payout Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149034",
-      "isin_primary": "",
-      "isin_secondary": "INF277KA1083",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Quarterly Dividend Reinvestment Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149001",
-      "isin_primary": "INF277KA1059",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Quarterly Payout Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149003",
-      "isin_primary": "INF277KA1091",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149035",
-      "isin_primary": "",
-      "isin_secondary": "INF277KA1141",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Monthly Dividend Reinvestment Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149004",
-      "isin_primary": "INF277KA1117",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Monthly Payout Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149036",
-      "isin_primary": "",
-      "isin_secondary": "INF277KA1133",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Periodic Dividend Reinvestment Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149006",
-      "isin_primary": "INF277KA1109",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Periodic Payout Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149038",
-      "isin_primary": "",
-      "isin_secondary": "INF277KA1158",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Quarterly Dividend Reinvestment Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
-      "scheme_code": "149005",
-      "isin_primary": "INF277KA1125",
-      "isin_secondary": "",
-      "scheme_name": "Tata Floating Rate Fund",
-      "nav": null,
-      "nav_date": "IDCW Quarterly Payout Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Floater Fund)"
-    },
-    {
       "scheme_code": "153206",
       "isin_primary": "INF0QA701AP9",
       "isin_secondary": "",
@@ -4439,66 +4299,6 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "SBI Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "102046",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Tata Gilt Securities Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "101945",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Tata Gilt Securities Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "119954",
-      "isin_primary": "INF277K01OV1",
-      "isin_secondary": "INF277K01OW9",
-      "scheme_name": "Tata Gilt Securities Fund",
-      "nav": null,
-      "nav_date": "Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "101049",
-      "isin_primary": "INF277K01DN1",
-      "isin_secondary": "INF277K01535",
-      "scheme_name": "Tata Gilt Securities Fund",
-      "nav": null,
-      "nav_date": "Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "101042",
-      "isin_primary": "INF277K01519",
-      "isin_secondary": "",
-      "scheme_name": "Tata Gilt Securities Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "119953",
-      "isin_primary": "INF277K01OX7",
-      "isin_secondary": "",
-      "scheme_name": "Tata Gilt Securities Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
     },
     {
@@ -8109,86 +7909,6 @@
       "nav": null,
       "nav_date": "",
       "amc": "Franklin Templeton Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "119863",
-      "isin_primary": "INF277K01OK4",
-      "isin_secondary": "",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "103159",
-      "isin_primary": "INF277K01MA9",
-      "isin_secondary": "",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "119864",
-      "isin_primary": "",
-      "isin_secondary": "INF277K018B3",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Daily Reinvestment of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "119957",
-      "isin_primary": "INF277K01OL2",
-      "isin_secondary": "INF277K01OM0",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Periodic Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "119865",
-      "isin_primary": "INF277K019B1",
-      "isin_secondary": "INF277K010C8",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Weekly Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "103160",
-      "isin_primary": "",
-      "isin_secondary": "INF277K01LZ8",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Daily Reinvestment of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "115464",
-      "isin_primary": "INF277K01MC5",
-      "isin_secondary": "INF277K01ME1",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Periodic Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
-    },
-    {
-      "scheme_code": "103158",
-      "isin_primary": "INF277K01MD3",
-      "isin_secondary": "INF277K01MB7",
-      "scheme_name": "Tata Treasury Advantage Fund",
-      "nav": null,
-      "nav_date": "Weekly Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Low Duration Fund)"
     },
     {
@@ -13472,66 +13192,6 @@
       "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
     },
     {
-      "scheme_code": "119949",
-      "isin_primary": "INF277K01QR4",
-      "isin_secondary": "",
-      "scheme_name": "Tata Short Term Bond Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "101548",
-      "isin_primary": "INF277K01972",
-      "isin_secondary": "",
-      "scheme_name": "Tata Short Term Bond Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "119950",
-      "isin_primary": "INF277K01QP8",
-      "isin_secondary": "INF277K01QQ6",
-      "scheme_name": "Tata Short Term Bond Fund",
-      "nav": null,
-      "nav_date": "Monthly Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "133974",
-      "isin_primary": "INF277K01P38",
-      "isin_secondary": "INF277K01P46",
-      "scheme_name": "Tata Short Term Bond Fund",
-      "nav": null,
-      "nav_date": "Periodic Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "101547",
-      "isin_primary": "INF277K01EI9",
-      "isin_secondary": "INF277K01964",
-      "scheme_name": "Tata Short Term Bond Fund",
-      "nav": null,
-      "nav_date": "Monthly Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "133975",
-      "isin_primary": "INF277K01P12",
-      "isin_secondary": "INF277K01P20",
-      "scheme_name": "Tata Short Term Bond Fund",
-      "nav": null,
-      "nav_date": "Periodic Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
       "scheme_code": "149076",
       "isin_primary": "INF0GCD01370",
       "isin_secondary": "",
@@ -15909,46 +15569,6 @@
       "nav": null,
       "nav_date": "IDCW (Income Distribution CUM Capital Withdrawal)",
       "amc": "Sundaram Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - ELSS)"
-    },
-    {
-      "scheme_code": "119281",
-      "isin_primary": "INF277K01I94",
-      "isin_secondary": "",
-      "scheme_name": "Tata ELSS Fund",
-      "nav": null,
-      "nav_date": "Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - ELSS)"
-    },
-    {
-      "scheme_code": "100474",
-      "isin_primary": "INF277K01I60",
-      "isin_secondary": "",
-      "scheme_name": "Tata ELSS Fund",
-      "nav": null,
-      "nav_date": "Payout of IDCW Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - ELSS)"
-    },
-    {
-      "scheme_code": "132756",
-      "isin_primary": "INF277K01I86",
-      "isin_secondary": "",
-      "scheme_name": "Tata ELSS Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - ELSS)"
-    },
-    {
-      "scheme_code": "132757",
-      "isin_primary": "INF277K01I52",
-      "isin_secondary": "",
-      "scheme_name": "Tata ELSS Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Tata Mutual Fund",
       "category": "Open Ended Schemes(Equity Scheme - ELSS)"
     },
     {
@@ -31839,6 +31459,46 @@
       "nav": null,
       "nav_date": "IDCW Payout Option",
       "amc": "NJ Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
+    },
+    {
+      "scheme_code": "119281",
+      "isin_primary": "INF277K01I94",
+      "isin_secondary": "",
+      "scheme_name": "Tata ELSS - Tax Saver Fund",
+      "nav": null,
+      "nav_date": "Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
+    },
+    {
+      "scheme_code": "100474",
+      "isin_primary": "INF277K01I60",
+      "isin_secondary": "",
+      "scheme_name": "Tata ELSS - Tax Saver Fund",
+      "nav": null,
+      "nav_date": "Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
+    },
+    {
+      "scheme_code": "132756",
+      "isin_primary": "INF277K01I86",
+      "isin_secondary": "",
+      "scheme_name": "Tata ELSS - Tax Saver Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
+    },
+    {
+      "scheme_code": "132757",
+      "isin_primary": "INF277K01I52",
+      "isin_secondary": "",
+      "scheme_name": "Tata ELSS - Tax Saver Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
     },
     {
@@ -50792,6 +50452,46 @@
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
     },
     {
+      "scheme_code": "154618",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "SBI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "SBI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
+      "scheme_code": "154617",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "SBI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "SBI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
+      "scheme_code": "154616",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "SBI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "SBI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
+      "scheme_code": "154615",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "SBI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "SBI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
       "scheme_code": "152132",
       "isin_primary": "INF03VN01829",
       "isin_secondary": "",
@@ -54397,7 +54097,17 @@
       "isin_secondary": "INF789F1AVZ0",
       "scheme_name": "UTI 10 year Constant Maturity Gilt Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
+    },
+    {
+      "scheme_code": "150412",
+      "isin_primary": "INF789F1AVS5",
+      "isin_secondary": "INF789F1AVT3",
+      "scheme_name": "UTI 10 year Constant Maturity Gilt Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
     },
@@ -54422,16 +54132,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
     },
     {
-      "scheme_code": "150412",
-      "isin_primary": "INF789F1AVS5",
-      "isin_secondary": "INF789F1AVT3",
-      "scheme_name": "UTI 10 year Constant Maturity Gilt Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
-    },
-    {
       "scheme_code": "150419",
       "isin_primary": "INF789F1AVN6",
       "isin_secondary": "INF789F1AVO4",
@@ -54447,7 +54147,17 @@
       "isin_secondary": "INF789F1AVQ9",
       "scheme_name": "UTI 10 year Constant Maturity Gilt Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
+    },
+    {
+      "scheme_code": "150411",
+      "isin_primary": "INF789F1AVJ4",
+      "isin_secondary": "INF789F1AVK2",
+      "scheme_name": "UTI 10 year Constant Maturity Gilt Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
     },
@@ -54468,16 +54178,6 @@
       "scheme_name": "UTI 10 year Constant Maturity Gilt Fund",
       "nav": null,
       "nav_date": "Half Yearly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
-    },
-    {
-      "scheme_code": "150411",
-      "isin_primary": "INF789F1AVJ4",
-      "isin_secondary": "INF789F1AVK2",
-      "scheme_name": "UTI 10 year Constant Maturity Gilt Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - 10-year Constant Maturity Gilt Fund)"
     },
@@ -55877,7 +55577,17 @@
       "isin_secondary": "INF789FA1V37",
       "scheme_name": "UTI Banking & PSU Debt Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
+    },
+    {
+      "scheme_code": "126942",
+      "isin_primary": "INF789F016Z4",
+      "isin_secondary": "INF789F017Z2",
+      "scheme_name": "UTI Banking & PSU Debt Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
     },
@@ -55912,16 +55622,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
     },
     {
-      "scheme_code": "126942",
-      "isin_primary": "INF789F016Z4",
-      "isin_secondary": "INF789F017Z2",
-      "scheme_name": "UTI Banking & PSU Debt Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
-    },
-    {
       "scheme_code": "140116",
       "isin_primary": "INF789FA1U46",
       "isin_secondary": "INF789FA1U53",
@@ -55937,7 +55637,17 @@
       "isin_secondary": "INF789FA1U79",
       "scheme_name": "UTI Banking & PSU Debt Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
+    },
+    {
+      "scheme_code": "126941",
+      "isin_primary": "INF789F012Z3",
+      "isin_secondary": "INF789F013Z1",
+      "scheme_name": "UTI Banking & PSU Debt Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
     },
@@ -55958,16 +55668,6 @@
       "scheme_name": "UTI Banking & PSU Debt Fund",
       "nav": null,
       "nav_date": "Monthly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
-    },
-    {
-      "scheme_code": "126941",
-      "isin_primary": "INF789F012Z3",
-      "isin_secondary": "INF789F013Z1",
-      "scheme_name": "UTI Banking & PSU Debt Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Banking and PSU Debt Fund)"
     },
@@ -56627,7 +56327,17 @@
       "isin_secondary": "INF789F1A611",
       "scheme_name": "UTI - Corporate Bond Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "144346",
+      "isin_primary": "INF789F1A546",
+      "isin_secondary": "INF789F1A553",
+      "scheme_name": "UTI - Corporate Bond Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
     },
@@ -56652,16 +56362,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
     },
     {
-      "scheme_code": "144346",
-      "isin_primary": "INF789F1A546",
-      "isin_secondary": "INF789F1A553",
-      "scheme_name": "UTI - Corporate Bond Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
-    },
-    {
       "scheme_code": "144337",
       "isin_primary": "INF789F1A496",
       "isin_secondary": "INF789F1A504",
@@ -56677,7 +56377,17 @@
       "isin_secondary": "INF789F1A520",
       "scheme_name": "UTI - Corporate Bond Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "144342",
+      "isin_primary": "INF789F1A454",
+      "isin_secondary": "INF789F1A462",
+      "scheme_name": "UTI - Corporate Bond Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
     },
@@ -56698,16 +56408,6 @@
       "scheme_name": "UTI - Corporate Bond Fund",
       "nav": null,
       "nav_date": "Half yearly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "144342",
-      "isin_primary": "INF789F1A454",
-      "isin_secondary": "INF789F1A462",
-      "scheme_name": "UTI - Corporate Bond Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
     },
@@ -56987,7 +56687,17 @@
       "isin_secondary": "INF789FB1U51",
       "scheme_name": "UTI - Credit Risk Fund.",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
+    },
+    {
+      "scheme_code": "120765",
+      "isin_primary": "INF789F01YC4",
+      "isin_secondary": "INF789F01YD2",
+      "scheme_name": "UTI - Credit Risk Fund.",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
     },
@@ -57022,16 +56732,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
     },
     {
-      "scheme_code": "120765",
-      "isin_primary": "INF789F01YC4",
-      "isin_secondary": "INF789F01YD2",
-      "scheme_name": "UTI - Credit Risk Fund.",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
-    },
-    {
       "scheme_code": "133344",
       "isin_primary": "INF789FA1V60",
       "isin_secondary": "INF789FA1V78",
@@ -57047,7 +56747,17 @@
       "isin_secondary": "INF789FA1V94",
       "scheme_name": "UTI - Credit Risk Fund.",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
+    },
+    {
+      "scheme_code": "117982",
+      "isin_primary": "INF789F01RA2",
+      "isin_secondary": "INF789F01RB0",
+      "scheme_name": "UTI - Credit Risk Fund.",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
     },
@@ -57068,16 +56778,6 @@
       "scheme_name": "UTI - Credit Risk Fund.",
       "nav": null,
       "nav_date": "Monthly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
-    },
-    {
-      "scheme_code": "117982",
-      "isin_primary": "INF789F01RA2",
-      "isin_secondary": "INF789F01RB0",
-      "scheme_name": "UTI - Credit Risk Fund.",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Credit Risk Fund)"
     },
@@ -58747,7 +58447,17 @@
       "isin_secondary": "INF789FA1S99",
       "scheme_name": "UTI Dynamic Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
+    },
+    {
+      "scheme_code": "120763",
+      "isin_primary": "INF789F01XB8",
+      "isin_secondary": "INF789F01XC6",
+      "scheme_name": "UTI Dynamic Term Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
     },
@@ -58772,16 +58482,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
     },
     {
-      "scheme_code": "120763",
-      "isin_primary": "INF789F01XB8",
-      "isin_secondary": "INF789F01XC6",
-      "scheme_name": "UTI Dynamic Term Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
-    },
-    {
       "scheme_code": "133852",
       "isin_primary": "INF789FA1S08",
       "isin_secondary": "INF789FA1S16",
@@ -58797,7 +58497,17 @@
       "isin_secondary": "INF789FA1S32",
       "scheme_name": "UTI Dynamic Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
+    },
+    {
+      "scheme_code": "113078",
+      "isin_primary": "INF789F01JO0",
+      "isin_secondary": "INF789F01JP7",
+      "scheme_name": "UTI Dynamic Term Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
     },
@@ -58818,16 +58528,6 @@
       "scheme_name": "UTI Dynamic Term Fund",
       "nav": null,
       "nav_date": "Half yearly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
-    },
-    {
-      "scheme_code": "113078",
-      "isin_primary": "INF789F01JO0",
-      "isin_secondary": "INF789F01JP7",
-      "scheme_name": "UTI Dynamic Term Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Dynamic Term Fund)"
     },
@@ -59782,6 +59482,146 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
     },
     {
+      "scheme_code": "149007",
+      "isin_primary": "INF277KA1026",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149037",
+      "isin_primary": "",
+      "isin_secondary": "INF277KA1075",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Monthly Dividend Reinvestment Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149000",
+      "isin_primary": "INF277KA1042",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Monthly Payout Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149033",
+      "isin_primary": "",
+      "isin_secondary": "INF277KA1067",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Periodic Dividend Reinvestment Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149002",
+      "isin_primary": "INF277KA1034",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Periodic Payout Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149034",
+      "isin_primary": "",
+      "isin_secondary": "INF277KA1083",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Quarterly Dividend Reinvestment Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149001",
+      "isin_primary": "INF277KA1059",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Quarterly Payout Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149003",
+      "isin_primary": "INF277KA1091",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149035",
+      "isin_primary": "",
+      "isin_secondary": "INF277KA1141",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Monthly Dividend Reinvestment Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149004",
+      "isin_primary": "INF277KA1117",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Monthly Payout Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149036",
+      "isin_primary": "",
+      "isin_secondary": "INF277KA1133",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Periodic Dividend Reinvestment Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149006",
+      "isin_primary": "INF277KA1109",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Periodic Payout Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149038",
+      "isin_primary": "",
+      "isin_secondary": "INF277KA1158",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Quarterly Dividend Reinvestment Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
+      "scheme_code": "149005",
+      "isin_primary": "INF277KA1125",
+      "isin_secondary": "",
+      "scheme_name": "Tata Floating Interest Rates Fund",
+      "nav": null,
+      "nav_date": "IDCW Quarterly Payout Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
+    },
+    {
       "scheme_code": "145293",
       "isin_primary": "INF789F1ADA1",
       "isin_secondary": "INF789F1ADB9",
@@ -59882,26 +59722,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Floating Interest Rates Fund)"
     },
     {
-      "scheme_code": "119606",
-      "isin_primary": "INF209KA1LC4",
-      "isin_secondary": "INF209K01XR3",
-      "scheme_name": "Aditya Birla Sun Life Gilt Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "Aditya Birla Sun Life Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
-    },
-    {
-      "scheme_code": "100057",
-      "isin_primary": "INF209K01AF6",
-      "isin_secondary": "INF209K01DP9",
-      "scheme_name": "Aditya Birla Sun Life Gilt Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "Aditya Birla Sun Life Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
-    },
-    {
       "scheme_code": "100058",
       "isin_primary": "INF209K01AC3",
       "isin_secondary": "INF209K01AD1",
@@ -59918,6 +59738,26 @@
       "scheme_name": "Aditya Birla Sun Life Gilt Fund",
       "nav": null,
       "nav_date": "GROWTH",
+      "amc": "Aditya Birla Sun Life Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "119606",
+      "isin_primary": "INF209KA1LC4",
+      "isin_secondary": "INF209K01XR3",
+      "scheme_name": "Aditya Birla Sun Life Gilt Fund",
+      "nav": null,
+      "nav_date": "Quarterly IDCW",
+      "amc": "Aditya Birla Sun Life Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "100057",
+      "isin_primary": "INF209K01AF6",
+      "isin_secondary": "INF209K01DP9",
+      "scheme_name": "Aditya Birla Sun Life Gilt Fund",
+      "nav": null,
+      "nav_date": "Quarterly IDCW",
       "amc": "Aditya Birla Sun Life Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
     },
@@ -60409,6 +60249,66 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "LIC Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "102046",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Tata Gilt Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "101945",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Tata Gilt Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "119954",
+      "isin_primary": "INF277K01OV1",
+      "isin_secondary": "INF277K01OW9",
+      "scheme_name": "Tata Gilt Fund",
+      "nav": null,
+      "nav_date": "Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "101049",
+      "isin_primary": "INF277K01DN1",
+      "isin_secondary": "INF277K01535",
+      "scheme_name": "Tata Gilt Fund",
+      "nav": null,
+      "nav_date": "Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "101042",
+      "isin_primary": "INF277K01519",
+      "isin_secondary": "",
+      "scheme_name": "Tata Gilt Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "119953",
+      "isin_primary": "INF277K01OX7",
+      "isin_secondary": "",
+      "scheme_name": "Tata Gilt Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
     },
     {
@@ -62812,26 +62712,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Long Term Fund)"
     },
     {
-      "scheme_code": "119540",
-      "isin_primary": "INF209KA1KN3",
-      "isin_secondary": "",
-      "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
-      "nav": null,
-      "nav_date": "Half Yearly IDCW",
-      "amc": "Aditya Birla Sun Life Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
-    },
-    {
-      "scheme_code": "119538",
-      "isin_primary": "INF209KA1KO1",
-      "isin_secondary": "",
-      "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
-      "nav": null,
-      "nav_date": "IDCW",
-      "amc": "Aditya Birla Sun Life Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
-    },
-    {
       "scheme_code": "119541",
       "isin_primary": "INF209KA1KP8",
       "isin_secondary": "",
@@ -62852,6 +62732,36 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
     {
+      "scheme_code": "111812",
+      "isin_primary": "INF209K01611",
+      "isin_secondary": "INF209K01DA1",
+      "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
+      "nav": null,
+      "nav_date": "Half Yearly IDCW",
+      "amc": "Aditya Birla Sun Life Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
+    },
+    {
+      "scheme_code": "119540",
+      "isin_primary": "INF209KA1KN3",
+      "isin_secondary": "",
+      "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
+      "nav": null,
+      "nav_date": "Half Yearly IDCW",
+      "amc": "Aditya Birla Sun Life Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
+    },
+    {
+      "scheme_code": "119538",
+      "isin_primary": "INF209KA1KO1",
+      "isin_secondary": "",
+      "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
+      "nav": null,
+      "nav_date": "IDCW",
+      "amc": "Aditya Birla Sun Life Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
+    },
+    {
       "scheme_code": "111803",
       "isin_primary": "INF209K01603",
       "isin_secondary": "",
@@ -62862,32 +62772,12 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
     {
-      "scheme_code": "111804",
-      "isin_primary": "INF209K01660",
-      "isin_secondary": "",
-      "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Aditya Birla Sun Life Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
-    },
-    {
       "scheme_code": "111811",
       "isin_primary": "INF209K01595",
       "isin_secondary": "INF209K01CZ0",
       "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
       "nav": null,
       "nav_date": "",
-      "amc": "Aditya Birla Sun Life Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
-    },
-    {
-      "scheme_code": "111812",
-      "isin_primary": "INF209K01611",
-      "isin_secondary": "INF209K01DA1",
-      "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
-      "nav": null,
-      "nav_date": "Half Yearly IDCW",
       "amc": "Aditya Birla Sun Life Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
@@ -63887,7 +63777,17 @@
       "isin_secondary": "INF789FB1KN7",
       "scheme_name": "UTI Medium Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
+    },
+    {
+      "scheme_code": "134502",
+      "isin_primary": "INF789FB1KH9",
+      "isin_secondary": "INF789FB1KI7",
+      "scheme_name": "UTI Medium Term Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
@@ -63922,16 +63822,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
     {
-      "scheme_code": "134502",
-      "isin_primary": "INF789FB1KH9",
-      "isin_secondary": "INF789FB1KI7",
-      "scheme_name": "UTI Medium Term Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
-    },
-    {
       "scheme_code": "134500",
       "isin_primary": "INF789FB1KA4",
       "isin_secondary": "INF789FB1KB2",
@@ -63947,7 +63837,7 @@
       "isin_secondary": "INF789FB1KD8",
       "scheme_name": "UTI Medium Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
@@ -64897,7 +64787,17 @@
       "isin_secondary": "INF789FA1U12",
       "scheme_name": "UTI Medium to Long Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
+    },
+    {
+      "scheme_code": "120690",
+      "isin_primary": "INF789F01SO1",
+      "isin_secondary": "INF789F01SP8",
+      "scheme_name": "UTI Medium to Long Term Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
     },
@@ -64908,16 +64808,6 @@
       "scheme_name": "UTI Medium to Long Term Fund",
       "nav": null,
       "nav_date": "Half-Yearly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
-    },
-    {
-      "scheme_code": "120690",
-      "isin_primary": "INF789F01SO1",
-      "isin_secondary": "INF789F01SP8",
-      "scheme_name": "UTI Medium to Long Term Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
     },
@@ -64937,7 +64827,17 @@
       "isin_secondary": "INF789FA1T56",
       "scheme_name": "UTI Medium to Long Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
+    },
+    {
+      "scheme_code": "100742",
+      "isin_primary": "INF789F01380",
+      "isin_secondary": "INF789F01398",
+      "scheme_name": "UTI Medium to Long Term Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
     },
@@ -64948,16 +64848,6 @@
       "scheme_name": "UTI Medium to Long Term Fund",
       "nav": null,
       "nav_date": "Half-Yearly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
-    },
-    {
-      "scheme_code": "100742",
-      "isin_primary": "INF789F01380",
-      "isin_secondary": "INF789F01398",
-      "scheme_name": "UTI Medium to Long Term Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
     },
@@ -68402,6 +68292,66 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
     },
     {
+      "scheme_code": "119949",
+      "isin_primary": "INF277K01QR4",
+      "isin_secondary": "",
+      "scheme_name": "Tata Short Term Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "101548",
+      "isin_primary": "INF277K01972",
+      "isin_secondary": "",
+      "scheme_name": "Tata Short Term Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "119950",
+      "isin_primary": "INF277K01QP8",
+      "isin_secondary": "INF277K01QQ6",
+      "scheme_name": "Tata Short Term Fund",
+      "nav": null,
+      "nav_date": "Monthly Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "133974",
+      "isin_primary": "INF277K01P38",
+      "isin_secondary": "INF277K01P46",
+      "scheme_name": "Tata Short Term Fund",
+      "nav": null,
+      "nav_date": "Periodic Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "101547",
+      "isin_primary": "INF277K01EI9",
+      "isin_secondary": "INF277K01964",
+      "scheme_name": "Tata Short Term Fund",
+      "nav": null,
+      "nav_date": "Monthly Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "133975",
+      "isin_primary": "INF277K01P12",
+      "isin_secondary": "INF277K01P20",
+      "scheme_name": "Tata Short Term Fund",
+      "nav": null,
+      "nav_date": "Periodic Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
       "scheme_code": "135497",
       "isin_primary": "INF789FA1R33",
       "isin_secondary": "INF789FA1R41",
@@ -68417,7 +68367,17 @@
       "isin_secondary": "INF789FB1T62",
       "scheme_name": "UTI Short Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "120719",
+      "isin_primary": "INF789FA1R66",
+      "isin_secondary": "INF789FA1R74",
+      "scheme_name": "UTI Short Term Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
     },
@@ -68448,16 +68408,6 @@
       "scheme_name": "UTI Short Term Fund",
       "nav": null,
       "nav_date": "Monthly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
-    },
-    {
-      "scheme_code": "120719",
-      "isin_primary": "INF789FA1R66",
-      "isin_secondary": "INF789FA1R74",
-      "scheme_name": "UTI Short Term Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
     },
@@ -68497,7 +68447,17 @@
       "isin_secondary": "INF789FB1T47",
       "scheme_name": "UTI Short Term Fund",
       "nav": null,
-      "nav_date": "Flexi IDCW",
+      "nav_date": "Discontinued Flexi IDCW",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "106980",
+      "isin_primary": "INF789FC1GD5",
+      "isin_secondary": "INF789FA1R58",
+      "scheme_name": "UTI Short Term Fund",
+      "nav": null,
+      "nav_date": "Discontinued Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
     },
@@ -68528,16 +68488,6 @@
       "scheme_name": "UTI Short Term Fund",
       "nav": null,
       "nav_date": "Monthly IDCW",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
-    },
-    {
-      "scheme_code": "106980",
-      "isin_primary": "INF789FC1GD5",
-      "isin_secondary": "INF789FA1R58",
-      "scheme_name": "UTI Short Term Fund",
-      "nav": null,
-      "nav_date": "Quarterly IDCW",
       "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
     },
@@ -70812,16 +70762,6 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
     },
     {
-      "scheme_code": "103194",
-      "isin_primary": "",
-      "isin_secondary": "INF209K01KG3",
-      "scheme_name": "Aditya Birla Sun Life Ultra short to short term Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Aditya Birla Sun Life Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
-    },
-    {
       "scheme_code": "113307",
       "isin_primary": "",
       "isin_secondary": "INF209KA1LP6",
@@ -72959,6 +72899,86 @@
       "nav": null,
       "nav_date": "IDCW (Income Distribution CUM Capital Withdrawal)",
       "amc": "Sundaram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "119863",
+      "isin_primary": "INF277K01OK4",
+      "isin_secondary": "",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "103159",
+      "isin_primary": "INF277K01MA9",
+      "isin_secondary": "",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "119864",
+      "isin_primary": "",
+      "isin_secondary": "INF277K018B3",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Daily Reinvestment of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "119957",
+      "isin_primary": "INF277K01OL2",
+      "isin_secondary": "INF277K01OM0",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Periodic Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "119865",
+      "isin_primary": "INF277K019B1",
+      "isin_secondary": "INF277K010C8",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Weekly Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "103160",
+      "isin_primary": "",
+      "isin_secondary": "INF277K01LZ8",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Daily Reinvestment of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "115464",
+      "isin_primary": "INF277K01MC5",
+      "isin_secondary": "INF277K01ME1",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Periodic Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
+    },
+    {
+      "scheme_code": "103158",
+      "isin_primary": "INF277K01MD3",
+      "isin_secondary": "INF277K01MB7",
+      "scheme_name": "Tata Ultra Short to Short Term Fund",
+      "nav": null,
+      "nav_date": "Weekly Payout of IDCW Option",
+      "amc": "Tata Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short to Short Term Fund)"
     },
     {
