@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-07T04:38:49+00:00",
+  "fetched_at": "2026-09-09T04:38:19+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -13189,86 +13189,6 @@
       "nav": null,
       "nav_date": "",
       "amc": "JM Financial Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149076",
-      "isin_primary": "INF0GCD01370",
-      "isin_secondary": "",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Trust Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149078",
-      "isin_primary": "INF0GCD01396",
-      "isin_secondary": "INF0GCD01404",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Monthly Income Distribution Cum Capital Withdrawal",
-      "amc": "Trust Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149079",
-      "isin_primary": "INF0GCD01412",
-      "isin_secondary": "INF0GCD01420",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Quarterly Income Distribution Cum Capital Withdrawal",
-      "amc": "Trust Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149077",
-      "isin_primary": "",
-      "isin_secondary": "INF0GCD01388",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Weekly Income Distribution Cum Capital Withdrawal",
-      "amc": "Trust Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149073",
-      "isin_primary": "INF0GCD01313",
-      "isin_secondary": "",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Trust Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149080",
-      "isin_primary": "INF0GCD01339",
-      "isin_secondary": "INF0GCD01347",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Monthly Income Distribution Cum Capital Withdrawal",
-      "amc": "Trust Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149075",
-      "isin_primary": "INF0GCD01354",
-      "isin_secondary": "INF0GCD01362",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Quarterly Income Distribution Cum Capital Withdrawal",
-      "amc": "Trust Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
-    },
-    {
-      "scheme_code": "149074",
-      "isin_primary": "",
-      "isin_secondary": "INF0GCD01321",
-      "scheme_name": "TRUSTMF Short Duration Fund",
-      "nav": null,
-      "nav_date": "Weekly Income Distribution Cum Capital Withdrawal",
-      "amc": "Trust Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Short Duration Fund)"
     },
     {
@@ -41602,6 +41522,46 @@
       "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
     },
     {
+      "scheme_code": "154658",
+      "isin_primary": "INF966L01EJ3",
+      "isin_secondary": "",
+      "scheme_name": "quant Income Plus Arbitrage Active FOF",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "quant Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154657",
+      "isin_primary": "INF966L01EM7",
+      "isin_secondary": "",
+      "scheme_name": "quant Income Plus Arbitrage Active FOF",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "quant Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154659",
+      "isin_primary": "INF966L01EK1",
+      "isin_secondary": "INF966L01EL9",
+      "scheme_name": "quant Income Plus Arbitrage Active FOF",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "quant Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154660",
+      "isin_primary": "INF966L01EN5",
+      "isin_secondary": "INF966L01EO3",
+      "scheme_name": "quant Income Plus Arbitrage Active FOF",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "quant Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
       "scheme_code": "154526",
       "isin_primary": "INF200KB1BU5",
       "isin_secondary": "",
@@ -50489,6 +50449,46 @@
       "nav": null,
       "nav_date": "",
       "amc": "SBI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
+      "scheme_code": "154629",
+      "isin_primary": "INF789F1AH34",
+      "isin_secondary": "",
+      "scheme_name": "UTI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
+      "scheme_code": "154628",
+      "isin_primary": "INF789F1AH18",
+      "isin_secondary": "",
+      "scheme_name": "UTI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
+      "scheme_code": "154630",
+      "isin_primary": "INF789F1AH00",
+      "isin_secondary": "",
+      "scheme_name": "UTI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
+    },
+    {
+      "scheme_code": "154631",
+      "isin_primary": "INF789F1AH26",
+      "isin_secondary": "",
+      "scheme_name": "UTI Balanced Hybrid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "UTI Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
     },
     {
@@ -61783,7 +61783,7 @@
     },
     {
       "scheme_code": "120777",
-      "isin_primary": "",
+      "isin_primary": "INF789F1AH75",
       "isin_secondary": "INF789F1AD79",
       "scheme_name": "UTI - Liquid Fund",
       "nav": null,
@@ -61903,7 +61903,7 @@
     },
     {
       "scheme_code": "102013",
-      "isin_primary": "",
+      "isin_primary": "INF789F1AH83",
       "isin_secondary": "INF789F1AG19",
       "scheme_name": "UTI - Liquid Fund",
       "nav": null,
@@ -68352,6 +68352,86 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
     },
     {
+      "scheme_code": "149076",
+      "isin_primary": "INF0GCD01370",
+      "isin_secondary": "",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "149078",
+      "isin_primary": "INF0GCD01396",
+      "isin_secondary": "INF0GCD01404",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Monthly Income Distribution Cum Capital Withdrawal",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "149079",
+      "isin_primary": "INF0GCD01412",
+      "isin_secondary": "INF0GCD01420",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Quarterly Income Distribution Cum Capital Withdrawal",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "149077",
+      "isin_primary": "",
+      "isin_secondary": "INF0GCD01388",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Weekly Income Distribution Cum Capital Withdrawal",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "149073",
+      "isin_primary": "INF0GCD01313",
+      "isin_secondary": "",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "149080",
+      "isin_primary": "INF0GCD01339",
+      "isin_secondary": "INF0GCD01347",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Monthly Income Distribution Cum Capital Withdrawal",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "149075",
+      "isin_primary": "INF0GCD01354",
+      "isin_secondary": "INF0GCD01362",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Quarterly Income Distribution Cum Capital Withdrawal",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
+      "scheme_code": "149074",
+      "isin_primary": "",
+      "isin_secondary": "INF0GCD01321",
+      "scheme_name": "TRUSTMF Short Term Fund",
+      "nav": null,
+      "nav_date": "Weekly Income Distribution Cum Capital Withdrawal",
+      "amc": "Trust Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Short Term Fund)"
+    },
+    {
       "scheme_code": "135497",
       "isin_primary": "INF789FA1R33",
       "isin_secondary": "INF789FA1R41",
@@ -69525,6 +69605,16 @@
       "scheme_code": "154513",
       "isin_primary": "INF174KA1C43",
       "isin_secondary": "INF174KA1C27",
+      "scheme_name": "Kotak Ultra Short Term Fund",
+      "nav": null,
+      "nav_date": "IDCW Weekly",
+      "amc": "Kotak Mahindra Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short Term Fund)"
+    },
+    {
+      "scheme_code": "154607",
+      "isin_primary": "INF174KA1E33",
+      "isin_secondary": "INF174KA1E58",
       "scheme_name": "Kotak Ultra Short Term Fund",
       "nav": null,
       "nav_date": "IDCW Weekly",
