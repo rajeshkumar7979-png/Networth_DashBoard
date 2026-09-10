@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-09T04:38:19+00:00",
+  "fetched_at": "2026-09-10T04:38:21+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -62737,7 +62737,7 @@
       "isin_secondary": "INF209K01DA1",
       "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
       "nav": null,
-      "nav_date": "Half Yearly IDCW",
+      "nav_date": "IDCW",
       "amc": "Aditya Birla Sun Life Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
@@ -62777,7 +62777,7 @@
       "isin_secondary": "INF209K01CZ0",
       "scheme_name": "Aditya Birla Sun Life Medium Term Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "Half Yearly IDCW",
       "amc": "Aditya Birla Sun Life Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium Term Fund)"
     },
@@ -66479,6 +66479,36 @@
       "nav": null,
       "nav_date": "Weekly IDCW",
       "amc": "Mirae Asset Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154705",
+      "isin_primary": "INF2ZSC01085",
+      "isin_secondary": "INF2ZSC01069",
+      "scheme_name": "Monarch Overnight Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW",
+      "amc": "Monarch Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154706",
+      "isin_primary": "INF2ZSC01028",
+      "isin_secondary": "",
+      "scheme_name": "Monarch Overnight Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Monarch Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154711",
+      "isin_primary": "INF2ZSC01010",
+      "isin_secondary": "",
+      "scheme_name": "Monarch Overnight Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Monarch Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
     },
     {
