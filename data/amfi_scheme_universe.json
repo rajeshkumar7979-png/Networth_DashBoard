@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-10T04:38:21+00:00",
+  "fetched_at": "2026-09-11T04:38:05+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -26712,26 +26712,6 @@
       "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
     },
     {
-      "scheme_code": "151753",
-      "isin_primary": "INF0K1H01081",
-      "isin_secondary": "",
-      "scheme_name": "Samco Active Momentum Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Samco Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
-      "scheme_code": "151752",
-      "isin_primary": "INF0K1H01073",
-      "isin_secondary": "",
-      "scheme_name": "Samco Active Momentum Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Samco Mutual Fund",
-      "category": "Open Ended Schemes(Equity Scheme - Sectoral/ Thematic)"
-    },
-    {
       "scheme_code": "152586",
       "isin_primary": "INF0K1H01180",
       "isin_secondary": "",
@@ -32002,6 +31982,26 @@
       "category": "Open Ended Schemes(Equity Schemes - Flexi Cap Fund)"
     },
     {
+      "scheme_code": "154515",
+      "isin_primary": "INF082J01507",
+      "isin_secondary": "",
+      "scheme_name": "Quantum Flexi Cap Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Quantum Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Flexi Cap Fund)"
+    },
+    {
+      "scheme_code": "154516",
+      "isin_primary": "INF082J01515",
+      "isin_secondary": "",
+      "scheme_name": "Quantum Flexi Cap Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Quantum Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Flexi Cap Fund)"
+    },
+    {
       "scheme_code": "150349",
       "isin_primary": "INF03VN01555",
       "isin_secondary": "INF03VN01548",
@@ -34842,6 +34842,46 @@
       "category": "Open Ended Schemes(Equity Schemes - Sectoral Fund)"
     },
     {
+      "scheme_code": "154547",
+      "isin_primary": "INF205KA1BX5",
+      "isin_secondary": "",
+      "scheme_name": "Invesco India Pharma and Healthcare Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Invesco Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Sectoral Fund)"
+    },
+    {
+      "scheme_code": "154546",
+      "isin_primary": "INF205KA1BY3",
+      "isin_secondary": "INF205KA1BZ0",
+      "scheme_name": "Invesco India Pharma and Healthcare Fund",
+      "nav": null,
+      "nav_date": "IDCW",
+      "amc": "Invesco Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Sectoral Fund)"
+    },
+    {
+      "scheme_code": "154544",
+      "isin_primary": "INF205KA1BV9",
+      "isin_secondary": "INF205KA1BW7",
+      "scheme_name": "Invesco India Pharma and Healthcare Fund",
+      "nav": null,
+      "nav_date": "IDCW",
+      "amc": "Invesco Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Sectoral Fund)"
+    },
+    {
+      "scheme_code": "154545",
+      "isin_primary": "INF205KA1BU1",
+      "isin_secondary": "",
+      "scheme_name": "Invesco India Pharma and Healthcare Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Invesco Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Sectoral Fund)"
+    },
+    {
       "scheme_code": "152863",
       "isin_primary": "INF205KA1965",
       "isin_secondary": "",
@@ -37589,6 +37629,26 @@
       "nav": null,
       "nav_date": "Regular IDCW",
       "amc": "PGIM India Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "151753",
+      "isin_primary": "INF0K1H01081",
+      "isin_secondary": "",
+      "scheme_name": "Samco Active Momentum Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Samco Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
+    },
+    {
+      "scheme_code": "151752",
+      "isin_primary": "INF0K1H01073",
+      "isin_secondary": "",
+      "scheme_name": "Samco Active Momentum Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Samco Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - Thematic Fund)"
     },
     {
@@ -50413,41 +50473,41 @@
     },
     {
       "scheme_code": "154618",
-      "isin_primary": "",
+      "isin_primary": "INF200KB1CA5",
       "isin_secondary": "",
       "scheme_name": "SBI Balanced Hybrid Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "Growth",
       "amc": "SBI Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
     },
     {
       "scheme_code": "154617",
-      "isin_primary": "",
-      "isin_secondary": "",
+      "isin_primary": "INF200KB1CB3",
+      "isin_secondary": "INF200KB1CC1",
       "scheme_name": "SBI Balanced Hybrid Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "IDCW",
       "amc": "SBI Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
     },
     {
       "scheme_code": "154616",
-      "isin_primary": "",
-      "isin_secondary": "",
+      "isin_primary": "INF200KB1BY7",
+      "isin_secondary": "INF200KB1BZ4",
       "scheme_name": "SBI Balanced Hybrid Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "IDCW",
       "amc": "SBI Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
     },
     {
       "scheme_code": "154615",
-      "isin_primary": "",
+      "isin_primary": "INF200KB1BX9",
       "isin_secondary": "",
       "scheme_name": "SBI Balanced Hybrid Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "Growth",
       "amc": "SBI Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Hybrid Fund)"
     },
@@ -51829,6 +51889,46 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "Invesco Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Multi Asset Allocation Fund)"
+    },
+    {
+      "scheme_code": "154498",
+      "isin_primary": "INF00XX01DS6",
+      "isin_secondary": "",
+      "scheme_name": "ITI Multi Asset Allocation Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "ITI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Multi Asset Allocation Fund)"
+    },
+    {
+      "scheme_code": "154499",
+      "isin_primary": "INF00XX01DT4",
+      "isin_secondary": "INF00XX01DU2",
+      "scheme_name": "ITI Multi Asset Allocation Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "ITI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Multi Asset Allocation Fund)"
+    },
+    {
+      "scheme_code": "154500",
+      "isin_primary": "INF00XX01DP2",
+      "isin_secondary": "",
+      "scheme_name": "ITI Multi Asset Allocation Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "ITI Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Multi Asset Allocation Fund)"
+    },
+    {
+      "scheme_code": "154502",
+      "isin_primary": "INF00XX01DQ0",
+      "isin_secondary": "INF00XX01DR8",
+      "scheme_name": "ITI Multi Asset Allocation Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "ITI Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Multi Asset Allocation Fund)"
     },
     {
@@ -58535,7 +58635,7 @@
       "scheme_code": "122645",
       "isin_primary": "INF209K01UW9",
       "isin_secondary": "",
-      "scheme_name": "Aditya Birla Sun Life Floating Interest Rate Fund",
+      "scheme_name": "Aditya Birla Sun Life Floating Interest Rates Fund",
       "nav": null,
       "nav_date": "Daily IDCW",
       "amc": "Aditya Birla Sun Life Mutual Fund",
@@ -58545,7 +58645,7 @@
       "scheme_code": "122648",
       "isin_primary": "INF209K01UY5",
       "isin_secondary": "",
-      "scheme_name": "Aditya Birla Sun Life Floating Interest Rate Fund",
+      "scheme_name": "Aditya Birla Sun Life Floating Interest Rates Fund",
       "nav": null,
       "nav_date": "Weekly IDCW Payout",
       "amc": "Aditya Birla Sun Life Mutual Fund",
@@ -58555,7 +58655,7 @@
       "scheme_code": "122646",
       "isin_primary": "INF209K01UX7",
       "isin_secondary": "",
-      "scheme_name": "Aditya Birla Sun Life Floating Interest Rate Fund",
+      "scheme_name": "Aditya Birla Sun Life Floating Interest Rates Fund",
       "nav": null,
       "nav_date": "GROWTH",
       "amc": "Aditya Birla Sun Life Mutual Fund",
@@ -58565,7 +58665,7 @@
       "scheme_code": "122643",
       "isin_primary": "",
       "isin_secondary": "INF209KA1LN1",
-      "scheme_name": "Aditya Birla Sun Life Floating Interest Rate Fund",
+      "scheme_name": "Aditya Birla Sun Life Floating Interest Rates Fund",
       "nav": null,
       "nav_date": "Daily IDCW",
       "amc": "Aditya Birla Sun Life Mutual Fund",
@@ -58575,7 +58675,7 @@
       "scheme_code": "122647",
       "isin_primary": "",
       "isin_secondary": "INF209K01MH7",
-      "scheme_name": "Aditya Birla Sun Life Floating Interest Rate Fund",
+      "scheme_name": "Aditya Birla Sun Life Floating Interest Rates Fund",
       "nav": null,
       "nav_date": "Weekly IDCW Payout",
       "amc": "Aditya Birla Sun Life Mutual Fund",
@@ -58585,7 +58685,7 @@
       "scheme_code": "122644",
       "isin_primary": "INF209K01MG9",
       "isin_secondary": "",
-      "scheme_name": "Aditya Birla Sun Life Floating Interest Rate Fund",
+      "scheme_name": "Aditya Birla Sun Life Floating Interest Rates Fund",
       "nav": null,
       "nav_date": "GROWTH",
       "amc": "Aditya Birla Sun Life Mutual Fund",
