@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-11T04:38:05+00:00",
+  "fetched_at": "2026-09-12T04:36:07+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -7102,66 +7102,6 @@
       "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
     },
     {
-      "scheme_code": "153035",
-      "isin_primary": "INF680P01430",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Liquid Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "153036",
-      "isin_primary": "INF680P01448",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Liquid Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "153282",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Liquid Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "153283",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Liquid Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "153280",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Liquid Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "153281",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Liquid Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
       "scheme_code": "149744",
       "isin_primary": "",
       "isin_secondary": "INF903JA1JK3",
@@ -9732,26 +9672,6 @@
       "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
     },
     {
-      "scheme_code": "154144",
-      "isin_primary": "INF680P01471",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Money Market Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "154143",
-      "isin_primary": "INF680P01489",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Money Market Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
       "scheme_code": "145054",
       "isin_primary": "",
       "isin_secondary": "INF903JA1FU0",
@@ -12029,66 +11949,6 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "SBI Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "154395",
-      "isin_primary": "",
-      "isin_secondary": "INF680P01513",
-      "scheme_name": "Shriram Overnight Fund",
-      "nav": null,
-      "nav_date": "Daily IDCW",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "154394",
-      "isin_primary": "INF680P01497",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Overnight Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "154396",
-      "isin_primary": "INF680P01612",
-      "isin_secondary": "INF680P01638",
-      "scheme_name": "Shriram Overnight Fund",
-      "nav": null,
-      "nav_date": "Monthly IDCW",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "154398",
-      "isin_primary": "",
-      "isin_secondary": "INF680P01521",
-      "scheme_name": "Shriram Overnight Fund",
-      "nav": null,
-      "nav_date": "Daily IDCW",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "154399",
-      "isin_primary": "INF680P01505",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Overnight Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "154402",
-      "isin_primary": "INF680P01620",
-      "isin_secondary": "INF680P01646",
-      "scheme_name": "Shriram Overnight Fund",
-      "nav": null,
-      "nav_date": "Monthly IDCW",
-      "amc": "Shriram Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
     },
     {
@@ -38312,6 +38172,16 @@
       "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Debt ETF)"
     },
     {
+      "scheme_code": "152741",
+      "isin_primary": "INF680P01422",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Nifty 1D Rate Liquid ETF",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Debt ETF)"
+    },
+    {
       "scheme_code": "152369",
       "isin_primary": "INF789F1AZF3",
       "isin_secondary": "",
@@ -45592,46 +45462,6 @@
       "category": "Open Ended Schemes(Hybrid Scheme - Dynamic Asset Allocation or Balanced Advantage)"
     },
     {
-      "scheme_code": "147406",
-      "isin_primary": "INF680P01208",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Balanced Advantage Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Dynamic Asset Allocation or Balanced Advantage)"
-    },
-    {
-      "scheme_code": "147403",
-      "isin_primary": "INF680P01216",
-      "isin_secondary": "INF680P01224",
-      "scheme_name": "Shriram Balanced Advantage Fund",
-      "nav": null,
-      "nav_date": "IDCW",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Dynamic Asset Allocation or Balanced Advantage)"
-    },
-    {
-      "scheme_code": "147405",
-      "isin_primary": "INF680P01174",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Balanced Advantage Fund",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Dynamic Asset Allocation or Balanced Advantage)"
-    },
-    {
-      "scheme_code": "147404",
-      "isin_primary": "INF680P01182",
-      "isin_secondary": "INF680P01190",
-      "scheme_name": "Shriram Balanced Advantage Fund",
-      "nav": null,
-      "nav_date": "IDCW",
-      "amc": "Shriram Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Dynamic Asset Allocation or Balanced Advantage)"
-    },
-    {
       "scheme_code": "146006",
       "isin_primary": "INF277K014S6",
       "isin_secondary": "",
@@ -50329,6 +50159,46 @@
       "nav": null,
       "nav_date": "IDCW Payout Option",
       "amc": "NJ Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Advantage Fund/ Dynamic Asset Allocation)"
+    },
+    {
+      "scheme_code": "147406",
+      "isin_primary": "INF680P01208",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Balanced Advantage Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Advantage Fund/ Dynamic Asset Allocation)"
+    },
+    {
+      "scheme_code": "147403",
+      "isin_primary": "INF680P01216",
+      "isin_secondary": "INF680P01224",
+      "scheme_name": "Shriram Balanced Advantage Fund",
+      "nav": null,
+      "nav_date": "IDCW",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Advantage Fund/ Dynamic Asset Allocation)"
+    },
+    {
+      "scheme_code": "147405",
+      "isin_primary": "INF680P01174",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Balanced Advantage Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Advantage Fund/ Dynamic Asset Allocation)"
+    },
+    {
+      "scheme_code": "147404",
+      "isin_primary": "INF680P01182",
+      "isin_secondary": "INF680P01190",
+      "scheme_name": "Shriram Balanced Advantage Fund",
+      "nav": null,
+      "nav_date": "IDCW",
+      "amc": "Shriram Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Advantage Fund/ Dynamic Asset Allocation)"
     },
     {
@@ -61802,6 +61672,66 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
     },
     {
+      "scheme_code": "153035",
+      "isin_primary": "INF680P01430",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Liquid Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "153036",
+      "isin_primary": "INF680P01448",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Liquid Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "153282",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Liquid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "153283",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Liquid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "153280",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Liquid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "153281",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Liquid Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
       "scheme_code": "134427",
       "isin_primary": "INF789F1AE45",
       "isin_secondary": "INF789F1AE52",
@@ -65782,6 +65712,26 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
     },
     {
+      "scheme_code": "154144",
+      "isin_primary": "INF680P01471",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Money Market Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "154143",
+      "isin_primary": "INF680P01489",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Money Market Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
       "scheme_code": "153703",
       "isin_primary": "INF579M01BG4",
       "isin_secondary": "",
@@ -66639,6 +66589,66 @@
       "nav": null,
       "nav_date": "Unclaimed Redemption Plan - Upto 3 Years",
       "amc": "NJ Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154395",
+      "isin_primary": "",
+      "isin_secondary": "INF680P01513",
+      "scheme_name": "Shriram Overnight Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154394",
+      "isin_primary": "INF680P01497",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Overnight Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154396",
+      "isin_primary": "INF680P01612",
+      "isin_secondary": "INF680P01638",
+      "scheme_name": "Shriram Overnight Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154398",
+      "isin_primary": "",
+      "isin_secondary": "INF680P01521",
+      "scheme_name": "Shriram Overnight Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154399",
+      "isin_primary": "INF680P01505",
+      "isin_secondary": "",
+      "scheme_name": "Shriram Overnight Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Shriram Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154402",
+      "isin_primary": "INF680P01620",
+      "isin_secondary": "INF680P01646",
+      "scheme_name": "Shriram Overnight Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW",
+      "amc": "Shriram Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
     },
     {
@@ -93899,16 +93909,6 @@
       "nav": null,
       "nav_date": "Growth",
       "amc": "SBI Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - Other  ETFs)"
-    },
-    {
-      "scheme_code": "152741",
-      "isin_primary": "INF680P01422",
-      "isin_secondary": "",
-      "scheme_name": "Shriram Nifty 1D Rate Liquid ETF",
-      "nav": null,
-      "nav_date": "Growth",
-      "amc": "Shriram Mutual Fund",
       "category": "Open Ended Schemes(Other Scheme - Other  ETFs)"
     },
     {
