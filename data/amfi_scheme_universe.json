@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-16T04:38:05+00:00",
+  "fetched_at": "2026-09-17T04:38:18+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -509,126 +509,6 @@
       "nav": null,
       "nav_date": "Quarterly IDCW",
       "amc": "Bandhan Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150230",
-      "isin_primary": "INF251K01EN4",
-      "isin_secondary": "INF251K01EO2",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Annual IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150229",
-      "isin_primary": "INF251K01EI4",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150231",
-      "isin_primary": "INF251K01EJ2",
-      "isin_secondary": "INF251K01EK0",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Monthly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150228",
-      "isin_primary": "INF251K01EL8",
-      "isin_secondary": "INF251K01EM6",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Quarterly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150236",
-      "isin_primary": "INF251K01GU4",
-      "isin_secondary": "INF251K01GV2",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Annual IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150237",
-      "isin_primary": "INF251K01GP4",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150238",
-      "isin_primary": "INF251K01GQ2",
-      "isin_secondary": "INF251K01GR0",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Monthly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150239",
-      "isin_primary": "INF251K01GS8",
-      "isin_secondary": "INF251K01GT6",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Quarterly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150233",
-      "isin_primary": "INF251K01EU9",
-      "isin_secondary": "INF251K01EV7",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Annual IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150235",
-      "isin_primary": "INF251K01EP9",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150234",
-      "isin_primary": "INF251K01EQ7",
-      "isin_secondary": "INF251K01ER5",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Monthly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
-    },
-    {
-      "scheme_code": "150232",
-      "isin_primary": "INF251K01ES3",
-      "isin_secondary": "INF251K01ET1",
-      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
-      "nav": null,
-      "nav_date": "Quarterly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Corporate Bond Fund)"
     },
     {
@@ -3612,46 +3492,6 @@
       "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
     },
     {
-      "scheme_code": "119341",
-      "isin_primary": "INF955L01AD7",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "119340",
-      "isin_primary": "INF955L01AB1",
-      "isin_secondary": "INF955L01AC9",
-      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "101187",
-      "isin_primary": "INF955L01450",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
-      "scheme_code": "101188",
-      "isin_primary": "INF955L01435",
-      "isin_secondary": "INF955L01443",
-      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Gilt Fund)"
-    },
-    {
       "scheme_code": "119099",
       "isin_primary": "INF740K01NF3",
       "isin_secondary": "",
@@ -4819,156 +4659,6 @@
       "nav": null,
       "nav_date": "Weekly IDCW",
       "amc": "Bank of India Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "119414",
-      "isin_primary": "INF955L01AK2",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "119415",
-      "isin_primary": "INF955L01AL0",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "119416",
-      "isin_primary": "INF251K01SL8",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Weekly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "139344",
-      "isin_primary": "INF955L01GR4",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "116803",
-      "isin_primary": "INF955L01534",
-      "isin_secondary": "INF955L01542",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "111707",
-      "isin_primary": "INF955L01468",
-      "isin_secondary": "INF955L01476",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "111704",
-      "isin_primary": "INF955L01484",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "111705",
-      "isin_primary": "INF251K01SK0",
-      "isin_secondary": "INF955L01500",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Weekly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "142248",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "142246",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "142245",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "142247",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "101408",
-      "isin_primary": "INF955L01575",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "101407",
-      "isin_primary": "INF955L01559",
-      "isin_secondary": "INF955L01567",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "101409",
-      "isin_primary": "INF955L01518",
-      "isin_secondary": "INF955L01526",
-      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
     },
     {
@@ -8762,86 +8452,6 @@
       "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
     },
     {
-      "scheme_code": "147373",
-      "isin_primary": "INF955L01IG3",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Monthly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "147378",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01IE8",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "147376",
-      "isin_primary": "INF955L01IB4",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Monthly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "147379",
-      "isin_primary": "INF251K01VT5",
-      "isin_secondary": "INF955L01IF5",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Weekly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "147377",
-      "isin_primary": "INF955L01ID0",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "147382",
-      "isin_primary": "INF955L01HY8",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "147380",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01HZ5",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
-      "scheme_code": "147381",
-      "isin_primary": "INF251K01VS7",
-      "isin_secondary": "INF955L01IA6",
-      "scheme_name": "Baroda BNP Paribas Money Market Fund",
-      "nav": null,
-      "nav_date": "Weekly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Money Market Fund)"
-    },
-    {
       "scheme_code": "140236",
       "isin_primary": "INF843K01CI2",
       "isin_secondary": "INF843K01CH4",
@@ -10619,106 +10229,6 @@
       "nav": null,
       "nav_date": "",
       "amc": "Bank of India Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "147197",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01HW2",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "147196",
-      "isin_primary": "INF955L01HV4",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "147195",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01HX0",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Weekly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "149988",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "IDCW Greater than 3 years",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "149991",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "IDCW Up to 3 Yrs",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "149990",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Redemption Greater than 3 years",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "149989",
-      "isin_primary": "",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Redemption Up to 3 Yrs",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "147194",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01HT8",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "147193",
-      "isin_primary": "INF955L01HS0",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
-    },
-    {
-      "scheme_code": "147198",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01HU6",
-      "scheme_name": "Baroda BNP Paribas Overnight Fund",
-      "nav": null,
-      "nav_date": "Weekly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Overnight Fund)"
     },
     {
@@ -37917,7 +37427,7 @@
       "isin_secondary": "",
       "scheme_name": "HSBC Value Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "Growth",
       "amc": "HSBC Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - Value Fund)"
     },
@@ -37927,7 +37437,7 @@
       "isin_secondary": "INF917K01HB8",
       "scheme_name": "HSBC Value Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "IDCW",
       "amc": "HSBC Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - Value Fund)"
     },
@@ -37937,7 +37447,7 @@
       "isin_secondary": "",
       "scheme_name": "HSBC Value Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "Growth",
       "amc": "HSBC Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - Value Fund)"
     },
@@ -37947,7 +37457,7 @@
       "isin_secondary": "INF677K01015",
       "scheme_name": "HSBC Value Fund",
       "nav": null,
-      "nav_date": "",
+      "nav_date": "IDCW",
       "amc": "HSBC Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - Value Fund)"
     },
@@ -38895,7 +38405,17 @@
       "scheme_code": "141665",
       "isin_primary": "INF789F1AUW9",
       "isin_secondary": "",
-      "scheme_name": "UTI - Nifty Next 50 Exchange Traded Fund.",
+      "scheme_name": "UTI - Nifty Next 50 Exchange Traded Fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Equity ETF)"
+    },
+    {
+      "scheme_code": "154698",
+      "isin_primary": "INF789F1AH42",
+      "isin_secondary": "",
+      "scheme_name": "UTI BSE India Sector Leaders Exchange Traded Fund",
       "nav": null,
       "nav_date": "Growth",
       "amc": "UTI Mutual Fund",
@@ -38926,26 +38446,6 @@
       "isin_primary": "INF789F1AG76",
       "isin_secondary": "",
       "scheme_name": "UTI Nifty 500 Exchange Traded Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Equity ETF)"
-    },
-    {
-      "scheme_code": "154604",
-      "isin_primary": "INF789F1AG92",
-      "isin_secondary": "",
-      "scheme_name": "UTI Nifty 500 Index Fund",
-      "nav": null,
-      "nav_date": "",
-      "amc": "UTI Mutual Fund",
-      "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Equity ETF)"
-    },
-    {
-      "scheme_code": "154603",
-      "isin_primary": "INF789F1AG84",
-      "isin_secondary": "",
-      "scheme_name": "UTI Nifty 500 Index Fund",
       "nav": null,
       "nav_date": "",
       "amc": "UTI Mutual Fund",
@@ -39019,6 +38519,16 @@
       "nav": null,
       "nav_date": "",
       "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Gold ETF)"
+    },
+    {
+      "scheme_code": "152231",
+      "isin_primary": "INF251K01SU9",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Gold ETF",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Exchange Traded Funds (ETFs) - Gold ETF)"
     },
     {
@@ -39812,6 +39322,66 @@
       "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
     },
     {
+      "scheme_code": "153795",
+      "isin_primary": "INF251K01VF4",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Gold ETF Fund of Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153794",
+      "isin_primary": "INF251K01VE7",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Gold ETF Fund of Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153552",
+      "isin_primary": "INF251K01UO8",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153550",
+      "isin_primary": "INF251K01UP5",
+      "isin_secondary": "INF251K01UQ3",
+      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153548",
+      "isin_primary": "INF251K01UM2",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "153549",
+      "isin_primary": "INF251K01UN0",
+      "isin_secondary": "INF251K01UW1",
+      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
       "scheme_code": "154200",
       "isin_primary": "INF666M01NX9",
       "isin_secondary": "",
@@ -40489,6 +40059,26 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "HSBC Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154661",
+      "isin_primary": "INF109K1A641",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Dynamic Asset Allocation Passive FOF",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
+      "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
+    },
+    {
+      "scheme_code": "154662",
+      "isin_primary": "INF109K1A633",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Dynamic Asset Allocation Passive FOF",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
       "category": "Open Ended Schemes(Fund of Funds Scheme (Domestic) - Fund of Funds Scheme (Domestic))"
     },
     {
@@ -41869,46 +41459,6 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "Bandhan Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Aggressive Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150259",
-      "isin_primary": "INF251K01PB5",
-      "isin_secondary": "INF251K01PA7",
-      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Aggressive Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150260",
-      "isin_primary": "INF251K01OZ7",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Aggressive Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150261",
-      "isin_primary": "INF251K01OY0",
-      "isin_secondary": "INF251K01OX2",
-      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Aggressive Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150258",
-      "isin_primary": "INF251K01OW4",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Scheme - Aggressive Hybrid Fund)"
     },
     {
@@ -43942,66 +43492,6 @@
       "category": "Open Ended Schemes(Hybrid Scheme - Conservative Hybrid Fund)"
     },
     {
-      "scheme_code": "150206",
-      "isin_primary": "INF251K01HR8",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Conservative Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150207",
-      "isin_primary": "INF251K01HS6",
-      "isin_secondary": "INF251K01HT4",
-      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Monthly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Conservative Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150208",
-      "isin_primary": "INF251K01HU2",
-      "isin_secondary": "INF251K01HV0",
-      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Quarterly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Conservative Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150203",
-      "isin_primary": "INF251K01845",
-      "isin_secondary": "",
-      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Conservative Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150204",
-      "isin_primary": "INF251K01852",
-      "isin_secondary": "INF251K01860",
-      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Monthly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Conservative Hybrid Fund)"
-    },
-    {
-      "scheme_code": "150205",
-      "isin_primary": "INF251K01878",
-      "isin_secondary": "INF251K01886",
-      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Quarterly IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Conservative Hybrid Fund)"
-    },
-    {
       "scheme_code": "118574",
       "isin_primary": "INF090I01GF1",
       "isin_secondary": "",
@@ -45819,46 +45309,6 @@
       "nav": null,
       "nav_date": "Monthly IDCW",
       "amc": "Bandhan Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Equity Savings)"
-    },
-    {
-      "scheme_code": "147496",
-      "isin_primary": "INF955L01IL3",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Equity Savings)"
-    },
-    {
-      "scheme_code": "147498",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01IN9",
-      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Equity Savings)"
-    },
-    {
-      "scheme_code": "147494",
-      "isin_primary": "INF955L01II9",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Scheme - Equity Savings)"
-    },
-    {
-      "scheme_code": "147495",
-      "isin_primary": "",
-      "isin_secondary": "INF955L01IK5",
-      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Scheme - Equity Savings)"
     },
     {
@@ -48032,6 +47482,46 @@
       "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
     },
     {
+      "scheme_code": "150259",
+      "isin_primary": "INF251K01PB5",
+      "isin_secondary": "INF251K01PA7",
+      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150260",
+      "isin_primary": "INF251K01OZ7",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150261",
+      "isin_primary": "INF251K01OY0",
+      "isin_secondary": "INF251K01OX2",
+      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150258",
+      "isin_primary": "INF251K01OW4",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS AGGRESSIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
+    },
+    {
       "scheme_code": "118272",
       "isin_primary": "INF760K01EZ8",
       "isin_secondary": "",
@@ -49862,6 +49352,16 @@
       "category": "Open Ended Schemes(Hybrid Schemes - Balanced Advantage Fund/ Dynamic Asset Allocation)"
     },
     {
+      "scheme_code": "154734",
+      "isin_primary": "INF0R8701491",
+      "isin_secondary": "INF0R8701509",
+      "scheme_name": "Helios Balanced Advantage Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW",
+      "amc": "Helios Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Balanced Advantage Fund/ Dynamic Asset Allocation)"
+    },
+    {
       "scheme_code": "152509",
       "isin_primary": "INF0R8701145",
       "isin_secondary": "",
@@ -50562,6 +50062,66 @@
       "category": "Open Ended Schemes(Hybrid Schemes - Conservative Hybrid Fund)"
     },
     {
+      "scheme_code": "150206",
+      "isin_primary": "INF251K01HR8",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Conservative Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150207",
+      "isin_primary": "INF251K01HS6",
+      "isin_secondary": "INF251K01HT4",
+      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Monthly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Conservative Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150208",
+      "isin_primary": "INF251K01HU2",
+      "isin_secondary": "INF251K01HV0",
+      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Quarterly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Conservative Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150203",
+      "isin_primary": "INF251K01845",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Conservative Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150204",
+      "isin_primary": "INF251K01852",
+      "isin_secondary": "INF251K01860",
+      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Monthly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Conservative Hybrid Fund)"
+    },
+    {
+      "scheme_code": "150205",
+      "isin_primary": "INF251K01878",
+      "isin_secondary": "INF251K01886",
+      "scheme_name": "BARODA BNP PARIBAS CONSERVATIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Quarterly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Conservative Hybrid Fund)"
+    },
+    {
       "scheme_code": "118309",
       "isin_primary": "INF760K01GB4",
       "isin_secondary": "",
@@ -51099,6 +50659,46 @@
       "nav": null,
       "nav_date": "Regular IDCW Option",
       "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Equity Savings Fund)"
+    },
+    {
+      "scheme_code": "147496",
+      "isin_primary": "INF955L01IL3",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Equity Savings Fund)"
+    },
+    {
+      "scheme_code": "147498",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01IN9",
+      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Equity Savings Fund)"
+    },
+    {
+      "scheme_code": "147494",
+      "isin_primary": "INF955L01II9",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Equity Savings Fund)"
+    },
+    {
+      "scheme_code": "147495",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01IK5",
+      "scheme_name": "Baroda BNP Paribas Equity Savings Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Equity Savings Fund)"
     },
     {
@@ -55752,6 +55352,126 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
     },
     {
+      "scheme_code": "150230",
+      "isin_primary": "INF251K01EN4",
+      "isin_secondary": "INF251K01EO2",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Annual IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150229",
+      "isin_primary": "INF251K01EI4",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150231",
+      "isin_primary": "INF251K01EJ2",
+      "isin_secondary": "INF251K01EK0",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Monthly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150228",
+      "isin_primary": "INF251K01EL8",
+      "isin_secondary": "INF251K01EM6",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Quarterly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150236",
+      "isin_primary": "INF251K01GU4",
+      "isin_secondary": "INF251K01GV2",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Annual IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150237",
+      "isin_primary": "INF251K01GP4",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150238",
+      "isin_primary": "INF251K01GQ2",
+      "isin_secondary": "INF251K01GR0",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Monthly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150239",
+      "isin_primary": "INF251K01GS8",
+      "isin_secondary": "INF251K01GT6",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Quarterly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150233",
+      "isin_primary": "INF251K01EU9",
+      "isin_secondary": "INF251K01EV7",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Annual IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150235",
+      "isin_primary": "INF251K01EP9",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150234",
+      "isin_primary": "INF251K01EQ7",
+      "isin_secondary": "INF251K01ER5",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Monthly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
+      "scheme_code": "150232",
+      "isin_primary": "INF251K01ES3",
+      "isin_secondary": "INF251K01ET1",
+      "scheme_name": "BARODA BNP PARIBAS CORPORATE BOND FUND",
+      "nav": null,
+      "nav_date": "Quarterly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Corporate Bond Fund)"
+    },
+    {
       "scheme_code": "126685",
       "isin_primary": "INF760K01HB2",
       "isin_secondary": "",
@@ -59802,6 +59522,46 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
     },
     {
+      "scheme_code": "119341",
+      "isin_primary": "INF955L01AD7",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "119340",
+      "isin_primary": "INF955L01AB1",
+      "isin_secondary": "INF955L01AC9",
+      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "101187",
+      "isin_primary": "INF955L01450",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
+      "scheme_code": "101188",
+      "isin_primary": "INF955L01435",
+      "isin_secondary": "INF955L01443",
+      "scheme_name": "BARODA BNP PARIBAS GILT FUND",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Gilt Fund)"
+    },
+    {
       "scheme_code": "118299",
       "isin_primary": "INF760K01FC4",
       "isin_secondary": "",
@@ -60729,6 +60489,156 @@
       "nav": null,
       "nav_date": "Weekly IDCW Option",
       "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "119414",
+      "isin_primary": "INF955L01AK2",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "119415",
+      "isin_primary": "INF955L01AL0",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "119416",
+      "isin_primary": "INF251K01SL8",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Weekly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "139344",
+      "isin_primary": "INF955L01GR4",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "116803",
+      "isin_primary": "INF955L01534",
+      "isin_secondary": "INF955L01542",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "111707",
+      "isin_primary": "INF955L01468",
+      "isin_secondary": "INF955L01476",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "111704",
+      "isin_primary": "INF955L01484",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "111705",
+      "isin_primary": "INF251K01SK0",
+      "isin_secondary": "INF955L01500",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Weekly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "142248",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "142246",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "142245",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "142247",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "101408",
+      "isin_primary": "INF955L01575",
+      "isin_secondary": "",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "101407",
+      "isin_primary": "INF955L01559",
+      "isin_secondary": "INF955L01567",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "101409",
+      "isin_primary": "INF955L01518",
+      "isin_secondary": "INF955L01526",
+      "scheme_name": "BARODA BNP PARIBAS LIQUID FUND",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
     },
     {
@@ -65152,6 +65062,86 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
     },
     {
+      "scheme_code": "147373",
+      "isin_primary": "INF955L01IG3",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "147378",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01IE8",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "147376",
+      "isin_primary": "INF955L01IB4",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Monthly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "147379",
+      "isin_primary": "INF251K01VT5",
+      "isin_secondary": "INF955L01IF5",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Weekly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "147377",
+      "isin_primary": "INF955L01ID0",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "147382",
+      "isin_primary": "INF955L01HY8",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "147380",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01HZ5",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
+      "scheme_code": "147381",
+      "isin_primary": "INF251K01VS7",
+      "isin_secondary": "INF955L01IA6",
+      "scheme_name": "Baroda BNP Paribas Money Market Fund",
+      "nav": null,
+      "nav_date": "Weekly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Money Market Fund)"
+    },
+    {
       "scheme_code": "123288",
       "isin_primary": "",
       "isin_secondary": "INF740KA1PB3",
@@ -65849,6 +65839,106 @@
       "nav": null,
       "nav_date": "Weekly IDCW Option",
       "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "147197",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01HW2",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "147196",
+      "isin_primary": "INF955L01HV4",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "147195",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01HX0",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Weekly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "149988",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "IDCW Greater than 3 years",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "149991",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "IDCW Up to 3 Yrs",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "149990",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Redemption Greater than 3 years",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "149989",
+      "isin_primary": "",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Redemption Up to 3 Yrs",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "147194",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01HT8",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "147193",
+      "isin_primary": "INF955L01HS0",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "147198",
+      "isin_primary": "",
+      "isin_secondary": "INF955L01HU6",
+      "scheme_name": "Baroda BNP Paribas Overnight Fund",
+      "nav": null,
+      "nav_date": "Weekly IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
     },
     {
@@ -69757,7 +69847,7 @@
       "isin_secondary": "INF174KA1E58",
       "scheme_name": "Kotak Ultra Short Term Fund",
       "nav": null,
-      "nav_date": "IDCW Weekly",
+      "nav_date": "IDCW",
       "amc": "Kotak Mahindra Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Ultra Short Term Fund)"
     },
@@ -73792,6 +73882,46 @@
       "category": "Open Ended Schemes(Index Funds - Debt Funds)"
     },
     {
+      "scheme_code": "151574",
+      "isin_primary": "INF251K01RR7",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
+    },
+    {
+      "scheme_code": "151575",
+      "isin_primary": "INF251K01RS5",
+      "isin_secondary": "INF251K01RT3",
+      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
+    },
+    {
+      "scheme_code": "151576",
+      "isin_primary": "INF251K01RO4",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
+    },
+    {
+      "scheme_code": "151573",
+      "isin_primary": "INF251K01RP1",
+      "isin_secondary": "INF251K01RQ9",
+      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Debt Funds)"
+    },
+    {
       "scheme_code": "149966",
       "isin_primary": "INF336L01QH7",
       "isin_secondary": "",
@@ -75992,6 +76122,26 @@
       "category": "Open Ended Schemes(Index Funds - Equity Funds)"
     },
     {
+      "scheme_code": "154604",
+      "isin_primary": "INF789F1AG92",
+      "isin_secondary": "",
+      "scheme_name": "UTI Nifty 500 Index Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Equity Funds)"
+    },
+    {
+      "scheme_code": "154603",
+      "isin_primary": "INF789F1AG84",
+      "isin_secondary": "",
+      "scheme_name": "UTI Nifty 500 Index Fund",
+      "nav": null,
+      "nav_date": "",
+      "amc": "UTI Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Equity Funds)"
+    },
+    {
       "scheme_code": "151739",
       "isin_primary": "INF789F1AYN0",
       "isin_secondary": "",
@@ -76212,6 +76362,26 @@
       "category": "Open Ended Schemes(Index Funds - Hybrid Fund)"
     },
     {
+      "scheme_code": "154578",
+      "isin_primary": "INF109K1A583",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Life Cycle Fund 2036",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
+      "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 10 Years)"
+    },
+    {
+      "scheme_code": "154577",
+      "isin_primary": "INF109K1A575",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Life Cycle Fund 2036",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
+      "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 10 Years)"
+    },
+    {
       "scheme_code": "154436",
       "isin_primary": "INF0R8F01224",
       "isin_secondary": "",
@@ -76222,6 +76392,26 @@
       "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 10 Years)"
     },
     {
+      "scheme_code": "154580",
+      "isin_primary": "INF109K1A625",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Life Cycle Fund 2041",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
+      "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 15 Years)"
+    },
+    {
+      "scheme_code": "154579",
+      "isin_primary": "INF109K1A617",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Life Cycle Fund 2041",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
+      "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 15 Years)"
+    },
+    {
       "scheme_code": "154437",
       "isin_primary": "INF0R8F01216",
       "isin_secondary": "",
@@ -76230,6 +76420,26 @@
       "nav_date": "Growth Option",
       "amc": "Zerodha Mutual Fund",
       "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 15 Years)"
+    },
+    {
+      "scheme_code": "154564",
+      "isin_primary": "INF109K1A609",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Life Cycle Fund 2031",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
+      "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 5 Years)"
+    },
+    {
+      "scheme_code": "154563",
+      "isin_primary": "INF109K1A591",
+      "isin_secondary": "",
+      "scheme_name": "ICICI Prudential Life Cycle Fund 2031",
+      "nav": null,
+      "nav_date": "",
+      "amc": "ICICI Prudential Mutual Fund",
+      "category": "Open Ended Schemes(Life Cycle Funds - Life Cycle Fund with Maturity of 5 Years)"
     },
     {
       "scheme_code": "139619",
@@ -76902,26 +77112,6 @@
       "category": "Open Ended Schemes(Other Scheme - FoF Domestic)"
     },
     {
-      "scheme_code": "153795",
-      "isin_primary": "INF251K01VF4",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Gold ETF Fund of Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - FoF Domestic)"
-    },
-    {
-      "scheme_code": "153794",
-      "isin_primary": "INF251K01VE7",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Gold ETF Fund of Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - FoF Domestic)"
-    },
-    {
       "scheme_code": "153536",
       "isin_primary": "INF251K01UT7",
       "isin_secondary": "",
@@ -76956,46 +77146,6 @@
       "isin_primary": "INF251K01UX9",
       "isin_secondary": "INF251K01US9",
       "scheme_name": "Baroda BNP Paribas Income Plus Arbitrage Active Fund of Funds",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - FoF Domestic)"
-    },
-    {
-      "scheme_code": "153552",
-      "isin_primary": "INF251K01UO8",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - FoF Domestic)"
-    },
-    {
-      "scheme_code": "153550",
-      "isin_primary": "INF251K01UP5",
-      "isin_secondary": "INF251K01UQ3",
-      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - FoF Domestic)"
-    },
-    {
-      "scheme_code": "153548",
-      "isin_primary": "INF251K01UM2",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - FoF Domestic)"
-    },
-    {
-      "scheme_code": "153549",
-      "isin_primary": "INF251K01UN0",
-      "isin_secondary": "INF251K01UW1",
-      "scheme_name": "Baroda BNP Paribas Multi Asset Active Fund of Funds",
       "nav": null,
       "nav_date": "IDCW Option",
       "amc": "Baroda BNP Paribas Mutual Fund",
@@ -80932,16 +81082,6 @@
       "category": "Open Ended Schemes(Other Scheme - Gold ETF)"
     },
     {
-      "scheme_code": "152231",
-      "isin_primary": "INF251K01SU9",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Gold ETF",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - Gold ETF)"
-    },
-    {
       "scheme_code": "153933",
       "isin_primary": "INF2KCX01012",
       "isin_secondary": "",
@@ -82936,46 +83076,6 @@
       "isin_primary": "INF251K01RJ4",
       "isin_secondary": "",
       "scheme_name": "Baroda BNP Paribas Nifty SDL December 2026 Index Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - Index Funds)"
-    },
-    {
-      "scheme_code": "151574",
-      "isin_primary": "INF251K01RR7",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - Index Funds)"
-    },
-    {
-      "scheme_code": "151575",
-      "isin_primary": "INF251K01RS5",
-      "isin_secondary": "INF251K01RT3",
-      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - Index Funds)"
-    },
-    {
-      "scheme_code": "151576",
-      "isin_primary": "INF251K01RO4",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Other Scheme - Index Funds)"
-    },
-    {
-      "scheme_code": "151573",
-      "isin_primary": "INF251K01RP1",
-      "isin_secondary": "INF251K01RQ9",
-      "scheme_name": "Baroda BNP Paribas NIFTY SDL December 2028 Index Fund",
       "nav": null,
       "nav_date": "IDCW Option",
       "amc": "Baroda BNP Paribas Mutual Fund",
@@ -95232,46 +95332,6 @@
       "category": "Open Ended Schemes(Solution Oriented Scheme - Retirement Fund)"
     },
     {
-      "scheme_code": "152628",
-      "isin_primary": "INF251K01TJ0",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Retirement Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Solution Oriented Scheme - Retirement Fund)"
-    },
-    {
-      "scheme_code": "152626",
-      "isin_primary": "INF251K01TK8",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Retirement Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Solution Oriented Scheme - Retirement Fund)"
-    },
-    {
-      "scheme_code": "152625",
-      "isin_primary": "INF251K01TH4",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Retirement Fund",
-      "nav": null,
-      "nav_date": "Growth Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Solution Oriented Scheme - Retirement Fund)"
-    },
-    {
-      "scheme_code": "152627",
-      "isin_primary": "INF251K01TI2",
-      "isin_secondary": "",
-      "scheme_name": "Baroda BNP Paribas Retirement Fund",
-      "nav": null,
-      "nav_date": "IDCW Option",
-      "amc": "Baroda BNP Paribas Mutual Fund",
-      "category": "Open Ended Schemes(Solution Oriented Scheme - Retirement Fund)"
-    },
-    {
       "scheme_code": "118548",
       "isin_primary": "INF090I01JZ3",
       "isin_secondary": "",
@@ -96029,6 +96089,46 @@
       "nav": null,
       "nav_date": "IDCW Option",
       "amc": "Axis Mutual Fund",
+      "category": "Open Ended Schemes(Solution Oriented Schemes ** - Retirement Fund)"
+    },
+    {
+      "scheme_code": "152628",
+      "isin_primary": "INF251K01TJ0",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Retirement Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Solution Oriented Schemes ** - Retirement Fund)"
+    },
+    {
+      "scheme_code": "152626",
+      "isin_primary": "INF251K01TK8",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Retirement Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Solution Oriented Schemes ** - Retirement Fund)"
+    },
+    {
+      "scheme_code": "152625",
+      "isin_primary": "INF251K01TH4",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Retirement Fund",
+      "nav": null,
+      "nav_date": "Growth Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
+      "category": "Open Ended Schemes(Solution Oriented Schemes ** - Retirement Fund)"
+    },
+    {
+      "scheme_code": "152627",
+      "isin_primary": "INF251K01TI2",
+      "isin_secondary": "",
+      "scheme_name": "Baroda BNP Paribas Retirement Fund",
+      "nav": null,
+      "nav_date": "IDCW Option",
+      "amc": "Baroda BNP Paribas Mutual Fund",
       "category": "Open Ended Schemes(Solution Oriented Schemes ** - Retirement Fund)"
     },
     {
