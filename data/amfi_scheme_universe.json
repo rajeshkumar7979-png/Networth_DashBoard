@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-17T04:38:18+00:00",
+  "fetched_at": "2026-09-18T09:06:12+00:00",
   "rows": [
     {
       "scheme_code": "135762",
@@ -5579,26 +5579,6 @@
       "nav": null,
       "nav_date": "Weekly IDCW Option",
       "amc": "ITI Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "101549",
-      "isin_primary": "INF192K01890",
-      "isin_secondary": "",
-      "scheme_name": "JM Liquid Fund - Bonus Option",
-      "nav": null,
-      "nav_date": "Bonus Option - Principal Units",
-      "amc": "JM Financial Mutual Fund",
-      "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
-    },
-    {
-      "scheme_code": "101078",
-      "isin_primary": "",
-      "isin_secondary": "INF192K01833",
-      "scheme_name": "JM Liquid Fund - Daily Dividend Option",
-      "nav": null,
-      "nav_date": "Daily IDCW Option",
-      "amc": "JM Financial Mutual Fund",
       "category": "Open Ended Schemes(Debt Scheme - Liquid Fund)"
     },
     {
@@ -30092,6 +30072,16 @@
       "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
     },
     {
+      "scheme_code": "111710",
+      "isin_primary": "INF761K01181",
+      "isin_secondary": "",
+      "scheme_name": "BANK OF INDIA ELSS TAX SAVER FUND",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Bank of India Mutual Fund",
+      "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
+    },
+    {
       "scheme_code": "119351",
       "isin_primary": "INF761K01884",
       "isin_secondary": "",
@@ -30128,16 +30118,6 @@
       "scheme_name": "BANK OF INDIA ELSS TAX SAVER FUND",
       "nav": null,
       "nav_date": "IDCW",
-      "amc": "Bank of India Mutual Fund",
-      "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
-    },
-    {
-      "scheme_code": "111710",
-      "isin_primary": "INF761K01181",
-      "isin_secondary": "",
-      "scheme_name": "BANK OF INDIA ELSS TAX SAVER FUND",
-      "nav": null,
-      "nav_date": "Growth",
       "amc": "Bank of India Mutual Fund",
       "category": "Open Ended Schemes(Equity Schemes - ELSS- Tax Saver Fund)"
     },
@@ -47442,6 +47422,16 @@
       "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
     },
     {
+      "scheme_code": "139529",
+      "isin_primary": "INF761K01DP9",
+      "isin_secondary": "",
+      "scheme_name": "BANK OF INDIA AGGRESSIVE HYBRID FUND",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Bank of India Mutual Fund",
+      "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
+    },
+    {
       "scheme_code": "139527",
       "isin_primary": "INF761K01DM6",
       "isin_secondary": "",
@@ -47458,16 +47448,6 @@
       "scheme_name": "BANK OF INDIA AGGRESSIVE HYBRID FUND",
       "nav": null,
       "nav_date": "IDCW",
-      "amc": "Bank of India Mutual Fund",
-      "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
-    },
-    {
-      "scheme_code": "139529",
-      "isin_primary": "INF761K01DP9",
-      "isin_secondary": "",
-      "scheme_name": "BANK OF INDIA AGGRESSIVE HYBRID FUND",
-      "nav": null,
-      "nav_date": "Growth",
       "amc": "Bank of India Mutual Fund",
       "category": "Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)"
     },
@@ -61232,6 +61212,26 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
     },
     {
+      "scheme_code": "101549",
+      "isin_primary": "INF192K01890",
+      "isin_secondary": "",
+      "scheme_name": "JM Liquid Fund",
+      "nav": null,
+      "nav_date": "Bonus Option - Principal Units",
+      "amc": "JM Financial Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
+      "scheme_code": "101078",
+      "isin_primary": "",
+      "isin_secondary": "INF192K01833",
+      "scheme_name": "JM Liquid Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW Option",
+      "amc": "JM Financial Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Liquid Fund)"
+    },
+    {
       "scheme_code": "100244",
       "isin_primary": "INF192K01866",
       "isin_secondary": "INF192K01874",
@@ -64342,6 +64342,16 @@
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
     },
     {
+      "scheme_code": "101181",
+      "isin_primary": "INF192K01AC1",
+      "isin_secondary": "",
+      "scheme_name": "JM Medium to Long Term Fund",
+      "nav": null,
+      "nav_date": "Bonus Option - Principal Units",
+      "amc": "JM Financial Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
+    },
+    {
       "scheme_code": "100223",
       "isin_primary": "INF192K01AB3",
       "isin_secondary": "",
@@ -64358,16 +64368,6 @@
       "scheme_name": "JM Medium to Long Term Fund",
       "nav": null,
       "nav_date": "Quarterly IDCW Option",
-      "amc": "JM Financial Mutual Fund",
-      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
-    },
-    {
-      "scheme_code": "101181",
-      "isin_primary": "INF192K01AC1",
-      "isin_secondary": "",
-      "scheme_name": "JM Medium to Long Term Fund Growth - Bonus Option",
-      "nav": null,
-      "nav_date": "Bonus Option - Principal Units",
       "amc": "JM Financial Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Medium to Long Term Fund)"
     },
@@ -66648,6 +66648,16 @@
       "scheme_name": "Monarch Overnight Fund",
       "nav": null,
       "nav_date": "Growth",
+      "amc": "Monarch Mutual Fund",
+      "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
+    },
+    {
+      "scheme_code": "154710",
+      "isin_primary": "",
+      "isin_secondary": "INF2ZSC01036",
+      "scheme_name": "Monarch Overnight Fund",
+      "nav": null,
+      "nav_date": "Daily IDCW",
       "amc": "Monarch Mutual Fund",
       "category": "Open Ended Schemes(Income/Debt Oriented Schemes - Overnight Fund)"
     },
@@ -75999,6 +76009,26 @@
       "nav": null,
       "nav_date": "IDCW",
       "amc": "Mirae Asset Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Equity Funds)"
+    },
+    {
+      "scheme_code": "154704",
+      "isin_primary": "INF959L01HT0",
+      "isin_secondary": "",
+      "scheme_name": "Navi Nifty Reits & Realty Index fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Navi Mutual Fund",
+      "category": "Open Ended Schemes(Index Funds - Equity Funds)"
+    },
+    {
+      "scheme_code": "154703",
+      "isin_primary": "INF959L01HU8",
+      "isin_secondary": "",
+      "scheme_name": "Navi Nifty Reits & Realty Index fund",
+      "nav": null,
+      "nav_date": "Growth",
+      "amc": "Navi Mutual Fund",
       "category": "Open Ended Schemes(Index Funds - Equity Funds)"
     },
     {
